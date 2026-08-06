@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwachhLens | AI Municipal Cleanliness Engine</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script src="assets/config.js"></script>
+    <style>
+        .portal-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 28px;
+            max-width: 960px;
+            width: 100%;
+        }
+        @media (max-width: 768px) {
+            .portal-grid { grid-template-columns: 1fr; }
+        }
+        .portal-card {
+            background: var(--card-dark);
+            backdrop-filter: blur(16px);
+            padding: 38px;
+            border-radius: 28px;
+            border: 1px solid var(--glass-border);
+            box-shadow: var(--shadow-glow);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            overflow: hidden;
+            transition: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .portal-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 4px;
+            background: linear-gradient(90deg, transparent, var(--primary), transparent);
+            opacity: 0;
+            transition: opacity 0.35s ease;
+        }
+        .portal-card:hover {
+            transform: translateY(-6px);
+            border-color: var(--glass-border-hover);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6), var(--shadow-accent);
+        }
+        .portal-card:hover::before {
+            opacity: 1;
+        }
+        .card-icon {
+            width: 64px;
+            height: 64px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.8rem;
+            margin-bottom: 24px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .btn-portal {
+            padding: 16px;
+            border-radius: 16px;
+            border: none;
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.98rem;
+            font-weight: 800;
+            text-decoration: none;
+            text-align: center;
+            cursor: pointer;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            transition: all 0.3s ease;
+        }
+        .hero-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 3.2rem;
+            font-weight: 800;
+            letter-spacing: -1px;
+            background: linear-gradient(135deg, #ffffff 40%, var(--primary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 10px;
+        }
+        .tech-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: var(--primary);
+            font-size: 0.8rem;
+            font-weight: 700;
+            padding: 6px 16px;
+            border-radius: 30px;
+            margin-bottom: 20px;
+        }
+    </style>
+    <script>
+        (function() {
+            document.documentElement.setAttribute("data-theme", "dark");
+            localStorage.setItem("swachh_theme", "dark");
+        })();
+    </script>
+</head>
+<body>
+
+    <div class="container-center">
+        <!-- Floating Header Bar -->
+        <div style="width:100%; max-width:960px; display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+            <div class="tech-pill" style="margin-bottom:0;">
+                <i class="fa-solid fa-shield-halved"></i> Privacy First AI Engine & Telemetry
+            </div>
+            <button id="themeToggleBtn" onclick="toggleTheme()" class="theme-toggle-btn" title="Toggle Light / Dark Mode">
+                <i class="fa-solid fa-sun"></i>
+            </button>
+        </div>
+        
+        <div style="text-align:center; margin-bottom:44px; max-width:680px;">
+            <div class="tech-pill">
+                <i class="fa-solid fa-bolt text-primary"></i> TechNova 3.0 • AI Civic Intelligence
+            </div>
+            <h1 class="hero-title"><i class="fa-solid fa-leaf text-primary"></i> SwachhLens</h1>
+            <p style="color:var(--text-muted); font-size:1.1rem; line-weight:1.6; font-weight:500;">
+                AI-Powered Municipal Cleanliness, Automated Spatial Deduplication & Computer Vision Logistics Engine
+            </p>
+        </div>
+
+        <div class="portal-grid">
+            
+            <!-- Citizen Portal Card -->
+            <div class="portal-card">
+                <div>
+                    <div class="card-icon" style="background:rgba(16, 185, 129, 0.12); color:var(--primary);">
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                    <h3 style="font-family:'Outfit',sans-serif; font-size:1.5rem; font-weight:800; color:white; margin-bottom:10px;">Citizen App</h3>
+                    <p style="color:var(--text-muted); font-size:0.92rem; line-height:1.6; margin-bottom:28px;">
+                        Report civic waste issues with instant photo capture, regional voice transcriptions, and automated face/license plate privacy receipts.
+                    </p>
+                </div>
+                <a href="citizen.html" class="btn-portal" style="background:linear-gradient(135deg, var(--primary), var(--primary-dark)); box-shadow:0 8px 24px var(--primary-glow);">
+                    <span>Launch Citizen App</span> <i class="fa-solid fa-arrow-right"></i>
+                </a>
+            </div>
+
+            <!-- Officer Command Card -->
+            <div class="portal-card">
+                <div>
+                    <div class="card-icon" style="background:rgba(6, 182, 212, 0.12); color:var(--accent-cyan);">
+                        <i class="fa-solid fa-building-shield"></i>
+                    </div>
+                    <h3 style="font-family:'Outfit',sans-serif; font-size:1.5rem; font-weight:800; color:white; margin-bottom:10px;">Municipal Command</h3>
+                    <p style="color:var(--text-muted); font-size:0.92rem; line-height:1.6; margin-bottom:28px;">
+                        Spatial Leaflet logistics maps, real-time algorithmic urgency dispatch queues, and interactive inspection drawers.
+                    </p>
+                </div>
+                <button type="button" onclick="openModal()" class="btn-portal" style="background:linear-gradient(135deg, var(--accent-cyan), #0284c7); box-shadow:0 8px 24px rgba(6, 182, 212, 0.3);">
+                    <i class="fa-solid fa-lock"></i> <span>Officer Login</span>
+                </button>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div id="loginModal" class="modal-backdrop">
+        <div class="modal-content">
+            <button onclick="closeModal()" style="position:absolute; top:20px; right:20px; border:none; background:rgba(255,255,255,0.06); color:var(--text-muted); width:36px; height:36px; border-radius:50%; font-size:1.1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+                <div style="width:42px; height:42px; border-radius:12px; background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                    <i class="fa-solid fa-shield-halved"></i>
+                </div>
+                <div>
+                    <h3 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.3rem; color:white;">Officer Auth</h3>
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Command Center Verification</span>
+                </div>
+            </div>
+
+            <form onsubmit="return handleLogin(event);">
+                <div class="input-group-custom" style="margin-bottom:16px;">
+                    <label class="input-label"><i class="fa-solid fa-id-badge"></i> Officer ID / Email</label>
+                    <input type="text" id="loginId" class="input-field" placeholder="admin@swachhlens.gov.in" required>
+                </div>
+                <div class="input-group-custom" style="margin-bottom:24px;">
+                    <label class="input-label"><i class="fa-solid fa-key"></i> Security Password</label>
+                    <input type="password" id="loginPass" class="input-field" placeholder="••••••••" required>
+                </div>
+                
+                <div id="loginError" style="color:var(--accent-red); background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.2); padding:10px 14px; border-radius:12px; font-size:0.82rem; font-weight:700; margin-bottom:16px; display:none; text-align:center;">
+                    Invalid Credentials
+                </div>
+
+                <button type="submit" class="btn-portal" style="background:linear-gradient(135deg, var(--accent-cyan), #0284c7); width:100%;">
+                    <span>Authenticate & Access</span> <i class="fa-solid fa-right-to-bracket"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        function openModal() { document.getElementById('loginModal').style.display = 'flex'; }
+        function closeModal() { document.getElementById('loginModal').style.display = 'none'; }
+        
+        async function handleLogin(e) {
+            e.preventDefault();
+            const id = document.getElementById('loginId').value.trim();
+            const pass = document.getElementById('loginPass').value.trim();
+            const errDiv = document.getElementById('loginError');
+            errDiv.style.display = 'none';
+            
+            try {
+                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/auth`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({id, password: pass})
+                });
+                const data = await res.json();
+                if (res.ok && data.status === 'success') {
+                    sessionStorage.setItem("swachh_auth", data.token);
+                    window.location.assign("admin.html");
+                    return false;
+                } else {
+                    errDiv.innerText = data.message || "Invalid credentials";
+                    errDiv.style.display = 'block';
+                }
+            } catch(err) {
+                errDiv.innerText = "Cannot connect to backend server on " + CONFIG.API_BASE_URL;
+                errDiv.style.display = 'block';
+            }
+            return false;
+        }
+    </script>
+</body>
+</html>

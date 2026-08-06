@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwachhLens | Municipal Command System</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .admin-layout {
+            display: grid;
+            grid-template-columns: 1fr 420px;
+            gap: 24px;
+            padding: 24px;
+            max-width: 1750px;
+            margin: 0 auto;
+        }
+        @media (max-width: 1200px) {
+            .admin-layout { grid-template-columns: 1fr; }
+        }
+        .card-admin {
+            background: var(--card-dark);
+            backdrop-filter: blur(16px);
+            border-radius: 24px;
+            border: 1px solid var(--glass-border);
+            padding: 24px;
+            box-shadow: var(--shadow-glow);
+            position: relative;
+        }
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        @media (max-width: 768px) {
+            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        .metric-box {
+            background: rgba(18, 32, 28, 0.6);
+            border: 1px solid var(--glass-border);
+            padding: 18px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            transition: all 0.3s ease;
+        }
+        .metric-box:hover {
+            border-color: var(--glass-border-hover);
+            transform: translateY(-2px);
+        }
+        .metric-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+        }
+        .metric-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.8rem;
+            font-weight: 800;
+            line-height: 1;
+        }
+        .metric-lbl {
+            font-size: 0.72rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+        }
+        #map {
+            height: 460px;
+            border-radius: 16px;
+            width: 100%;
+            margin-bottom: 0;
+            z-index: 1;
+            border: 1px solid var(--glass-border);
+        }
+        .filter-row {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 16px;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            text-align: left;
+            font-size: 0.86rem;
+        }
+        th {
+            background: rgba(11, 19, 17, 0.7);
+            padding: 12px 14px;
+            font-weight: 700;
+            color: var(--text-muted);
+            border-bottom: 1px solid var(--glass-border);
+            text-transform: uppercase;
+            font-size: 0.72rem;
+            letter-spacing: 0.5px;
+        }
+        td {
+            padding: 12px 14px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            color: var(--text-main);
+        }
+        tr {
+            transition: background 0.2s ease;
+        }
+        tr:hover {
+            background: rgba(16, 185, 129, 0.08);
+            cursor: pointer;
+        }
+        tr.selected-row {
+            background: rgba(16, 185, 129, 0.16) !important;
+            border-left: 3px solid var(--primary);
+        }
+        .preview-img-side {
+            width: 100%;
+            height: 210px;
+            object-fit: contain;
+            background: #080d0b;
+            border-radius: 14px;
+            margin-top: 8px;
+            border: 1px solid var(--glass-border);
+        }
+        .action-btn-pill {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--glass-border);
+            color: var(--text-main);
+            padding: 6px 14px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.25s ease;
+        }
+        .action-btn-pill:hover {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: var(--primary);
+            color: var(--primary);
+        }
+        /* Leaflet Dark Customization */
+        .leaflet-container {
+            background: #0b1311 !important;
+        }
+        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+            background: var(--card-dark) !important;
+            color: white !important;
+            border: 1px solid var(--glass-border) !important;
+            border-radius: 14px !important;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5) !important;
+        }
+    </style>
+</head>
+<body>
+
+    <header class="app-header">
+        <div style="display:flex; align-items:center; gap:16px;">
+            <a href="index.html" class="nav-back-btn">
+                <i class="fa-solid fa-arrow-left"></i> <span>Main Gateway</span>
+            </a>
+            <div class="brand-logo">
+                <i class="fa-solid fa-building-shield"></i> SwachhLens Command OS
+            </div>
+        </div>
+
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <button onclick="fetchSummary()" class="action-btn-pill" style="border-color:rgba(16,185,129,0.3); color:var(--primary);">
+                <i class="fa-solid fa-robot"></i> <span>AI Summary</span>
+            </button>
+
+            <button onclick="drawTruckRoute()" class="action-btn-pill" style="border-color:rgba(6,182,212,0.3); color:var(--accent-cyan);">
+                <i class="fa-solid fa-truck-route"></i> <span>Route Trucks</span>
+            </button>
+
+            <button onclick="exportCsv()" class="action-btn-pill" style="border-color:rgba(245,158,11,0.3); color:var(--accent-amber);">
+                <i class="fa-solid fa-file-csv"></i> <span>Export CSV</span>
+            </button>
+
+            <button onclick="logout()" style="background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.3); color:var(--accent-red); padding:6px 14px; border-radius:10px; cursor:pointer; font-weight:700; font-size:0.8rem; transition:all 0.2s ease;">
+                <i class="fa-solid fa-right-from-bracket"></i> Logout
+            </button>
+        </div>
+    </header>
+
+    <div class="admin-layout">
+        <div>
+            <!-- Metrics Row -->
+            <div class="metrics-grid">
+                <div class="metric-box">
+                    <div class="metric-icon" style="background:rgba(16, 185, 129, 0.15); color:var(--primary);">
+                        <i class="fa-solid fa-layer-group"></i>
+                    </div>
+                    <div>
+                        <div class="metric-val" id="mTotal" style="color:var(--primary);">0</div>
+                        <div class="metric-lbl">Total Active</div>
+                    </div>
+                </div>
+
+                <div class="metric-box">
+                    <div class="metric-icon" style="background:rgba(239, 68, 68, 0.15); color:var(--accent-red);">
+                        <i class="fa-solid fa-triangle-exclamation"></i>
+                    </div>
+                    <div>
+                        <div class="metric-val" id="mHigh" style="color:var(--accent-red);">0</div>
+                        <div class="metric-lbl">Critical Urgency (&ge;7.0)</div>
+                    </div>
+                </div>
+
+                <div class="metric-box">
+                    <div class="metric-icon" style="background:rgba(245, 158, 11, 0.15); color:var(--accent-amber);">
+                        <i class="fa-solid fa-clone"></i>
+                    </div>
+                    <div>
+                        <div class="metric-val" id="mDups" style="color:var(--accent-amber);">0</div>
+                        <div class="metric-lbl">Duplicates (&lt;20m)</div>
+                    </div>
+                </div>
+
+                <div class="metric-box">
+                    <div class="metric-icon" style="background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan);">
+                        <i class="fa-solid fa-user-shield"></i>
+                    </div>
+                    <div>
+                        <div class="metric-val" id="mBlurred" style="color:var(--accent-cyan);">0</div>
+                        <div class="metric-lbl">Anonymized Targets</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- AI Executive Summary Banner (Hidden until triggered) -->
+            <div id="summaryCard" class="card-admin" style="display:none; margin-bottom:24px; border-color:var(--primary-glow); background:rgba(16, 185, 129, 0.05);">
+                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(16, 185, 129, 0.2); padding-bottom:10px; margin-bottom:12px;">
+                    <span style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.1rem; color:var(--primary); display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-brain"></i> AI Municipal Executive Analytics Summary
+                    </span>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted);">Cleanliness Score: <strong id="summaryScore" style="color:var(--primary); font-size:0.95rem;">-</strong></span>
+                        <button onclick="document.getElementById('summaryCard').style.display='none'" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1rem;"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                </div>
+                <p id="summaryText" style="font-size:0.9rem; color:var(--text-main); line-height:1.6; font-weight:500;">
+                    Generating intelligent summary...
+                </p>
+            </div>
+
+            <!-- Spatial Leaflet Map Card -->
+            <div class="card-admin" id="mapCardSection" style="position:relative;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                    <h4 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.15rem; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-map-location-dot text-primary"></i> Spatial Telemetry & Dispatch Route Map
+                    </h4>
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Animated SVG Radar Pins & Moving Truck Route</span>
+                </div>
+
+                <!-- Custom Map Toolbar Overlay Controls -->
+                <div class="map-toolbar-overlay">
+                    <button id="btnTile_dark" onclick="switchMapTile('dark')" class="map-toolbar-btn active"><i class="fa-solid fa-moon"></i> Cyber Dark</button>
+                    <button id="btnTile_satellite" onclick="switchMapTile('satellite')" class="map-toolbar-btn"><i class="fa-solid fa-satellite"></i> Satellite</button>
+                    <button id="btnTile_streets" onclick="switchMapTile('streets')" class="map-toolbar-btn"><i class="fa-solid fa-road"></i> Streets</button>
+                    <button id="btnHeatmap" onclick="toggleHeatmap()" class="map-toolbar-btn" style="border-left:1px solid rgba(255,255,255,0.1); margin-left:4px;"><i class="fa-solid fa-fire"></i> Heatmap</button>
+                    <button onclick="recenterMap()" class="map-toolbar-btn" title="Recenter View"><i class="fa-solid fa-crosshairs"></i></button>
+                </div>
+
+                <div id="map"></div>
+            </div>
+
+            <!-- Complaint Queue Table Card -->
+            <div class="card-admin" id="queueCardSection" style="margin-top:24px;">
+                <div class="filter-row">
+                    <h4 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.15rem; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+                        <i class="fa-solid fa-list-check text-primary"></i> Civic Complaint Queue
+                    </h4>
+                    
+                    <div style="display:flex; gap:10px;">
+                        <input type="text" id="searchInput" onkeyup="filterTickets()" placeholder="Search ID or category..." class="input-field" style="width:200px; padding:6px 12px; font-size:0.8rem;">
+                        <select id="statusFilter" onchange="filterTickets()" class="input-field" style="width:170px; padding:6px 12px; font-size:0.8rem;">
+                            <option value="ALL">All Statuses</option>
+                            <option value="reported">Reported</option>
+                            <option value="in_progress">In Progress</option>
+                            <option value="resolved">Resolved</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div style="overflow-x:auto;">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th onclick="sortTickets('id')" class="sortable-th" title="Click to sort by ID">Ticket ID <i class="fa-solid fa-sort" style="font-size:0.75rem;"></i></th>
+                                <th onclick="sortTickets('category')" class="sortable-th" title="Click to sort by Category">Category <i class="fa-solid fa-sort" style="font-size:0.75rem;"></i></th>
+                                <th onclick="sortTickets('volume_band')" class="sortable-th" title="Click to sort by Volume">Volume <i class="fa-solid fa-sort" style="font-size:0.75rem;"></i></th>
+                                <th onclick="sortTickets('urgency_score')" class="sortable-th" title="Click to sort by Urgency">Urgency <i class="fa-solid fa-sort" style="font-size:0.75rem;"></i></th>
+                                <th>Duplicates</th>
+                                <th>Blurred</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminTableBody">
+                            <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Loading active tickets from backend...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- AI Inspector Drawer -->
+        <div>
+            <div class="card-admin" id="inspectCardSection" style="position:sticky; top:85px;">
+                <div style="border-bottom:1px solid var(--glass-border); padding-bottom:12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <h4 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.15rem; color:var(--primary);" id="inspectId">
+                            🔎 AI Ticket Inspector
+                        </h4>
+                        <span style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Real-time Multimodal Inspection</span>
+                    </div>
+
+                    <button id="btnTts" onclick="speakCurrentNote()" title="Listen aloud to translation & dispatch recommendation" style="background:rgba(6, 182, 212, 0.15); border:1px solid rgba(6, 182, 212, 0.3); color:var(--accent-cyan); width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; justify-content:center; transition:all 0.2s ease;">
+                        <i class="fa-solid fa-volume-high"></i>
+                    </button>
+                </div>
+                
+                <!-- Box 1: Original Spoken Voice Note with Sound Wave Animation -->
+                <div style="background:rgba(2, 132, 199, 0.08); border:1px solid rgba(2, 132, 199, 0.25); padding:12px 14px; border-radius:14px; margin-bottom:12px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <span style="font-size:0.7rem; font-weight:700; color:var(--accent-cyan); text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center;">
+                            <i class="fa-solid fa-microphone"></i> Spoken Regional Note:
+                            <span class="sound-wave-bars">
+                                <span class="sound-bar"></span>
+                                <span class="sound-bar"></span>
+                                <span class="sound-bar"></span>
+                                <span class="sound-bar"></span>
+                            </span>
+                        </span>
+                        <span class="privacy-pill" style="font-size:0.68rem; padding:2px 8px;"><i class="fa-solid fa-globe"></i> Voice AI</span>
+                    </div>
+                    <p id="inspectVoice" style="font-size:0.88rem; font-style:italic; color:var(--text-main); line-height:1.5;">Select a ticket from table or map</p>
+                </div>
+
+                <!-- Box 2: Visual Dispatch & Specification Card -->
+                <div class="dispatch-spec-card">
+                    <span style="font-size:0.7rem; font-weight:800; color:var(--primary); display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">
+                        <i class="fa-solid fa-language"></i> AI English Context & Translation:
+                    </span>
+                    <p id="inspectTransEn" style="font-size:0.85rem; font-weight:600; color:var(--text-main); line-height:1.5; margin-bottom:8px;">Select a ticket from table or map</p>
+
+                    <span style="font-size:0.7rem; font-weight:800; color:var(--primary); display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">
+                        <i class="fa-solid fa-truck-ramp-box"></i> Recommended Dispatch Specification:
+                    </span>
+                    <p id="inspectDispatch" style="font-size:0.82rem; font-weight:600; color:var(--text-main); line-height:1.5; margin-bottom:10px;">Select a ticket from table or map</p>
+
+                    <!-- Visual Truck & Crew Specification Grid -->
+                    <div class="dispatch-grid">
+                        <div class="dispatch-badge">
+                            <span id="inspectTruckEmoji" style="font-size:1.2rem;">🚛</span>
+                            <div>
+                                <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Vehicle Type</div>
+                                <div id="inspectTruckType" style="color:var(--primary);">Heavy Compactor</div>
+                            </div>
+                        </div>
+
+                        <div class="dispatch-badge">
+                            <span style="font-size:1.2rem;">👷‍♂️</span>
+                            <div>
+                                <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Crew Assigned</div>
+                                <div id="inspectCrewCount" style="color:var(--accent-cyan);">3 Workers</div>
+                            </div>
+                        </div>
+
+                        <div class="dispatch-badge">
+                            <span style="font-size:1.2rem;">📦</span>
+                            <div>
+                                <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Payload Band</div>
+                                <div id="inspectVolume" style="color:var(--accent-amber);">Medium (0.2-1.0m³)</div>
+                            </div>
+                        </div>
+
+                        <div class="dispatch-badge">
+                            <span style="font-size:1.2rem;">🧹</span>
+                            <div>
+                                <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Equipment</div>
+                                <div id="inspectTools" style="color:var(--text-main);">Vacuum Loader</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Box 3: Anonymized Image Payload Viewer & Privacy Pills -->
+                <div style="margin-bottom:14px;">
+                    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                        <span style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">
+                            <i class="fa-solid fa-shield-halved"></i> Anonymized Payload:
+                        </span>
+                        <div class="privacy-pill-group">
+                            <span class="privacy-pill" id="pillFaces"><i class="fa-solid fa-user-slash"></i> 0 Faces</span>
+                            <span class="privacy-pill" id="pillPlates"><i class="fa-solid fa-car-burst"></i> 0 Plates</span>
+                        </div>
+                    </div>
+                    <img id="inspectImg" class="preview-img-side" alt="Stored Payload" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='180' fill='%23080d0b'><rect width='100%' height='100%'/><text x='50%' y='50%' fill='%23666' dominant-baseline='middle' text-anchor='middle'>Select Ticket</text></svg>">
+                </div>
+
+                <!-- Box 4: Status Update Action Buttons -->
+                <div style="display:flex; gap:8px;">
+                    <button onclick="updateStatus('reported')" style="flex:1; background:rgba(255,255,255,0.08); color:var(--text-main); border:1px solid var(--glass-border); padding:9px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.78rem; transition:all 0.2s ease;">
+                        <i class="fa-solid fa-rotate-left"></i> Reported
+                    </button>
+                    <button onclick="updateStatus('in_progress')" style="flex:1.2; background:linear-gradient(135deg, #ea580c, #c2410c); color:white; border:none; padding:9px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.78rem; box-shadow:0 4px 14px rgba(234, 88, 12, 0.3); transition:all 0.2s ease;">
+                        <i class="fa-solid fa-truck-fast"></i> In Progress
+                    </button>
+                    <button onclick="updateStatus('resolved')" style="flex:1.2; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; padding:9px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.78rem; box-shadow:0 4px 14px var(--primary-glow); transition:all 0.2s ease;">
+                        <i class="fa-solid fa-circle-check"></i> Resolved
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING MISTRAL AI ADVISOR CHATBOT WIDGET -->
+    <button onclick="toggleChatWindow()" class="floating-chat-btn" id="floatingChatBtn" title="Mistral AI Telemetry Advisor Chatbot">
+        <i class="fa-solid fa-robot"></i>
+        <span class="chat-online-dot"></span>
+    </button>
+
+    <div class="floating-chat-window" id="floatingChatWindow">
+        <div class="chat-header">
+            <div style="display:flex; align-items:center; gap:10px;">
+                <div style="width:34px; height:34px; border-radius:50%; background:rgba(16,185,129,0.2); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                    <i class="fa-solid fa-robot"></i>
+                </div>
+                <div>
+                    <strong style="font-family:'Outfit',sans-serif; color:var(--text-main); font-size:0.98rem; display:block;">Mistral AI Advisor</strong>
+                    <span style="font-size:0.68rem; color:var(--primary); font-weight:700;">● Online Telemetry</span>
+                </div>
+            </div>
+            <button onclick="toggleChatWindow()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.1rem;"><i class="fa-solid fa-chevron-down"></i></button>
+        </div>
+
+        <div class="chat-msg-thread" id="chatMsgThread">
+            <div class="chat-bubble-bot">
+                👋 Hello Command Officer! I am your Mistral AI City Advisor. Ask me anything about current complaint density, workload backlogs, or low-activity zone reasoning.
+            </div>
+        </div>
+
+        <div class="chat-chips-row">
+            <span class="chat-chip" onclick="sendChatQuery('Workload backlog?')">📊 Workload Backlog</span>
+            <span class="chat-chip" onclick="sendChatQuery('Hotspot density?')">🔥 Hotspot Density</span>
+            <span class="chat-chip" onclick="sendChatQuery('Low complaint root causes?')">🔍 Low-Complaint Causes</span>
+        </div>
+
+        <div class="chat-input-bar">
+            <input type="text" id="chatInputText" placeholder="Ask AI advisor..." class="input-field" style="font-size:0.84rem; padding:8px 12px;" onkeypress="if(event.key==='Enter') sendChatQuery();">
+            <button onclick="sendChatQuery()" style="background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; padding:8px 14px; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.85rem;">
+                <i class="fa-solid fa-paper-plane"></i>
+            </button>
+        </div>
+    </div>
+
+    <script src="assets/config.js"></script>
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
+
+    <script>
+        // Theme Manager Script - Permanent Cyber Dark Mode
+        (function() {
+            document.documentElement.setAttribute("data-theme", "dark");
+            localStorage.setItem("swachh_theme", "dark");
+        })();
+
+        if (!sessionStorage.getItem("swachh_auth")) window.location.replace("index.html");
+        function logout() { sessionStorage.removeItem("swachh_auth"); window.location.replace("index.html"); }
+
+        let map, markersGroup, routePolyline = null, heatmapLayer = null, isHeatmapActive = false, ticketsData = [], filteredTickets = [], currentInspectId = null;
+        let currentTileLayer = null;
+
+        const tileProviders = {
+            dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
+            light: 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',
+            satellite: 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+            streets: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png'
+        };
+
+        document.addEventListener("DOMContentLoaded", async () => {
+            map = L.map('map', { zoomControl: false }).setView([CONFIG.DEFAULT_LAT, CONFIG.DEFAULT_LNG], 13);
+            L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+            switchMapTile("dark");
+            markersGroup = L.layerGroup().addTo(map);
+
+            await loadAdminData();
+        });
+
+        function switchMapTile(mode) {
+            if (currentTileLayer) map.removeLayer(currentTileLayer);
+            currentTileLayer = L.tileLayer(tileProviders[mode] || tileProviders.dark, {
+                maxZoom: 19,
+                attribution: '&copy; CartoDB & Esri World Imagery'
+            }).addTo(map);
+
+            document.querySelectorAll('.map-toolbar-btn').forEach(btn => {
+                if (btn.id && btn.id.startsWith('btnTile_')) btn.classList.remove('active');
+            });
+            const activeBtn = document.getElementById(`btnTile_${mode}`);
+            if (activeBtn) activeBtn.classList.add('active');
+        }
+
+        function recenterMap() {
+            if (ticketsData.length > 0) {
+                const group = L.featureGroup(markersGroup.getLayers());
+                if (group.getLayers().length > 0) {
+                    map.fitBounds(group.getBounds(), { padding: [50, 50] });
+                    return;
+                }
+            }
+            map.setView([CONFIG.DEFAULT_LAT, CONFIG.DEFAULT_LNG], 13);
+        }
+
+        function toggleHeatmap() {
+            isHeatmapActive = !isHeatmapActive;
+            const btn = document.getElementById('btnHeatmap');
+            if (btn) btn.classList.toggle('active', isHeatmapActive);
+
+            if (!isHeatmapActive) {
+                if (heatmapLayer) map.removeLayer(heatmapLayer);
+                markersGroup.addTo(map);
+            } else {
+                markersGroup.remove();
+                if (heatmapLayer) map.removeLayer(heatmapLayer);
+
+                const heatPoints = ticketsData.map(t => [t.lat, t.lng, (t.urgency_score || 5) / 10.0]);
+                if (typeof L.heatLayer === 'function') {
+                    heatmapLayer = L.heatLayer(heatPoints, { radius: 28, blur: 18, maxZoom: 17 }).addTo(map);
+                } else {
+                    heatmapLayer = L.layerGroup();
+                    ticketsData.forEach(t => {
+                        L.circle([t.lat, t.lng], { radius: 140, color: '#ef4444', fillColor: '#ef4444', fillOpacity: 0.4, stroke: false }).addTo(heatmapLayer);
+                    });
+                    heatmapLayer.addTo(map);
+                }
+            }
+        }
+
+        let movingTruckMarker = null;
+        let truckAnimTimer = null;
+        let currentSortKey = null;
+        let currentSortAsc = true;
+
+        async function loadAdminData() {
+            try {
+                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/reports`);
+                const data = await res.json();
+                if (data.status === 'success') {
+                    ticketsData = data.data;
+                    updateStatusFilterCounts();
+                    filterTickets();
+                }
+            } catch(e) {
+                console.error("Backend fetch error:", e);
+                document.getElementById('adminTableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--accent-red);">Failed to connect to backend at ${CONFIG.API_BASE_URL}</td></tr>`;
+            }
+        }
+
+        function updateStatusFilterCounts() {
+            const reportedCount = ticketsData.filter(t => (t.status || 'reported') === 'reported').length;
+            const inProgCount = ticketsData.filter(t => t.status === 'in_progress').length;
+            const resolvedCount = ticketsData.filter(t => t.status === 'resolved').length;
+
+            const sel = document.getElementById('statusFilter');
+            if (!sel) return;
+            const currentVal = sel.value;
+            sel.innerHTML = `
+                <option value="ALL">All Statuses (${ticketsData.length})</option>
+                <option value="reported">Reported (${reportedCount})</option>
+                <option value="in_progress">In Progress (${inProgCount})</option>
+                <option value="resolved">Resolved (${resolvedCount})</option>
+            `;
+            sel.value = currentVal;
+        }
+
+        function sortTickets(key) {
+            if (currentSortKey === key) {
+                currentSortAsc = !currentSortAsc;
+            } else {
+                currentSortKey = key;
+                currentSortAsc = true;
+            }
+
+            filteredTickets.sort((a, b) => {
+                let valA = a[key] ?? "";
+                let valB = b[key] ?? "";
+                if (typeof valA === "string") valA = valA.toLowerCase();
+                if (typeof valB === "string") valB = valB.toLowerCase();
+                if (valA < valB) return currentSortAsc ? -1 : 1;
+                if (valA > valB) return currentSortAsc ? 1 : -1;
+                return 0;
+            });
+
+            renderTableAndMap();
+        }
+
+        function scrollToSection(id) {
+            const el = document.getElementById(id);
+            if (el) el.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function filterTickets() {
+            const q = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase().trim() : '';
+            const statusF = document.getElementById('statusFilter') ? document.getElementById('statusFilter').value : 'ALL';
+
+            filteredTickets = ticketsData.filter(t => {
+                const matchQ = (t.id && t.id.toLowerCase().includes(q)) || (t.category && t.category.toLowerCase().includes(q));
+                const matchStatus = statusF === 'ALL' || (t.status || 'reported') === statusF;
+                return matchQ && matchStatus;
+            });
+
+            renderMetrics();
+            renderTableAndMap();
+        }
+
+        // --- Garbage Truck Polyline Dispatch Routing & Moving Truck Marker ---
+        function drawTruckRoute() {
+            if (routePolyline) map.removeLayer(routePolyline);
+            if (movingTruckMarker) map.removeLayer(movingTruckMarker);
+            if (truckAnimTimer) clearInterval(truckAnimTimer);
+
+            const activeTickets = ticketsData
+                .filter(t => (t.status || 'reported') !== 'resolved')
+                .sort((a, b) => b.urgency_score - a.urgency_score);
+
+            if (activeTickets.length === 0) {
+                alert("No active unresolved tickets available for truck routing.");
+                return;
+            }
+
+            const waypoints = activeTickets.map(t => [t.lat, t.lng]);
+            routePolyline = L.polyline(waypoints, {
+                color: '#10b981',
+                weight: 4,
+                dashArray: '8, 8',
+                opacity: 0.95
+            }).addTo(map);
+
+            const truckIcon = L.divIcon({
+                className: 'moving-truck-pin',
+                html: '<div class="moving-truck-icon">🚛</div>',
+                iconSize: [36, 36],
+                iconAnchor: [18, 18]
+            });
+
+            movingTruckMarker = L.marker(waypoints[0], { icon: truckIcon }).addTo(map);
+
+            let step = 0;
+            truckAnimTimer = setInterval(() => {
+                step = (step + 1) % waypoints.length;
+                movingTruckMarker.setLatLng(waypoints[step]);
+            }, 1100);
+
+            map.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
+            alert(`🚛 Truck Animated Route Active! Connecting ${activeTickets.length} active collection points on the map.`);
+        }
+
+        function renderMetrics() {
+            document.getElementById('mTotal').innerText = ticketsData.length;
+            document.getElementById('mHigh').innerText = ticketsData.filter(t => t.urgency_score >= 7.0).length;
+            document.getElementById('mDups').innerText = ticketsData.reduce((acc, t) => acc + (t.duplicate_count || 0), 0);
+            document.getElementById('mBlurred').innerText = ticketsData.reduce((acc, t) => acc + (t.faces_blurred || 0) + (t.plates_blurred || 0), 0);
+        }
+
+        function renderTableAndMap() {
+            markersGroup.clearLayers();
+            const tbody = document.getElementById('adminTableBody');
+            tbody.innerHTML = '';
+
+            if (filteredTickets.length === 0) {
+                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">No matching civic tickets found.</td></tr>';
+                return;
+            }
+
+            filteredTickets.forEach(t => {
+                let pinColor = t.status === 'resolved' ? '#06b6d4' : (t.urgency_score >= 7.0 ? '#ef4444' : t.urgency_score >= 4.0 ? '#f59e0b' : '#10b981');
+                let categoryIcon = '🗑️';
+                if (t.is_drain_blocked) categoryIcon = '🌊';
+                else if (t.is_fire_hazard) categoryIcon = '🔥';
+                else if (t.category === 'Plastic Waste') categoryIcon = '🥤';
+                else if (t.category === 'Construction Debris') categoryIcon = '🏗️';
+                else if (t.category === 'E-Waste') categoryIcon = '🔋';
+                else if (t.category === 'Hazardous') categoryIcon = '☣️';
+
+                const customIcon = L.divIcon({
+                    className: '',
+                    html: `
+                        <div class="custom-radar-pin" style="color: ${pinColor};">
+                            ${t.urgency_score >= 6.0 && t.status !== 'resolved' ? '<div class="radar-wave"></div>' : ''}
+                            <div class="pin-center">
+                                <span>${categoryIcon}</span>
+                            </div>
+                            <div class="pin-score-chip">${t.urgency_score}</div>
+                        </div>
+                    `,
+                    iconSize: [36, 36],
+                    iconAnchor: [18, 18]
+                });
+
+                const marker = L.marker([t.lat, t.lng], { icon: customIcon }).addTo(markersGroup);
+
+                const popupHtml = `
+                    <div style="padding:4px; font-family:'Plus Jakarta Sans',sans-serif;">
+                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:6px;">
+                            <strong style="font-family:'Outfit',sans-serif; color:white; font-size:1.05rem;">${t.id}</strong>
+                            <span style="font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:6px; background:${pinColor}22; color:${pinColor}; border:1px solid ${pinColor}44;">${t.status || 'reported'}</span>
+                        </div>
+                        <div style="font-size:0.8rem; color:#94a3b8; margin-bottom:4px;">Category: <strong style="color:white;">${t.category}</strong></div>
+                        <div style="font-size:0.8rem; color:#94a3b8; margin-bottom:8px;">Urgency Score: <strong style="color:${pinColor}; font-size:0.9rem;">${t.urgency_score}/10</strong></div>
+                        <button onclick="inspect('${t.id}')" style="width:100%; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; padding:6px; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">Inspect Ticket</button>
+                    </div>
+                `;
+
+                marker.bindPopup(popupHtml);
+                marker.on('click', () => inspect(t.id));
+
+                const isSelected = currentInspectId === t.id;
+                const statusBadgeBg = t.status === 'resolved' ? 'rgba(6, 182, 212, 0.2)' : t.status === 'in_progress' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.1)';
+                const statusBadgeColor = t.status === 'resolved' ? 'var(--accent-cyan)' : t.status === 'in_progress' ? 'var(--accent-amber)' : 'var(--text-muted)';
+
+                tbody.innerHTML += `
+                    <tr class="${isSelected ? 'selected-row' : ''}" onclick="inspect('${t.id}')">
+                        <td><b>${t.id}</b> <span style="font-size:0.68rem; padding:3px 8px; border-radius:6px; font-weight:800; background:${statusBadgeBg}; color:${statusBadgeColor};">${t.status || 'reported'}</span></td>
+                        <td>${t.category || 'N/A'}</td>
+                        <td>${t.volume_band || 'N/A'}</td>
+                        <td><span style="background:${pinColor}; color:white; font-weight:800; padding:3px 8px; border-radius:6px;">${t.urgency_score}/10</span></td>
+                        <td>+${t.duplicate_count || 0}</td>
+                        <td>${t.faces_blurred}F / ${t.plates_blurred}P</td>
+                        <td><button onclick="event.stopPropagation(); inspect('${t.id}');" style="background:linear-gradient(135deg, var(--accent-cyan), #0284c7); color:white; border:none; padding:5px 10px; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">Inspect</button></td>
+                    </tr>
+                `;
+            });
+
+            if (filteredTickets.length > 0 && !currentInspectId) {
+                inspect(filteredTickets[0].id);
+            }
+        }
+
+        function updateDispatchVisuals(t) {
+            const cat = (t.category || "").toLowerCase();
+            const vol = (t.volume_band || "").toLowerCase();
+            const isSmall = vol.includes("small") || vol.includes("<0.2");
+            const isLarge = vol.includes("large") || vol.includes(">1") || vol.includes(">3");
+
+            let emoji = "🚚";
+            let truckType = "Medium Waste Tipper";
+            let crew = "2 Sanitation Workers";
+            let tools = "Shovels & Gloves";
+
+            // 1. Small Volume (<0.2m³) -> Electric Cart / Tipper
+            if (isSmall && !cat.includes("construction") && !cat.includes("hazard")) {
+                emoji = "🛺";
+                truckType = "Electric Tipper Cart";
+                crew = "1 Sanitation Worker";
+                tools = "Hand Broom & Trash Bin";
+            }
+            // 2. Construction Debris / Heavy Rubble
+            else if (cat.includes("construction") || cat.includes("debris")) {
+                emoji = "🚜";
+                truckType = "Debris Tractor";
+                crew = "4 Heavy-Duty Workers";
+                tools = "Hydraulic Bucket & Loader";
+            }
+            // 3. Hazardous or E-Waste
+            else if (cat.includes("e-waste") || cat.includes("hazard")) {
+                emoji = "☣️";
+                truckType = "HazMat Sealed Tipper";
+                crew = "2 HazMat Specialists";
+                tools = "Insulated Gear & Tongs";
+            }
+            // 4. Large/High Volume Waste or Overflowing Bins -> Heavy Compactor
+            else if (isLarge || cat.includes("bin") || t.urgency_score >= 8.0) {
+                emoji = "🚛";
+                truckType = "Heavy Compactor Truck";
+                crew = "3 Crew Operators";
+                tools = "Vacuum Loader & Winch";
+            }
+            // 5. Plastic / Medium General Waste -> Plastic Recycling Van
+            else if (cat.includes("plastic")) {
+                emoji = "🚚";
+                truckType = "Plastic Recycling Van";
+                crew = "2 Sanitation Workers";
+                tools = "Sorting Bags & Gloves";
+            }
+            // 6. Organic / General Medium Waste
+            else {
+                emoji = "🚚";
+                truckType = "Medium Waste Tipper";
+                crew = "2 Sanitation Workers";
+                tools = "Shovels & Yard Brooms";
+            }
+
+            const truckEmojiEl = document.getElementById('inspectTruckEmoji');
+            if (truckEmojiEl) truckEmojiEl.innerText = emoji;
+            const truckTypeEl = document.getElementById('inspectTruckType');
+            if (truckTypeEl) truckTypeEl.innerText = truckType;
+            const crewCountEl = document.getElementById('inspectCrewCount');
+            if (crewCountEl) crewCountEl.innerText = crew;
+            const volumeEl = document.getElementById('inspectVolume');
+            if (volumeEl) volumeEl.innerText = t.volume_band || "Medium (0.2-1.0m³)";
+            const toolsEl = document.getElementById('inspectTools');
+            if (toolsEl) toolsEl.innerText = tools;
+
+            const pillFacesEl = document.getElementById('pillFaces');
+            if (pillFacesEl) pillFacesEl.innerHTML = `<i class="fa-solid fa-user-slash"></i> ${t.faces_blurred || 0} Faces`;
+            const pillPlatesEl = document.getElementById('pillPlates');
+            if (pillPlatesEl) pillPlatesEl.innerHTML = `<i class="fa-solid fa-car-burst"></i> ${t.plates_blurred || 0} Plates`;
+        }
+
+        async function inspect(id) {
+            currentInspectId = id;
+            const t = ticketsData.find(x => x.id === id);
+            if (!t) return;
+
+            // Highlight selected row in table
+            const tbody = document.getElementById('adminTableBody');
+            if (tbody) {
+                const rows = tbody.getElementsByTagName('tr');
+                for (let r of rows) {
+                    if (r.innerText.includes(id)) r.classList.add('selected-row');
+                    else r.classList.remove('selected-row');
+                }
+            }
+
+            // Smooth pan map to selected ticket location
+            if (map && t.lat && t.lng) {
+                map.setView([t.lat, t.lng], 14, { animate: true });
+            }
+
+            document.getElementById('inspectId').innerText = `Inspector: ${t.id} (${t.status || 'reported'})`;
+            document.getElementById('inspectVoice').innerText = t.note || "No regional voice note spoken.";
+            document.getElementById('inspectTransEn').innerText = t.note_summary_en || t.note || "English translation ready.";
+            document.getElementById('inspectDispatch').innerText = t.description || "Inspect site for general clearance.";
+
+            updateDispatchVisuals(t);
+
+            try {
+                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/report/${id}/image`);
+                const result = await res.json();
+                if (result.status === 'success' && result.image_b64) {
+                    document.getElementById('inspectImg').src = `data:image/jpeg;base64,${result.image_b64}`;
+                }
+            } catch(e) {
+                console.error("Failed image payload fetch:", e);
+            }
+        }
+
+        async function updateStatus(newStatus) {
+            if (!currentInspectId) return;
+            try {
+                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/report/${currentInspectId}/status`, {
+                    method: 'PATCH',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ status: newStatus })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    await loadAdminData();
+                    inspect(currentInspectId);
+                }
+            } catch(e) {
+                console.error("Failed to update status:", e);
+            }
+        }
+
+        // --- Text-to-Speech Speaker ---
+        function speakCurrentNote() {
+            if (!('speechSynthesis' in window)) {
+                alert("Text-to-Speech is not supported in this browser.");
+                return;
+            }
+            window.speechSynthesis.cancel();
+            const transEn = document.getElementById('inspectTransEn') ? document.getElementById('inspectTransEn').innerText : "";
+            const dispatch = document.getElementById('inspectDispatch') ? document.getElementById('inspectDispatch').innerText : "";
+            const textToSpeak = transEn + ". Recommendation: " + dispatch;
+            
+            if (!textToSpeak || textToSpeak.includes("Select a ticket")) {
+                alert("Select a ticket first to listen to its voice note.");
+                return;
+            }
+            
+            const utterance = new SpeechSynthesisUtterance(textToSpeak);
+            utterance.rate = 0.95;
+            window.speechSynthesis.speak(utterance);
+        }
+
+        // --- CSV Export ---
+        function exportCsv() {
+            if (!ticketsData || ticketsData.length === 0) {
+                alert("No civic tickets available to export.");
+                return;
+            }
+            let csv = "Ticket ID,Category,Volume,Urgency Score,Duplicates,Faces Blurred,Plates Blurred,Status,Lat,Lng,Created At,Description,Note Summary\n";
+            ticketsData.forEach(t => {
+                const desc = (t.description || "").replace(/"/g, '""');
+                const noteSum = (t.note_summary_en || t.note || "").replace(/"/g, '""');
+                csv += `"${t.id}","${t.category}","${t.volume_band}",${t.urgency_score},${t.duplicate_count || 0},${t.faces_blurred || 0},${t.plates_blurred || 0},"${t.status || 'reported'}",${t.lat},${t.lng},"${t.created_at}","${desc}","${noteSum}"\n`;
+            });
+            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement("a");
+            link.setAttribute("href", url);
+            link.setAttribute("download", `SwachhLens_Civic_Reports_${new Date().toISOString().slice(0,10)}.csv`);
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+
+        // --- Garbage Truck Polyline Dispatch Routing ---
+        function drawTruckRoute() {
+            if (routePolyline) {
+                map.removeLayer(routePolyline);
+            }
+            const activeTickets = ticketsData
+                .filter(t => (t.status || 'reported') !== 'resolved')
+                .sort((a, b) => b.urgency_score - a.urgency_score);
+
+            if (activeTickets.length === 0) {
+                alert("No active unresolved tickets available for truck routing.");
+                return;
+            }
+
+            const waypoints = activeTickets.map(t => [t.lat, t.lng]);
+            routePolyline = L.polyline(waypoints, {
+                color: '#06b6d4',
+                weight: 4,
+                dashArray: '8, 8',
+                opacity: 0.9
+            }).addTo(map);
+
+            map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
+            alert(`Optimized dispatch route calculated connecting ${activeTickets.length} active collection points on the map.`);
+        }
+
+        // --- AI Executive Summary ---
+        async function fetchSummary() {
+            const sumCard = document.getElementById('summaryCard');
+            const sumText = document.getElementById('summaryText');
+            const sumScore = document.getElementById('summaryScore');
+            sumCard.style.display = 'block';
+            sumText.innerText = "Analyzing active complaint database with AI vision & spatial telemetry...";
+
+            try {
+                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/reports/summary`, { method: 'POST' });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    sumText.innerText = result.summary;
+                    if (sumScore) sumScore.innerText = `${result.cleanliness_score || 85}/100`;
+                    sumCard.scrollIntoView({ behavior: 'smooth' });
+                }
+            } catch(e) {
+                console.error("Summary error:", e);
+                sumText.innerText = "Failed to generate AI executive summary. Ensure backend is active.";
+            }
+        }
+
+        // --- MISTRAL AI BOT ADVISOR FUNCTIONS ---
+        function openAiBotModal() {
+            document.getElementById('aiBotModal').style.display = 'flex';
+            fetchCityAnalysis();
+        }
+
+        function closeAiBotModal() {
+            document.getElementById('aiBotModal').style.display = 'none';
+        }
+
+        async function fetchCityAnalysis(query = "") {
+            document.getElementById('botWorkload').innerText = "Analyzing remaining municipal workload & clearance time...";
+            document.getElementById('botDensity').innerText = "Analyzing spatial waste concentration & density clusters...";
+            document.getElementById('botLowDensity').innerText = "Diagnosing low-complaint zones & root causes...";
+
+            try {
+                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/ai/analyze-city`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ query })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    document.getElementById('botWorkload').innerText = result.workload_analysis;
+                    document.getElementById('botDensity').innerText = result.density_analysis;
+                    document.getElementById('botLowDensity').innerText = result.low_density_root_cause;
+
+                    if (query && result.bot_response) {
+                        const box = document.getElementById('botResponseBox');
+                        document.getElementById('botResponseText').innerText = result.bot_response;
+                        box.style.display = 'block';
+                    }
+                }
+            } catch(e) {
+                console.error("AI Bot error:", e);
+                document.getElementById('botWorkload').innerText = "Failed to load telemetry analysis from backend server.";
+            }
+        }
+
+        async function askAiBot() {
+            const input = document.getElementById('botUserQuery');
+            const q = input.value.trim();
+            if (!q) return;
+            await fetchCityAnalysis(q);
+            input.value = '';
+        }
+
+        function formatMarkdownToHtml(str) {
+            if (!str) return "";
+            return str
+                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                .replace(/\n/g, '<br>');
+        }
+
+        // --- FLOATING CHATBOT WIDGET FUNCTIONS ---
+        function toggleChatWindow() {
+            const win = document.getElementById('floatingChatWindow');
+            if (!win) return;
+            const isHidden = win.style.display === 'none' || !win.style.display;
+            win.style.display = isHidden ? 'flex' : 'none';
+        }
+
+        async function sendChatQuery(queryText) {
+            const input = document.getElementById('chatInputText');
+            const q = queryText || (input ? input.value.trim() : '');
+            if (!q) return;
+
+            if (input) input.value = '';
+
+            const thread = document.getElementById('chatMsgThread');
+            if (!thread) return;
+
+            // User speech bubble
+            const userBubble = document.createElement('div');
+            userBubble.className = 'chat-bubble-user';
+            userBubble.innerText = q;
+            thread.appendChild(userBubble);
+            thread.scrollTop = thread.scrollHeight;
+
+            // Bot loading bubble
+            const botLoading = document.createElement('div');
+            botLoading.className = 'chat-bubble-bot';
+            botLoading.innerText = 'Analyzing city telemetry with Mistral AI...';
+            thread.appendChild(botLoading);
+            thread.scrollTop = thread.scrollHeight;
+
+            try {
+                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/ai/analyze-city`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ query: q })
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    const rawResp = result.bot_response || result.workload_analysis;
+                    botLoading.innerHTML = formatMarkdownToHtml(rawResp);
+                    thread.scrollTop = thread.scrollHeight;
+                }
+            } catch(e) {
+                console.error("Chatbot error:", e);
+                botLoading.innerText = "Failed to connect to AI server. Ensure backend is active.";
+            }
+        }
+    </script>
+
+    <!-- MOBILE FLOATING BOTTOM DOCK NAVBAR -->
+    <div class="mobile-bottom-dock" id="mobileBottomNav">
+        <button onclick="scrollToSection('mapCardSection')" class="dock-btn"><i class="fa-solid fa-map-location-dot"></i><span>Map</span></button>
+        <button onclick="scrollToSection('queueCardSection')" class="dock-btn"><i class="fa-solid fa-list-check"></i><span>Queue</span></button>
+        <button onclick="scrollToSection('inspectCardSection')" class="dock-btn"><i class="fa-solid fa-magnifying-glass"></i><span>Inspector</span></button>
+        <button onclick="toggleChatWindow()" class="dock-btn"><i class="fa-solid fa-robot"></i><span>AI Chat</span></button>
+    </div>
+</body>
+</html>

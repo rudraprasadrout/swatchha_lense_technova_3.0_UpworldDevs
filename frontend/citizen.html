@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwachhLens | Citizen AI Reporting Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <script>
+        (function() {
+            document.documentElement.setAttribute("data-theme", "dark");
+            localStorage.setItem("swachh_theme", "dark");
+        })();
+    </script>
+</head>
+<body>
+
+    <header class="app-header">
+        <div style="display:flex; align-items:center; gap:16px;">
+            <a href="index.html" class="nav-back-btn">
+                <i class="fa-solid fa-arrow-left"></i> <span>Back to Gateway</span>
+            </a>
+            <a href="index.html" class="brand-logo"><i class="fa-solid fa-leaf"></i> SwachhLens</a>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <span style="font-size:0.75rem; font-weight:700; background:rgba(16, 185, 129, 0.12); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.3); padding:5px 12px; border-radius:20px; display:inline-flex; align-items:center; gap:6px;">
+                <span style="width:8px; height:8px; border-radius:50%; background:var(--primary); box-shadow:0 0 8px var(--primary);"></span> Live Vision AI
+            </span>
+        </div>
+    </header>
+
+    <div class="app-container">
+        
+        <div style="text-align:center; margin-bottom:4px;">
+            <h2 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.4rem; color:var(--text-main);">Report Civic Issue</h2>
+            <p style="font-size:0.82rem; color:var(--text-muted); font-weight:500;">Capture image, speak regional note, & auto-anonymize</p>
+        </div>
+
+        <!-- Capture Area -->
+        <div class="capture-box" id="captureBox">
+            <input type="file" id="imageInput" accept="image/*" capture="environment">
+            <img id="previewImg" class="preview-img" alt="Captured Waste Image">
+            <div id="capturePlaceholder" style="text-align:center; color:var(--primary);">
+                <div style="width:64px; height:64px; border-radius:50%; background:rgba(16, 185, 129, 0.12); display:flex; align-items:center; justify-content:center; margin:0 auto 129px auto;">
+                    <i class="fa-solid fa-camera" style="font-size:1.8rem; color:var(--primary);"></i>
+                </div>
+                <div style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.1rem; color:var(--text-main);">Tap to Capture Photo</div>
+                <div style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Supports live camera & gallery selection</div>
+            </div>
+        </div>
+
+        <!-- Metadata Grid -->
+        <div class="meta-grid">
+            <div class="input-group-custom">
+                <label class="input-label"><i class="fa-solid fa-location-dot"></i> GPS Coordinates</label>
+                <input type="text" id="locationInput" class="input-field" value="20.2961, 85.8245">
+            </div>
+            <div class="input-group-custom">
+                <label class="input-label"><i class="fa-solid fa-clock"></i> Timestamp</label>
+                <input type="text" id="dateTimeInput" class="input-field" readonly>
+            </div>
+        </div>
+
+        <!-- Voice & Language Controls -->
+        <div class="voice-lang-row">
+            <div class="input-group-custom" style="flex:1;">
+                <label class="input-label"><i class="fa-solid fa-language"></i> Regional Language</label>
+                <select id="langSelect" class="input-field">
+                    <option value="or-IN" selected>Odia (ଓଡ଼ିଆ)</option>
+                    <option value="hi-IN">Hindi (हिन्दी)</option>
+                    <option value="bn-IN">Bengali (বাংলা)</option>
+                    <option value="en-IN">English (India)</option>
+                </select>
+            </div>
+            <div style="display:flex; flex-direction:column; align-items:center;">
+                <button type="button" id="micBtn" class="voice-mic-btn" onclick="toggleSpeech()"><i class="fa-solid fa-microphone"></i></button>
+                <span id="micCaption" style="font-size:0.7rem; font-weight:700; color:var(--primary); margin-top:6px;">Tap Voice</span>
+            </div>
+        </div>
+
+        <!-- Transcribed Description Box -->
+        <div class="input-group-custom">
+            <label class="input-label"><i class="fa-solid fa-quote-left"></i> Voice Note Transcript</label>
+            <textarea id="speechText" class="speech-box" placeholder="Speak in your regional language or type notes here..."></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button type="button" id="submitBtn" class="submit-btn" onclick="submitReport(event)">
+            <i class="fa-solid fa-paper-plane"></i> <span>Submit Complaint</span>
+        </button>
+
+        <!-- Receipt Card -->
+        <div id="detailsCard" class="details-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(16, 185, 129, 0.2); padding-bottom:8px;">
+                <span style="font-family:'Outfit',sans-serif; font-weight:800; color:var(--primary); display:flex; align-items:center; gap:6px;">
+                    <i class="fa-solid fa-circle-check"></i> Complaint Registered
+                </span>
+                <span id="resTicketId" style="background:var(--primary); color:white; font-size:0.75rem; font-weight:800; padding:4px 10px; border-radius:8px;">SW-PENDING</span>
+            </div>
+            <div class="detail-row"><span style="color:var(--text-muted);">Waste Category:</span><span id="resCategory" style="font-weight:700; color:white;">-</span></div>
+            <div class="detail-row"><span style="color:var(--text-muted);">Est. Volume:</span><span id="resVolume" style="font-weight:700; color:white;">-</span></div>
+            <div class="detail-row"><span style="color:var(--text-muted);">Algorithmic Urgency:</span><span id="resUrgency" style="font-weight:800; color:var(--accent-amber);">-</span></div>
+            <div class="detail-row"><span style="color:var(--text-muted);">AI Dispatch Plan:</span><span id="resDispatch" style="font-weight:600; text-align:right; max-width:62%; color:white;">-</span></div>
+            <div style="display:flex; gap:10px; margin-top:6px;">
+                <span id="resFaces" style="font-size:0.75rem; background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan); border:1px solid rgba(6, 182, 212, 0.3); font-weight:700; padding:5px 10px; border-radius:8px; flex:1; text-align:center;">
+                    <i class="fa-solid fa-user-shield"></i> 0 Faces Blurred
+                </span>
+                <span id="resPlates" style="font-size:0.75rem; background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan); border:1px solid rgba(6, 182, 212, 0.3); font-weight:700; padding:5px 10px; border-radius:8px; flex:1; text-align:center;">
+                    <i class="fa-solid fa-car"></i> 0 Plates Blurred
+                </span>
+            </div>
+        </div>
+
+    </div>
+
+    <script src="assets/config.js"></script>
+    <script src="js/voice.js"></script>
+    <script src="js/citizen.js"></script>
+</body>
+</html>
