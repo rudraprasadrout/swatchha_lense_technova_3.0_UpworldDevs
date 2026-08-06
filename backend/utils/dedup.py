@@ -1,7 +1,8 @@
 import math
 from datetime import datetime
 from scoring import calculate_algorithmic_urgency
-
+from db import get_conn
+from scoring import calculate_algorithmic_urgency
 
 
 # Earth radius in meters

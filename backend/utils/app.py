@@ -1,31 +1,39 @@
 import base64
 from datetime import datetime
 import os
+import sys
 import uuid
 from flask import Flask, jsonify, request
 from flask_cors import CORS
 
-# Import local modules
-from backend.utils.anonymizer import anonymize_image_bytes
-from backend.utils.db import get_conn, init_db
-from backend.utils.scoring import calculate_algorithmic_urgency
-from backend.utils.dedup import (
-    find_existing_nearby_ticket,
-    merge_duplicate_ticket,
-)  # or dedup
-from backend.utils.vision import analyze_image_with_mistral
+# Automatically ensure parent directory is in sys.path to avoid ModuleNotFoundError
+CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
+PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, "..", ".."))
+
+if CURRENT_DIR not in sys.path:
+    sys.path.insert(0, CURRENT_DIR)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
+
+# Import backend modules
+from anonymizer import anonymize_image_bytes
+from db import get_conn, init_db
+from dedup import find_existing_nearby_ticket, merge_duplicate_ticket
+from scoring import calculate_algorithmic_urgency
+from vision import analyze_image_with_mistral
 
 app = Flask(__name__)
 
-# Enable CORS for frontend cross-origin requests (Netlify)
+# Enable CORS for cross-origin access (e.g., Netlify or local HTML files)
 CORS(app, resources={r"/api/*": {"origins": "*"}})
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "swachhlens.db")
+DB_PATH = os.path.join(CURRENT_DIR, "swachhlens.db")
 
-# Initialize database schema on app launch
+# Initialize database schema on startup
 init_db(DB_PATH)
 
 
+# --- ROOT INDEX ENDPOINT ---
 @app.route("/", methods=["GET"])
 def index():
     return jsonify(
@@ -37,9 +45,11 @@ def index():
                 "health": "/health",
                 "submit_report": "POST /api/v1/report",
                 "get_reports": "GET /api/v1/reports",
+                "get_image": "GET /api/v1/report/<ticket_id>/image",
             },
         }
     )
+
 
 # --- HEALTHCHECK ENDPOINT ---
 @app.route("/health", methods=["GET"])
@@ -57,24 +67,25 @@ def submit_report():
     lat = float(request.form.get("lat", 20.2961))
     lng = float(request.form.get("lng", 85.8245))
     note = request.form.get("note", "")
-    lang = request.form.get("lang", "en")
+    lang = request.form.get("lang", "or-IN")
     api_key = request.form.get("api_key")  # Optional key override
 
     raw_bytes = file.read()
     if not raw_bytes:
         return jsonify({"status": "error", "message": "Uploaded image file is empty"}), 400
 
+    conn = None
     try:
         # Step 1: Anonymize Image Bytes (YuNet ONNX Faces + Haar License Plates)
         anonymized_bytes, faces_blurred, plates_blurred = anonymize_image_bytes(raw_bytes)
 
         conn = get_conn(DB_PATH)
 
-        # Step 2: Check Spatial Deduplication (20m Haversine Radius)
+        # Step 2: Spatial Deduplication Check (20m Haversine Radius)
         duplicate_match = find_existing_nearby_ticket(conn, lat, lng, max_distance_meters=20.0)
 
         if duplicate_match:
-            # Merge report into existing ticket & recalculate algorithmic score
+            # Merge report into existing active ticket & recalculate urgency score
             merge_duplicate_ticket(conn, existing_ticket=duplicate_match)
             conn.close()
 
@@ -87,19 +98,25 @@ def submit_report():
                 }
             )
 
-        # Step 3: Run Mistral Multimodal Vision Extraction
-        ai_data = analyze_image_with_mistral(anonymized_bytes, api_key=api_key)
+        # Step 3: Run Mistral Multimodal Vision Extraction with Regional Voice Note
+        ai_data = analyze_image_with_mistral(
+            anonymized_bytes, citizen_note=note, lang=lang, api_key=api_key
+        )
+
+        is_drain = bool(ai_data.get("is_drain_blocked", False))
+        is_fire = bool(ai_data.get("is_fire_hazard", False))
 
         # Step 4: Calculate Deterministic Algorithmic Urgency Score
         computed_urgency = calculate_algorithmic_urgency(
             category=ai_data.get("category", "Organic Waste"),
             volume_band=ai_data.get("volume_band", "Medium (0.2-1.0m³)"),
-            is_drain_blocked=ai_data.get("is_drain_blocked", False),
-            is_fire_hazard=ai_data.get("is_fire_hazard", False),
+            is_drain_blocked=is_drain,
+            is_fire_hazard=is_fire,
             duplicate_count=0,
+            is_monsoon_season=True,
         )
 
-        # Step 5: Convert Anonymized Bytes to Base64
+        # Step 5: Convert Anonymized Bytes to Base64 String
         img_b64 = base64.b64encode(anonymized_bytes).decode("utf-8")
 
         ticket_id = f"SW-{uuid.uuid4().hex[:8].upper()}"
@@ -120,7 +137,7 @@ def submit_report():
                 lng,
                 ai_data.get("category"),
                 ai_data.get("volume_band"),
-                1 if (ai_data.get("is_drain_blocked") or ai_data.get("is_fire_hazard")) else 0,
+                1 if (is_drain or is_fire) else 0,
                 ai_data.get("description"),
                 ai_data.get("confidence", 0.9),
                 computed_urgency,
@@ -136,7 +153,6 @@ def submit_report():
             ),
         )
         conn.commit()
-        conn.close()
 
         return jsonify(
             {
@@ -146,9 +162,10 @@ def submit_report():
                     "id": ticket_id,
                     "category": ai_data.get("category"),
                     "volume_band": ai_data.get("volume_band"),
-                    "hazard_level": 1 if (ai_data.get("is_drain_blocked") or ai_data.get("is_fire_hazard")) else 0,
+                    "hazard_level": 1 if (is_drain or is_fire) else 0,
                     "urgency_score": computed_urgency,
                     "description": ai_data.get("description"),
+                    "note_summary_en": ai_data.get("note_summary_en", "N/A"),
                     "faces_blurred": faces_blurred,
                     "plates_blurred": plates_blurred,
                     "lat": lat,
@@ -159,6 +176,9 @@ def submit_report():
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
+    finally:
+        if conn:
+            conn.close()
 
 
 # --- ADMIN DASHBOARD MAP TICKETS ENDPOINT ---
@@ -166,14 +186,15 @@ def submit_report():
 def get_reports():
     """Returns all active civic tickets formatted for Leaflet.js map integration."""
     conn = get_conn(DB_PATH)
-    rows = conn.execute("SELECT * FROM tickets ORDER BY urgency_score DESC, created_at DESC").fetchall()
+    rows = conn.execute(
+        "SELECT * FROM tickets ORDER BY urgency_score DESC, created_at DESC"
+    ).fetchall()
     conn.close()
 
     reports = []
     for row in rows:
         r = dict(row)
-        # Exclude raw base64 image string from summary payload to keep network transfers lightweight
-        r.pop("image_b64", None)
+        r.pop("image_b64", None)  # Omit large Base64 payload for list view speed
         reports.append(r)
 
     return jsonify({"status": "success", "data": reports})
@@ -182,9 +203,11 @@ def get_reports():
 # --- TICKET IMAGE RETRIEVAL ENDPOINT ---
 @app.route("/api/v1/report/<ticket_id>/image", methods=["GET"])
 def get_ticket_image(ticket_id):
-    """Returns base64 image for a specific ticket when clicked on admin map."""
+    """Returns base64 image payload for a specific ticket when requested by dashboard."""
     conn = get_conn(DB_PATH)
-    row = conn.execute("SELECT image_b64 FROM tickets WHERE id = ?", (ticket_id,)).fetchone()
+    row = conn.execute(
+        "SELECT image_b64 FROM tickets WHERE id = ?", (ticket_id,)
+    ).fetchone()
     conn.close()
 
     if not row or not row["image_b64"]:
