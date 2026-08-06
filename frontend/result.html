@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Prediction & Analysis Result - Swachh Lens</title>
+  <meta name="description" content="AI analysis breakdown of civic report including urgency score gauge, waste categorization, hazard flags, and anonymized photo preview.">
+  
+  <link rel="stylesheet" href="css/style.css">
+  <link rel="stylesheet" href="css/layout.css">
+  <link rel="stylesheet" href="css/components.css">
+  <link rel="stylesheet" href="css/animations.css">
+  <link rel="stylesheet" href="css/responsive.css">
+</head>
+<body>
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+    <div class="container navbar-inner">
+      <a href="index.html" class="brand-logo">
+        <div class="brand-icon">👁️</div>
+        <span>Swachh Lens</span>
+      </a>
+
+      <button class="menu-toggle" aria-label="Toggle navigation menu">☰</button>
+
+      <ul class="nav-menu">
+        <li><a href="index.html" class="nav-link">Home</a></li>
+        <li><a href="upload.html" class="nav-link">Upload Report</a></li>
+        <li><a href="history.html" class="nav-link">Civic Dashboard</a></li>
+        <li><a href="about.html" class="nav-link">About AI</a></li>
+      </ul>
+
+      <div class="nav-actions">
+        <button class="btn btn-glass btn-icon-only theme-toggle-btn" aria-label="Toggle Dark Mode">🌙</button>
+        <a href="upload.html" class="btn btn-primary">New Upload</a>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="container" id="resultContainer">
+      
+      <!-- Spatial Duplicate Alert Notice (Hidden by default unless duplicate detected) -->
+      <div id="duplicateBannerAlert" class="glass-card" style="display: none; background: rgba(245, 158, 11, 0.15); border-color: var(--warning-amber); margin-bottom: 2rem; align-items: center; gap: 1rem;">
+      </div>
+
+      <!-- Top Result Header -->
+      <div style="display: flex; justify-content: space-between; align-items: flex-center; margin-bottom: 2rem; flex-wrap: wrap; gap: 1rem;">
+        <div>
+          <span class="badge badge-blue" style="margin-bottom: 0.5rem;">CIVIC TICKET</span>
+          <h1 style="font-size: 2.2rem; font-weight: 800; display: flex; align-items: center; gap: 0.8rem;">
+            Report ID: <span id="ticketIdDisplay" style="color: var(--primary-blue);">SW-LOADING</span>
+          </h1>
+        </div>
+
+        <div style="display: flex; gap: 1rem;">
+          <a href="upload.html" class="btn btn-glass">📸 Upload Another Image</a>
+          <a href="history.html" class="btn btn-primary">📊 View All Dashboard Reports</a>
+        </div>
+      </div>
+
+      <!-- Result Main Grid -->
+      <div style="display: grid; grid-template-columns: 1.2fr 1fr; gap: 2.5rem; align-items: start;">
+        
+        <!-- Left Column: Anonymized Photo & Privacy Obfuscation Stats -->
+        <div class="glass-card fade-in">
+          <h3 style="font-size: 1.25rem; margin-bottom: 1.2rem; display: flex; justify-content: space-between; align-items: center;">
+            <span>Processed Anonymized Photo</span>
+            <span class="badge badge-green">YuNet + Haar Protected</span>
+          </h3>
+
+          <div style="position: relative; border-radius: var(--radius-lg); overflow: hidden; background: var(--surface-card-solid); min-height: 320px; display: grid; place-items: center; border: 1px solid var(--border-subtle); margin-bottom: 1.5rem;">
+            <div id="imageLoaderSkeleton" class="skeleton skeleton-card"></div>
+            <img id="resultAnonymizedImage" src="" alt="Anonymized Civic Waste Report Photo" style="width: 100%; height: 100%; object-fit: cover; display: none;">
+          </div>
+
+          <!-- Privacy Blurring Stats Row -->
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; background: var(--surface-card-solid); padding: 1.2rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+            <div>
+              <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">FACES BLURRED</span>
+              <strong id="facesCountDisplay" style="font-size: 1.3rem; color: var(--accent-green);">0</strong>
+            </div>
+            <div>
+              <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">LICENSE PLATES BLURRED</span>
+              <strong id="platesCountDisplay" style="font-size: 1.3rem; color: var(--primary-blue);">0</strong>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Column: Urgency Gauge, Detection Attributes & AI Recommendations -->
+        <div style="display: flex; flex-direction: column; gap: 2rem;">
+          
+          <!-- Urgency Circular Meter Card -->
+          <div class="glass-card fade-in text-center" style="display: flex; flex-direction: column; align-items: center;">
+            <h3 style="font-size: 1.2rem; margin-bottom: 1rem; color: var(--text-secondary);">Algorithmic Urgency Priority Score</h3>
+
+            <div class="score-gauge-container" style="margin-bottom: 1rem;">
+              <svg viewBox="0 0 36 36" class="circular-chart">
+                <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+                <path id="scoreCirclePath" class="circle-fill" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"/>
+              </svg>
+              <div style="position: absolute; top: 48%; left: 50%; transform: translate(-50%, -50%); text-align: center;">
+                <span id="scoreValueText" class="score-number">--</span>
+                <span style="font-size: 0.85rem; color: var(--text-muted); display: block;">out of 10.0</span>
+              </div>
+            </div>
+
+            <h4 id="scoreCategoryText" style="font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem;">Loading Score...</h4>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Formula: Base 2.0 + Waste Category + Volume Band + Hazard Multipliers</p>
+          </div>
+
+          <!-- Detection Details Card -->
+          <div class="glass-card fade-in">
+            <h3 style="font-size: 1.2rem; margin-bottom: 1.2rem;">Vision Model Predictions</h3>
+
+            <div style="display: flex; flex-direction: column; gap: 1rem;">
+              
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+                <span style="color: var(--text-secondary); font-size: 0.95rem;">Waste Category</span>
+                <strong id="categoryDisplay" style="color: var(--primary-blue);">--</strong>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+                <span style="color: var(--text-secondary); font-size: 0.95rem;">Volume Band</span>
+                <strong id="volumeDisplay">--</strong>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+                <span style="color: var(--text-secondary); font-size: 0.95rem;">AI Confidence</span>
+                <strong id="confidenceDisplay" style="color: var(--accent-green);">--</strong>
+              </div>
+
+              <div style="display: flex; justify-content: space-between; border-bottom: 1px solid var(--border-subtle); padding-bottom: 0.75rem;">
+                <span style="color: var(--text-secondary); font-size: 0.95rem;">GPS Coordinates</span>
+                <strong id="coordsDisplay">--</strong>
+              </div>
+
+              <div style="margin-top: 0.5rem;">
+                <span style="color: var(--text-secondary); font-size: 0.9rem; display: block; margin-bottom: 0.5rem;">Environmental Hazards</span>
+                <div id="hazardBadgesContainer" style="display: flex; gap: 0.5rem; flex-wrap: wrap;">
+                </div>
+              </div>
+
+            </div>
+          </div>
+
+          <!-- Actionable AI Recommendations Card -->
+          <div class="glass-card fade-in" style="border-left: 4px solid var(--primary-blue);">
+            <h3 style="font-size: 1.2rem; margin-bottom: 0.8rem; display: flex; align-items: center; gap: 0.5rem;">
+              <span>🤖 Actionable Vehicle Dispatch Recommendation</span>
+            </h3>
+            <p id="descriptionDisplay" style="color: var(--text-secondary); font-size: 0.95rem; line-height: 1.6; margin-bottom: 1rem;">
+              Analyzing dispatch instructions...
+            </p>
+
+            <div id="noteSummaryBox" style="display: none; background: var(--surface-card-solid); padding: 1rem; border-radius: var(--radius-md); border: 1px solid var(--border-subtle);">
+              <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 0.3rem;">CITIZEN VOICE NOTE SUMMARY (EN)</span>
+              <p id="noteSummaryText" style="font-size: 0.9rem; font-style: italic; color: var(--text-primary); margin: 0;"></p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+    <div class="container">
+      <div class="footer-bottom">
+        <p>© 2026 Swachh Lens Technova UpworldDevs.</p>
+        <p><a href="index.html">Back to Home</a></p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Modular Scripts -->
+  <script src="js/config.js"></script>
+  <script src="js/utils.js"></script>
+  <script src="js/toast.js"></script>
+  <script src="js/api.js"></script>
+  <script src="js/ui.js"></script>
+  <script src="js/result.js"></script>
+</body>
+</html>
