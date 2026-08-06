@@ -1,0 +1,8 @@
+__pycache__/
+*.pyc
+backend/utils/swachhlens.db
+backend/utils/tempCodeRunnerFile.py
+output_anonymized.jpg
+sample.jpg
+.env
+venv/
