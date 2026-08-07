@@ -44,7 +44,7 @@ from firebase_db import (
 app = Flask(__name__, static_folder=FRONTEND_DIR)
 
 # Enable full CORS for cross-origin access across all routes
-CORS(app, resources={r"/*": {"origins": "*"}}, supports_credentials=True)
+CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.after_request
 def add_cors_headers(response):

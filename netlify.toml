@@ -1,0 +1,8 @@
+# Netlify Deployment Configuration for SwachhLens Frontend
+[build]
+  publish = "frontend"
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
