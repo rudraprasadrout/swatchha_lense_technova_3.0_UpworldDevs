@@ -3,7 +3,7 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 DB_PATH = os.path.join(BASE_DIR, "swachhlens.db")
-MODEL_PATH = os.path.join(BASE_DIR, "face_detection_yunet_2023mar.onnx")
+MODEL_PATH = os.path.join(BASE_DIR, "models", "face_detection_yunet_2023mar.onnx")
 
 def get_conn(db_path):
     conn = sqlite3.connect(db_path)

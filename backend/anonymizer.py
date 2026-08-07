@@ -5,8 +5,10 @@ import urllib.request
 
 # Path for the model file
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+MODELS_DIR = os.path.join(BASE_DIR, "models")
+os.makedirs(MODELS_DIR, exist_ok=True)
 DB_PATH = os.path.join(BASE_DIR, "swachhlens.db")
-MODEL_PATH = os.path.join(BASE_DIR, "face_detection_yunet_2023mar.onnx")
+MODEL_PATH = os.path.join(MODELS_DIR, "face_detection_yunet_2023mar.onnx")
 
 
 # Auto-download model weights if not present in the current directory

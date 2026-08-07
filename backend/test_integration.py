@@ -91,11 +91,8 @@ def run_tests():
     assert res_v_img.status_code == 200
 
     # Cleanup test ticket created during test run so database stays clean
-    from db import get_conn, DB_PATH
-    conn = get_conn(DB_PATH)
-    conn.execute("DELETE FROM tickets WHERE id = ?", (ticket_id,))
-    conn.commit()
-    conn.close()
+    from firebase_db import delete_ticket_fs
+    delete_ticket_fs(ticket_id)
 
     print("\nALL INTEGRATION TESTS PASSED SUCCESSFULLY & DATABASE CLEANED!")
 
