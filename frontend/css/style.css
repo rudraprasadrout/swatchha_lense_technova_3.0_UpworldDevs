@@ -801,6 +801,73 @@ tr.selected-row {
     font-size: 1.1rem;
 }
 
+/* --- COMPREHENSIVE MOBILE RESPONSIVENESS ENHANCEMENTS --- */
+@media (max-width: 640px) {
+    .app-header {
+        padding: 8px 12px;
+        height: auto;
+        min-height: 56px;
+        flex-wrap: wrap;
+        gap: 8px;
+        justify-content: space-between;
+    }
+
+    .hero-title {
+        font-size: 1.9rem !important;
+        line-height: 1.25 !important;
+    }
+
+    .container-center {
+        padding: 20px 12px !important;
+        min-height: auto !important;
+    }
+
+    .app-container {
+        padding: 16px !important;
+        gap: 16px !important;
+        border-radius: 14px !important;
+    }
+
+    .meta-grid {
+        grid-template-columns: 1fr !important;
+        gap: 12px !important;
+    }
+
+    .voice-lang-row {
+        flex-direction: column !important;
+        align-items: stretch !important;
+        gap: 12px !important;
+    }
+
+    .capture-box {
+        height: 180px !important;
+    }
+
+    .portal-card {
+        padding: 20px !important;
+    }
+
+    .portal-grid {
+        grid-template-columns: 1fr !important;
+        gap: 16px !important;
+    }
+
+    .details-card {
+        padding: 14px !important;
+    }
+
+    .detail-row {
+        flex-direction: column !important;
+        align-items: flex-start !important;
+        gap: 2px !important;
+    }
+
+    .detail-row span:last-child {
+        text-align: left !important;
+        max-width: 100% !important;
+    }
+}
+
 @keyframes fadeIn {
     from { opacity: 0; transform: translateY(6px); }
     to { opacity: 1; transform: translateY(0); }
