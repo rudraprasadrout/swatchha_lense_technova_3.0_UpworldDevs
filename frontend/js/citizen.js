@@ -3,7 +3,7 @@ let currentLng = CONFIG.DEFAULT_LNG;
 
 document.addEventListener("DOMContentLoaded", () => {
     updateTime();
-    
+
     // Auto-fetch GPS
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(p => {
@@ -41,15 +41,15 @@ function updateTime() {
     const now = new Date();
     const timeEl = document.getElementById('dateTimeInput');
     if (timeEl) {
-        timeEl.value = now.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) + ", " + now.toLocaleDateString();
+        timeEl.value = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) + ", " + now.toLocaleDateString();
     }
 }
 
 async function submitReport(e) {
     // 1. Strictly halt default browser form behavior
-    if (e) { 
-        e.preventDefault(); 
-        e.stopPropagation(); 
+    if (e) {
+        e.preventDefault();
+        e.stopPropagation();
     }
 
     const fileInput = document.getElementById('imageInput');
@@ -143,7 +143,7 @@ async function submitReport(e) {
         } else {
             alert("API Error: " + result.message);
         }
-    } catch(err) {
+    } catch (err) {
         console.error("Submission failed:", err);
         alert("Failed to reach server. Ensure python -m backend.utils.app is running at " + CONFIG.API_BASE_URL);
     } finally {

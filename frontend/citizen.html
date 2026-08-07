@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SwachhLens | Citizen AI Reporting Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <script>
-        (function() {
+        (function () {
             document.documentElement.setAttribute("data-theme", "dark");
             localStorage.setItem("swachh_theme", "dark");
         })();
     </script>
 </head>
+
 <body>
 
     <header class="app-header">
@@ -25,14 +29,17 @@
         </div>
         <div style="display:flex; align-items:center; gap:12px;">
             <!-- Universal UI Language Selector -->
-            <select id="uiLangSelect" onchange="changeUiLanguage(this.value)" style="background:rgba(16, 185, 129, 0.12); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.3); font-weight:700; font-size:0.78rem; padding:6px 12px; border-radius:8px; outline:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;">
+            <select id="uiLangSelect" onchange="changeUiLanguage(this.value)"
+                style="background:rgba(16, 185, 129, 0.12); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.3); font-weight:700; font-size:0.78rem; padding:6px 12px; border-radius:8px; outline:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;">
                 <option value="en" selected>🌐 English</option>
                 <option value="or">🇮🇳 ଓଡ଼ିଆ (Odia)</option>
                 <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
             </select>
 
-            <span style="font-size:0.75rem; font-weight:700; background:rgba(16, 185, 129, 0.12); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.3); padding:5px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
-                <span style="width:8px; height:8px; border-radius:50%; background:var(--primary);"></span> <span data-i18n="liveAi">Live Vision AI</span>
+            <span
+                style="font-size:0.75rem; font-weight:700; background:rgba(16, 185, 129, 0.12); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.3); padding:5px 12px; border-radius:8px; display:inline-flex; align-items:center; gap:6px;">
+                <span style="width:8px; height:8px; border-radius:50%; background:var(--primary);"></span> <span
+                    data-i18n="liveAi">Live Vision AI</span>
             </span>
 
         </div>
@@ -41,33 +48,42 @@
     <div class="container-center">
         <!-- INTERACTIVE REPORT FORM CARD -->
         <div class="app-container">
-            
+
             <div style="text-align:center; margin-bottom:4px;">
-                <h2 data-i18n="formHeaderTitle" style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.4rem; color:var(--text-main);">Report Civic Issue</h2>
-                <p data-i18n="formHeaderSub" style="font-size:0.82rem; color:var(--text-muted); font-weight:500;">Capture image, speak regional note, & auto-anonymize</p>
+                <h2 data-i18n="formHeaderTitle"
+                    style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.4rem; color:var(--text-main);">
+                    Report Civic Issue</h2>
+                <p data-i18n="formHeaderSub" style="font-size:0.82rem; color:var(--text-muted); font-weight:500;">
+                    Capture image, speak regional note, & auto-anonymize</p>
             </div>
 
             <!-- Capture Area -->
             <div class="capture-box" id="captureBox">
                 <input type="file" id="imageInput" accept="image/*" capture="environment">
                 <img id="previewImg" class="preview-img" alt="Captured Waste Image">
-                <div id="capturePlaceholder" style="text-align:center; color:var(--primary); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px; position:relative; z-index:3;">
+                <div id="capturePlaceholder"
+                    style="text-align:center; color:var(--primary); display:flex; flex-direction:column; align-items:center; justify-content:center; padding:16px; position:relative; z-index:3;">
                     <div class="camera-pulse-ring">
                         <i class="fa-solid fa-camera" style="font-size:1.6rem; color:var(--primary);"></i>
                     </div>
-                    <div data-i18n="tapPhotoTitle" style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.1rem; color:var(--text-main);">Tap to Capture Photo</div>
-                    <div data-i18n="tapPhotoSub" style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">Supports live camera & gallery selection</div>
+                    <div data-i18n="tapPhotoTitle"
+                        style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.1rem; color:var(--text-main);">
+                        Tap to Capture Photo</div>
+                    <div data-i18n="tapPhotoSub" style="font-size:0.8rem; color:var(--text-muted); margin-top:4px;">
+                        Supports live camera & gallery selection</div>
                 </div>
             </div>
 
             <!-- Metadata Grid -->
             <div class="meta-grid">
                 <div class="input-group-custom">
-                    <label class="input-label"><i class="fa-solid fa-location-dot"></i> <span data-i18n="lblGps">GPS Coordinates</span></label>
+                    <label class="input-label"><i class="fa-solid fa-location-dot"></i> <span data-i18n="lblGps">GPS
+                            Coordinates</span></label>
                     <input type="text" id="locationInput" class="input-field" value="20.2961, 85.8245">
                 </div>
                 <div class="input-group-custom">
-                    <label class="input-label"><i class="fa-solid fa-clock"></i> <span data-i18n="lblTime">Timestamp</span></label>
+                    <label class="input-label"><i class="fa-solid fa-clock"></i> <span
+                            data-i18n="lblTime">Timestamp</span></label>
                     <input type="text" id="dateTimeInput" class="input-field" readonly>
                 </div>
             </div>
@@ -75,7 +91,8 @@
             <!-- Voice & Language Controls -->
             <div class="voice-lang-row">
                 <div class="input-group-custom" style="flex:1;">
-                    <label class="input-label"><i class="fa-solid fa-language"></i> <span data-i18n="lblLang">Regional Voice Language</span></label>
+                    <label class="input-label"><i class="fa-solid fa-language"></i> <span data-i18n="lblLang">Regional
+                            Voice Language</span></label>
                     <select id="langSelect" class="input-field">
                         <option value="or-IN" selected>Odia (ଓଡ଼ିଆ)</option>
                         <option value="hi-IN">Hindi (हिन्दी)</option>
@@ -84,25 +101,34 @@
                     </select>
                 </div>
                 <div style="display:flex; flex-direction:column; align-items:center;">
-                    <button type="button" id="micBtn" class="voice-mic-btn" onclick="toggleSpeech()"><i class="fa-solid fa-microphone"></i></button>
-                    <span id="micCaption" data-i18n="lblMic" style="font-size:0.7rem; font-weight:700; color:var(--primary); margin-top:6px;">Tap Voice</span>
+                    <button type="button" id="micBtn" class="voice-mic-btn" onclick="toggleSpeech()"><i
+                            class="fa-solid fa-microphone"></i></button>
+                    <span id="micCaption" data-i18n="lblMic"
+                        style="font-size:0.7rem; font-weight:700; color:var(--primary); margin-top:6px;">Tap
+                        Voice</span>
                 </div>
             </div>
 
             <!-- Transcribed Description Box -->
             <div class="input-group-custom">
-                <label class="input-label"><i class="fa-solid fa-quote-left"></i> <span data-i18n="lblVoiceNote">Voice Note Transcript</span></label>
-                <textarea id="speechText" class="speech-box" data-i18n-ph="phVoiceNote" placeholder="Speak in your regional language or type notes here..."></textarea>
+                <label class="input-label"><i class="fa-solid fa-quote-left"></i> <span data-i18n="lblVoiceNote">Voice
+                        Note Transcript</span></label>
+                <textarea id="speechText" class="speech-box" data-i18n-ph="phVoiceNote"
+                    placeholder="Speak in your regional language or type notes here..."></textarea>
             </div>
 
             <!-- Location Sensitivity Selector -->
             <div class="input-group-custom">
-                <label class="input-label"><i class="fa-solid fa-building-shield"></i> <span data-i18n="lblSensitivity">Location Sensitivity Zone</span></label>
+                <label class="input-label"><i class="fa-solid fa-building-shield"></i> <span
+                        data-i18n="lblSensitivity">Location Sensitivity Zone</span></label>
                 <select id="sensitiveSelect" class="input-field">
                     <option value="None" data-i18n="optSensNone" selected>General Zone (Normal Priority)</option>
-                    <option value="School / Hospital Zone" data-i18n="optSensSchool">School / Hospital Zone (+1.5 Urgency)</option>
-                    <option value="Water Body / River Bank" data-i18n="optSensWater">Water Body / Drainage Canal (+1.5 Urgency)</option>
-                    <option value="Public Market / Bus Stand" data-i18n="optSensMarket">Public Market / Bus Stand (+1.5 Urgency)</option>
+                    <option value="School / Hospital Zone" data-i18n="optSensSchool">School / Hospital Zone (+1.5
+                        Urgency)</option>
+                    <option value="Water Body / River Bank" data-i18n="optSensWater">Water Body / Drainage Canal (+1.5
+                        Urgency)</option>
+                    <option value="Public Market / Bus Stand" data-i18n="optSensMarket">Public Market / Bus Stand (+1.5
+                        Urgency)</option>
                 </select>
             </div>
 
@@ -113,28 +139,43 @@
 
             <!-- Receipt Card -->
             <div id="detailsCard" class="details-card">
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(16, 185, 129, 0.2); padding-bottom:8px;">
-                    <span style="font-family:'Outfit',sans-serif; font-weight:800; color:var(--primary); display:flex; align-items:center; gap:6px;">
-                        <i class="fa-solid fa-circle-check"></i> <span data-i18n="receiptHeader">Complaint Registered</span>
+                <div
+                    style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(16, 185, 129, 0.2); padding-bottom:8px;">
+                    <span
+                        style="font-family:'Outfit',sans-serif; font-weight:800; color:var(--primary); display:flex; align-items:center; gap:6px;">
+                        <i class="fa-solid fa-circle-check"></i> <span data-i18n="receiptHeader">Complaint
+                            Registered</span>
                     </span>
-                    <span id="resTicketId" style="background:var(--primary); color:white; font-size:0.75rem; font-weight:800; padding:4px 10px; border-radius:8px;">SW-PENDING</span>
+                    <span id="resTicketId"
+                        style="background:var(--primary); color:white; font-size:0.75rem; font-weight:800; padding:4px 10px; border-radius:8px;">SW-PENDING</span>
                 </div>
-                <div class="detail-row"><span style="color:var(--text-muted);" data-i18n="lblResCat">Waste Category:</span><span id="resCategory" style="font-weight:700; color:white;">-</span></div>
-                <div class="detail-row"><span style="color:var(--text-muted);" data-i18n="lblResVol">Est. Volume:</span><span id="resVolume" style="font-weight:700; color:white;">-</span></div>
-                <div class="detail-row"><span style="color:var(--text-muted);" data-i18n="lblResDisp">Dispatch Unit:</span><span id="resDispatchUnit" style="font-weight:700; color:var(--primary);">Manual Sanitation Crew</span></div>
-                <div class="detail-row"><span style="color:var(--text-muted);" data-i18n="lblResUrg">Algorithmic Urgency:</span><span id="resUrgency" style="font-weight:800; color:var(--accent-amber);">-</span></div>
-                <div class="detail-row"><span style="color:var(--text-muted);" data-i18n="lblResPlan">AI Dispatch Plan:</span><span id="resDispatch" style="font-weight:600; text-align:right; max-width:62%; color:white;">-</span></div>
-                <div id="jurisdictionRow" style="display:none; background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.3); padding:8px 12px; border-radius:8px; margin-top:4px; flex-direction:column; gap:2px;">
+                <div class="detail-row"><span style="color:var(--text-muted);" data-i18n="lblResCat">Waste
+                        Category:</span><span id="resCategory" style="font-weight:700; color:white;">-</span></div>
+                <div class="detail-row"><span style="color:var(--text-muted);" data-i18n="lblResVol">Est.
+                        Volume:</span><span id="resVolume" style="font-weight:700; color:white;">-</span></div>
+                <div class="detail-row"><span style="color:var(--text-muted);" data-i18n="lblResDisp">Dispatch
+                        Unit:</span><span id="resDispatchUnit" style="font-weight:700; color:var(--primary);">Manual
+                        Sanitation Crew</span></div>
+                <div class="detail-row"><span style="color:var(--text-muted);" data-i18n="lblResUrg">Algorithmic
+                        Urgency:</span><span id="resUrgency"
+                        style="font-weight:800; color:var(--accent-amber);">-</span></div>
+                <div class="detail-row"><span style="color:var(--text-muted);" data-i18n="lblResPlan">AI Dispatch
+                        Plan:</span><span id="resDispatch"
+                        style="font-weight:600; text-align:right; max-width:62%; color:white;">-</span></div>
+                <div id="jurisdictionRow"
+                    style="display:none; background:rgba(245, 158, 11, 0.1); border:1px solid rgba(245, 158, 11, 0.3); padding:8px 12px; border-radius:8px; margin-top:4px; flex-direction:column; gap:2px;">
                     <span style="color:var(--accent-amber); font-size:0.78rem; font-weight:700;" id="jurisdictionBadge">
                         <i class="fa-solid fa-triangle-exclamation"></i> Outside Municipal Boundary (Forwarded)
                     </span>
                 </div>
                 <div style="display:flex; gap:10px; margin-top:6px;">
 
-                    <span id="resFaces" style="font-size:0.75rem; background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan); border:1px solid rgba(6, 182, 212, 0.3); font-weight:700; padding:5px 10px; border-radius:8px; flex:1; text-align:center;">
+                    <span id="resFaces"
+                        style="font-size:0.75rem; background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan); border:1px solid rgba(6, 182, 212, 0.3); font-weight:700; padding:5px 10px; border-radius:8px; flex:1; text-align:center;">
                         <i class="fa-solid fa-user-shield"></i> 0 Faces Blurred
                     </span>
-                    <span id="resPlates" style="font-size:0.75rem; background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan); border:1px solid rgba(6, 182, 212, 0.3); font-weight:700; padding:5px 10px; border-radius:8px; flex:1; text-align:center;">
+                    <span id="resPlates"
+                        style="font-size:0.75rem; background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan); border:1px solid rgba(6, 182, 212, 0.3); font-weight:700; padding:5px 10px; border-radius:8px; flex:1; text-align:center;">
                         <i class="fa-solid fa-car"></i> 0 Plates Blurred
                     </span>
                 </div>
@@ -148,4 +189,5 @@
     <script src="js/voice.js"></script>
     <script src="js/citizen.js"></script>
 </body>
+
 </html>
