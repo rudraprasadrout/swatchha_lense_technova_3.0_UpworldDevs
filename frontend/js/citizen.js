@@ -55,6 +55,7 @@ async function submitReport(e) {
     const fileInput = document.getElementById('imageInput');
     const speechText = document.getElementById('speechText') ? document.getElementById('speechText').value : "";
     const langSelect = document.getElementById('langSelect') ? document.getElementById('langSelect').value : "or-IN";
+    const sensitiveSelect = document.getElementById('sensitiveSelect') ? document.getElementById('sensitiveSelect').value : "None";
     const submitBtn = document.getElementById('submitBtn');
 
     if (!fileInput || !fileInput.files || !fileInput.files[0]) {
@@ -81,12 +82,16 @@ async function submitReport(e) {
         }
     }
 
+    const isSensitive = sensitiveSelect !== "None";
+
     const formData = new FormData();
     formData.append('image', fileInput.files[0]);
     formData.append('lat', currentLat);
     formData.append('lng', currentLng);
     formData.append('note', speechText);
     formData.append('lang', langSelect);
+    formData.append('is_sensitive_area', isSensitive ? "1" : "0");
+    formData.append('sensitive_area_type', sensitiveSelect);
 
     try {
         const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : "http://127.0.0.1:5000";
@@ -104,17 +109,33 @@ async function submitReport(e) {
                 setSafeText('resCategory', "Merged Duplicate (<20m Radius)");
                 setSafeText('resVolume', "Priority Incremented (+1)");
                 setSafeText('resUrgency', "Score Escalated");
+                setSafeText('resDispatchUnit', "Escalated Team Dispatch");
                 setSafeText('resDispatch', result.message);
             } else if (result.ticket) {
                 const t = result.ticket;
                 setSafeText('resTicketId', t.id);
                 setSafeText('resCategory', t.category);
                 setSafeText('resVolume', t.volume_band);
-                setSafeText('resUrgency', `${t.urgency_score} / 10`);
+                setSafeText('resDispatchUnit', t.dispatch_unit || "Manual Sanitation Crew");
+                setSafeText('resUrgency', `${t.urgency_score} / 10` + (t.is_sensitive_area ? ` (${t.sensitive_area_type})` : ''));
                 setSafeText('resDispatch', `${t.description} (Summary: ${t.note_summary_en || 'Processed'})`);
                 setSafeHTML('resFaces', `<i class="fa-solid fa-user-shield"></i> ${t.faces_blurred} Faces Blurred`);
                 setSafeHTML('resPlates', `<i class="fa-solid fa-car"></i> ${t.plates_blurred} Plates Blurred`);
+
+                // Municipal Jurisdiction Geofence Check (Bhubaneswar BMC Limits)
+                const jRow = document.getElementById('jurisdictionRow');
+                if (t.in_jurisdiction === false || t.in_jurisdiction === 0) {
+                    if (jRow) jRow.style.display = 'flex';
+                    const noteMsg = t.jurisdiction_note || `Out of BMC Region. This location falls under ${t.governing_authority || 'District Panchayati Raj / Highway Development Authority'}. Please contact your local Panchayati Raj office or Highway Development Authority.`;
+                    setSafeHTML('jurisdictionBadge', `<i class="fa-solid fa-triangle-exclamation"></i> <strong>Out of BMC Municipal Region</strong><br><span style="font-size:0.75rem; font-weight:500; color:var(--text-main); margin-top:4px; display:block; line-height:1.5;">${noteMsg}</span>`);
+                } else {
+                    if (jRow) jRow.style.display = 'none';
+                }
             }
+
+
+
+
 
             // Smooth scroll to receipt so the user sees the output immediately
             if (card) card.scrollIntoView({ behavior: 'smooth' });

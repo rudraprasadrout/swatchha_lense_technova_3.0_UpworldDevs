@@ -64,8 +64,10 @@ def merge_duplicate_ticket(conn, existing_ticket: dict):
         volume_band=existing_ticket.get("volume_band", "Medium (0.2-1.0m³)"),
         is_drain_blocked=bool(existing_ticket.get("is_drain_blocked", 0)),
         is_fire_hazard=bool(existing_ticket.get("is_fire_hazard", 0)),
+        is_sensitive_area=bool(existing_ticket.get("is_sensitive_area", 0)),
         duplicate_count=new_count,
     )
+
 
     conn.execute(
         """

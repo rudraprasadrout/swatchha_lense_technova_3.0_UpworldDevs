@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SwachhLens | System Architecture & Workflow</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        .about-wrapper {
+            max-width: 1060px;
+            margin: 36px auto;
+            padding: 0 24px 80px 24px;
+        }
+
+        .hero-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            color: var(--primary);
+            font-size: 0.78rem;
+            font-weight: 700;
+            padding: 5px 12px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        .stepper-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+            gap: 14px;
+            margin: 32px 0 44px 0;
+        }
+
+        .stepper-card {
+            background: var(--card-dark);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            transition: all 0.2s ease;
+        }
+
+        .stepper-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
+        }
+
+        .step-number {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 0.8rem;
+            color: var(--primary);
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+        }
+
+        .step-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 700;
+            font-size: 0.98rem;
+            color: white;
+        }
+
+        .step-desc {
+            font-size: 0.78rem;
+            color: var(--text-muted);
+            line-height: 1.45;
+        }
+
+        .arch-section {
+            background: var(--card-dark);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 32px;
+            margin-bottom: 28px;
+        }
+
+        .arch-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        @media (max-width: 768px) {
+            .arch-grid { grid-template-columns: 1fr; }
+        }
+
+        .arch-box {
+            background: rgba(8, 12, 10, 0.6);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 20px;
+        }
+
+        .arch-box h4 {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.05rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .arch-box p {
+            font-size: 0.84rem;
+            color: var(--text-muted);
+            line-height: 1.55;
+        }
+
+        .tech-pill-sm {
+            display: inline-block;
+            background: rgba(16, 185, 129, 0.12);
+            color: var(--primary);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            font-size: 0.72rem;
+            font-weight: 700;
+            padding: 3px 8px;
+            border-radius: 6px;
+            margin-top: 10px;
+        }
+    </style>
+    <script>
+        (function() {
+            document.documentElement.setAttribute("data-theme", "dark");
+            localStorage.setItem("swachh_theme", "dark");
+        })();
+    </script>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header class="app-header">
+        <div style="display:flex; align-items:center; gap:16px;">
+            <a href="index.html" class="nav-back-btn">
+                <i class="fa-solid fa-arrow-left"></i> <span data-i18n="navBack">Back to Gateway</span>
+            </a>
+            <a href="index.html" class="brand-logo"><i class="fa-solid fa-leaf"></i> SwachhLens</a>
+        </div>
+        
+        <div style="display:flex; align-items:center; gap:12px;">
+            <a href="citizen.html" class="nav-back-btn"><i class="fa-solid fa-camera"></i> <span data-i18n="navCitizen">Citizen App</span></a>
+            <a href="admin.html" class="nav-back-btn"><i class="fa-solid fa-building-shield"></i> <span data-i18n="navCommand">Municipal Command</span></a>
+            
+            <!-- Universal Language Selector -->
+            <select id="uiLangSelect" onchange="changeUiLanguage(this.value)" style="background:rgba(16, 185, 129, 0.12); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.3); font-weight:700; font-size:0.78rem; padding:6px 12px; border-radius:8px; outline:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;">
+                <option value="en" selected>🌐 English</option>
+                <option value="or">🇮🇳 ଓଡ଼ିଆ (Odia)</option>
+                <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
+            </select>
+        </div>
+    </header>
+
+    <div class="about-wrapper">
+        
+        <!-- Hero Header -->
+        <div style="text-align:center; max-width:800px; margin:0 auto;">
+            <div class="hero-badge">
+                <i class="fa-solid fa-shield-halved"></i> Technical System Documentation
+            </div>
+            <h1 data-i18n="aboutTitle" style="font-family:'Outfit',sans-serif; font-size:2.3rem; font-weight:800; color:white; line-height:1.25; margin-bottom:12px;">
+                SwachhLens System Architecture & AI Workflow
+            </h1>
+            <p data-i18n="aboutSub" style="color:var(--text-muted); font-size:1rem; line-height:1.6;">
+                An end-to-end multi-agent computer vision & spatial decision support framework designed for municipal sanitation logistics.
+            </p>
+        </div>
+
+        <!-- 5-Step System Workflow Timeline -->
+        <div class="stepper-grid">
+            
+            <div class="stepper-card">
+                <div class="step-number">Step 01</div>
+                <div class="step-name" data-i18n="step1Title">Telemetry Ingestion</div>
+                <div class="step-desc" data-i18n="step1Desc">Captures geo-tagged photographs, GPS coordinates, and regional voice notes in Odia, Hindi, Bengali, or English.</div>
+            </div>
+
+            <div class="stepper-card">
+                <div class="step-number" style="color:var(--accent-cyan);">Step 02</div>
+                <div class="step-name" data-i18n="step2Title">Privacy Anonymization</div>
+                <div class="step-desc" data-i18n="step2Desc">YuNet ONNX neural network and Haar Cascade classifiers detect faces and license plates, pixelating them instantly.</div>
+            </div>
+
+            <div class="stepper-card">
+                <div class="step-number" style="color:var(--accent-amber);">Step 03</div>
+                <div class="step-name" data-i18n="step3Title">Spatial Deduplication</div>
+                <div class="step-desc" data-i18n="step3Desc">Calculates spherical distance between incoming GPS coordinates and active tickets within a 20m radius.</div>
+            </div>
+
+            <div class="stepper-card">
+                <div class="step-number" style="color:#a855f7;">Step 04</div>
+                <div class="step-name" data-i18n="step4Title">Vision Classification</div>
+                <div class="step-desc" data-i18n="step4Desc">Pixtral-12B evaluates visual waste severity, categorizing material into Plastic, Organic, E-Waste, or Debris.</div>
+            </div>
+
+            <div class="stepper-card">
+                <div class="step-number">Step 05</div>
+                <div class="step-name" data-i18n="step5Title">Dispatch & Routing</div>
+                <div class="step-desc" data-i18n="step5Desc">Computes urgency score factoring volume, environmental hazards, and location sensitivity for crew dispatch.</div>
+            </div>
+
+        </div>
+
+        <!-- Deep Architectural Breakdown Section -->
+        <div class="arch-section">
+            <h2 style="font-family:'Outfit',sans-serif; font-size:1.45rem; font-weight:800; color:white; margin-bottom:10px;">
+                <i class="fa-solid fa-microchip text-primary"></i> Multi-Agent Technical Architecture
+            </h2>
+            <p style="color:var(--text-muted); font-size:0.88rem; line-height:1.6;">
+                SwachhLens decouples civic data collection from municipal response, using lightweight edge anonymization on the frontend and deterministic AI algorithms on the backend.
+            </p>
+
+            <div class="arch-grid">
+                
+                <div class="arch-box">
+                    <h4><i class="fa-solid fa-eye text-primary"></i> Pixtral-12B Multimodal Vision AI</h4>
+                    <p>
+                        Analyzes uploaded imagery to detect waste density, overflow risks, and material composition. Output is structured as key-value tags (<em>Plastic Waste, Heavy Compactor Required, Drain Blockage Risk</em>).
+                    </p>
+                    <span class="tech-pill-sm">Mistral API Gateway • Vision Transformer</span>
+                </div>
+
+                <div class="arch-box">
+                    <h4><i class="fa-solid fa-user-shield" style="color:var(--accent-cyan);"></i> YuNet & Haar Edge Anonymizer</h4>
+                    <p>
+                        Ensures privacy compliance before storage. The YuNet ONNX deep model detects human faces while Haar Cascades detect vehicle license plates, blurring sensitive regions in memory.
+                    </p>
+                    <span class="tech-pill-sm" style="color:var(--accent-cyan); border-color:rgba(6,182,212,0.3); background:rgba(6,182,212,0.1);">OpenCV Engine • Edge Anonymization</span>
+                </div>
+
+                <div class="arch-box">
+                    <h4><i class="fa-solid fa-location-crosshairs" style="color:var(--accent-amber);"></i> 20m Haversine Deduplication</h4>
+                    <p>
+                        Uses the Great-Circle Haversine formula to compare incoming GPS coordinates against existing active complaints. Prevents ticket spam and recalculates cumulative urgency.
+                    </p>
+                    <span class="tech-pill-sm" style="color:var(--accent-amber); border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.1);">Python Backend • Spatial Distance</span>
+                </div>
+
+                <div class="arch-box">
+                    <h4><i class="fa-solid fa-route text-primary"></i> Deterministic Dispatch Matrix</h4>
+                    <p>
+                        Assigns tailored crew units based on AI findings: <strong>Manual Sanitation Crew</strong> for light waste, <strong>Mini Truck + Heavy Compactor</strong> for massive piles, and <strong>Hazmat Units</strong> for chemical/medical hazards.
+                    </p>
+                    <span class="tech-pill-sm">Location Sensitivity Boost (+1.5) • Logistics Routing</span>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Navigation Action Buttons -->
+        <div style="display:flex; justify-content:center; gap:14px; margin-top:24px;">
+            <a href="citizen.html" class="submit-btn" style="width:auto; padding:12px 24px; text-decoration:none;">
+                <i class="fa-solid fa-camera"></i> <span data-i18n="btnLaunchCitizen">Launch Citizen App</span>
+            </a>
+            <a href="index.html" class="nav-back-btn" style="padding:12px 24px; font-size:0.88rem;">
+                <i class="fa-solid fa-house"></i> <span data-i18n="navHome">Back to Gateway</span>
+            </a>
+        </div>
+
+    </div>
+
+    <script src="assets/config.js"></script>
+    <script src="js/i18n.js"></script>
+</body>
+</html>

@@ -9,6 +9,17 @@ except ImportError:
     from mistralai.client import Mistral
 
 
+def determine_dispatch_unit(category: str, volume_band: str, is_drain_blocked: bool, is_fire_hazard: bool) -> str:
+    """Returns exact municipal crew and vehicle dispatch recommendation."""
+    if is_fire_hazard or is_drain_blocked or category == "Hazardous":
+        return "Hazmat & Emergency Response Unit"
+    if category in ["Plastic Waste", "E-Waste"]:
+        return "Recycling Partner Route (EcoRoute)"
+    if ("Large" in volume_band or "Very Large" in volume_band) or category == "Construction Debris":
+        return "Mini Truck + Heavy Compactor Crew"
+    return "Manual Sanitation Crew"
+
+
 def analyze_image_with_mistral(
     image_bytes: bytes,
     citizen_note: str = "",
@@ -34,15 +45,18 @@ def analyze_image_with_mistral(
             category = "Overflowing Bin"
 
         summary = citizen_note if citizen_note else "No specific voice note provided."
-        desc = f"Dispatch waste clearance crew for {category}. " + ("Drain blockage flagged. " if is_drain else "") + ("Fire hazard flagged. " if is_fire else "")
+        vol_band = "Medium (0.2-1.0m³)"
+        dispatch = determine_dispatch_unit(category, vol_band, is_drain, is_fire)
+        desc = f"Dispatch {dispatch} for {category}. " + ("Drain blockage flagged. " if is_drain else "") + ("Fire hazard flagged. " if is_fire else "")
 
         return {
             "category": category,
-            "volume_band": "Medium (0.2-1.0m³)",
+            "volume_band": vol_band,
             "is_drain_blocked": is_drain,
             "is_fire_hazard": is_fire,
             "note_summary_en": summary,
             "description": desc.strip(),
+            "dispatch_unit": dispatch,
             "confidence": 0.85,
         }
 
@@ -87,23 +101,22 @@ def analyze_image_with_mistral(
 
         content = response.choices[0].message.content.strip()
         data = json.loads(content)
+        cat = str(data.get("category", "Organic Waste"))
+        vol = str(data.get("volume_band", "Medium (0.2-1.0m³)"))
+        drain = bool(data.get("is_drain_blocked", False))
+        fire = bool(data.get("is_fire_hazard", False))
+        dispatch = determine_dispatch_unit(cat, vol, drain, fire)
+
         return {
-            "category": str(data.get("category", "Organic Waste")),
-            "volume_band": str(
-                data.get("volume_band", "Medium (0.2-1.0m³)")
-            ),
-            "is_drain_blocked": bool(data.get("is_drain_blocked", False)),
-            "is_fire_hazard": bool(data.get("is_fire_hazard", False)),
-            "note_summary_en": str(
-                data.get("note_summary_en", "No specific voice notes.")
-            ),
-            "description": str(
-                data.get(
-                    "description", "Inspect site for general waste clearance."
-                )
-            ),
+            "category": cat,
+            "volume_band": vol,
+            "is_drain_blocked": drain,
+            "is_fire_hazard": fire,
+            "note_summary_en": str(data.get("note_summary_en", "No specific voice notes.")),
+            "description": str(data.get("description", "Inspect site for general waste clearance.")),
+            "dispatch_unit": dispatch,
             "confidence": float(data.get("confidence", 0.9)),
         }
     except Exception as err:
         print(f"[Vision Fallback] Mistral API call failed: {err}")
-        return get_fallback()
+        return get_fallback()

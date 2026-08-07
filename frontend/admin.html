@@ -169,7 +169,10 @@
     <header class="app-header">
         <div style="display:flex; align-items:center; gap:16px;">
             <a href="index.html" class="nav-back-btn">
-                <i class="fa-solid fa-arrow-left"></i> <span>Main Gateway</span>
+                <i class="fa-solid fa-arrow-left"></i> <span data-i18n="navBack">Main Gateway</span>
+            </a>
+            <a href="about.html" class="nav-back-btn">
+                <i class="fa-solid fa-circle-info"></i> <span data-i18n="navAbout">AI Architecture</span>
             </a>
             <div class="brand-logo">
                 <i class="fa-solid fa-building-shield"></i> SwachhLens Command OS
@@ -177,6 +180,13 @@
         </div>
 
         <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+            <!-- Universal UI Language Selector -->
+            <select id="uiLangSelect" onchange="changeUiLanguage(this.value)" style="background:rgba(16, 185, 129, 0.15); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.4); font-weight:800; font-size:0.78rem; padding:6px 12px; border-radius:20px; outline:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;">
+                <option value="en" selected>🌐 English</option>
+                <option value="or">🇮🇳 ଓଡ଼ିଆ (Odia)</option>
+                <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
+            </select>
+
             <button onclick="fetchSummary()" class="action-btn-pill" style="border-color:rgba(16,185,129,0.3); color:var(--primary);">
                 <i class="fa-solid fa-robot"></i> <span>AI Summary</span>
             </button>
@@ -194,6 +204,7 @@
             </button>
         </div>
     </header>
+
 
     <div class="admin-layout">
         <div>
@@ -265,14 +276,19 @@
                     <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Animated SVG Radar Pins & Moving Truck Route</span>
                 </div>
 
-                <!-- Custom Map Toolbar Overlay Controls -->
                 <div class="map-toolbar-overlay">
                     <button id="btnTile_dark" onclick="switchMapTile('dark')" class="map-toolbar-btn active"><i class="fa-solid fa-moon"></i> Cyber Dark</button>
                     <button id="btnTile_satellite" onclick="switchMapTile('satellite')" class="map-toolbar-btn"><i class="fa-solid fa-satellite"></i> Satellite</button>
                     <button id="btnTile_streets" onclick="switchMapTile('streets')" class="map-toolbar-btn"><i class="fa-solid fa-road"></i> Streets</button>
                     <button id="btnHeatmap" onclick="toggleHeatmap()" class="map-toolbar-btn" style="border-left:1px solid rgba(255,255,255,0.1); margin-left:4px;"><i class="fa-solid fa-fire"></i> Heatmap</button>
                     <button onclick="recenterMap()" class="map-toolbar-btn" title="Recenter View"><i class="fa-solid fa-crosshairs"></i></button>
+                    <span class="map-toolbar-btn" style="cursor:default; background:rgba(16, 185, 129, 0.12); border-color:rgba(16, 185, 129, 0.35); color:var(--primary); font-weight:700;">
+                        <i class="fa-solid fa-building-shield"></i> BMC Jurisdiction Active
+                    </span>
                 </div>
+
+
+
 
                 <div id="map"></div>
             </div>
@@ -285,14 +301,24 @@
                     </h4>
                     
                     <div style="display:flex; gap:10px;">
-                        <input type="text" id="searchInput" onkeyup="filterTickets()" placeholder="Search ID or category..." class="input-field" style="width:200px; padding:6px 12px; font-size:0.8rem;">
-                        <select id="statusFilter" onchange="filterTickets()" class="input-field" style="width:170px; padding:6px 12px; font-size:0.8rem;">
+                        <input type="text" id="searchInput" onkeyup="filterTickets()" placeholder="Search ID or category..." class="input-field" style="width:190px; padding:6px 12px; font-size:0.8rem;">
+                        <select id="statusFilter" onchange="filterTickets()" class="input-field" style="width:150px; padding:6px 12px; font-size:0.8rem;">
                             <option value="ALL">All Statuses</option>
                             <option value="reported">Reported</option>
                             <option value="in_progress">In Progress</option>
+                            <option value="forwarded">Forwarded</option>
                             <option value="resolved">Resolved</option>
                         </select>
+                        <select id="jurisdictionFilter" onchange="filterTickets()" class="input-field" style="width:200px; padding:6px 12px; font-size:0.8rem;">
+                            <option value="BMC" selected>BMC Municipal Wards</option>
+                            <option value="ALL">All Regional Complaints</option>
+                            <option value="EXTERNAL">External (Out of BMC Limits)</option>
+                        </select>
+
+
+
                     </div>
+
                 </div>
 
                 <div style="overflow-x:auto;">
@@ -303,12 +329,13 @@
                                 <th onclick="sortTickets('category')" class="sortable-th" title="Click to sort by Category">Category <i class="fa-solid fa-sort" style="font-size:0.75rem;"></i></th>
                                 <th onclick="sortTickets('volume_band')" class="sortable-th" title="Click to sort by Volume">Volume <i class="fa-solid fa-sort" style="font-size:0.75rem;"></i></th>
                                 <th onclick="sortTickets('urgency_score')" class="sortable-th" title="Click to sort by Urgency">Urgency <i class="fa-solid fa-sort" style="font-size:0.75rem;"></i></th>
+                                <th>Dispatch Unit</th>
                                 <th>Duplicates</th>
-                                <th>Blurred</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="adminTableBody">
+
                             <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Loading active tickets from backend...</td></tr>
                         </tbody>
                     </table>
@@ -364,7 +391,7 @@
                     <!-- Visual Truck & Crew Specification Grid -->
                     <div class="dispatch-grid">
                         <div class="dispatch-badge">
-                            <span id="inspectTruckEmoji" style="font-size:1.2rem;">🚛</span>
+                            <span id="inspectTruckEmoji" style="font-size:1.2rem; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-truck-fast" style="color:var(--primary);"></i></span>
                             <div>
                                 <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Vehicle Type</div>
                                 <div id="inspectTruckType" style="color:var(--primary);">Heavy Compactor</div>
@@ -372,7 +399,7 @@
                         </div>
 
                         <div class="dispatch-badge">
-                            <span style="font-size:1.2rem;">👷‍♂️</span>
+                            <span style="font-size:1.2rem; color:var(--accent-cyan); display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-user-gear"></i></span>
                             <div>
                                 <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Crew Assigned</div>
                                 <div id="inspectCrewCount" style="color:var(--accent-cyan);">3 Workers</div>
@@ -380,7 +407,7 @@
                         </div>
 
                         <div class="dispatch-badge">
-                            <span style="font-size:1.2rem;">📦</span>
+                            <span style="font-size:1.2rem; color:var(--accent-amber); display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-boxes-stacked"></i></span>
                             <div>
                                 <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Payload Band</div>
                                 <div id="inspectVolume" style="color:var(--accent-amber);">Medium (0.2-1.0m³)</div>
@@ -388,13 +415,14 @@
                         </div>
 
                         <div class="dispatch-badge">
-                            <span style="font-size:1.2rem;">🧹</span>
+                            <span style="font-size:1.2rem; color:var(--primary); display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-broom"></i></span>
                             <div>
                                 <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Equipment</div>
                                 <div id="inspectTools" style="color:var(--text-main);">Vacuum Loader</div>
                             </div>
                         </div>
                     </div>
+
                 </div>
 
                 <!-- Box 3: Anonymized Image Payload Viewer & Privacy Pills -->
@@ -412,17 +440,21 @@
                 </div>
 
                 <!-- Box 4: Status Update Action Buttons -->
-                <div style="display:flex; gap:8px;">
-                    <button onclick="updateStatus('reported')" style="flex:1; background:rgba(255,255,255,0.08); color:var(--text-main); border:1px solid var(--glass-border); padding:9px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.78rem; transition:all 0.2s ease;">
+                <div style="display:flex; gap:6px; flex-wrap:wrap;">
+                    <button onclick="updateStatus('reported')" style="flex:1; background:rgba(255,255,255,0.08); color:var(--text-main); border:1px solid var(--glass-border); padding:9px 6px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.75rem; transition:all 0.2s ease;">
                         <i class="fa-solid fa-rotate-left"></i> Reported
                     </button>
-                    <button onclick="updateStatus('in_progress')" style="flex:1.2; background:linear-gradient(135deg, #ea580c, #c2410c); color:white; border:none; padding:9px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.78rem; box-shadow:0 4px 14px rgba(234, 88, 12, 0.3); transition:all 0.2s ease;">
+                    <button onclick="updateStatus('in_progress')" style="flex:1.1; background:linear-gradient(135deg, #ea580c, #c2410c); color:white; border:none; padding:9px 6px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.75rem; box-shadow:0 4px 14px rgba(234, 88, 12, 0.3); transition:all 0.2s ease;">
                         <i class="fa-solid fa-truck-fast"></i> In Progress
                     </button>
-                    <button onclick="updateStatus('resolved')" style="flex:1.2; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; padding:9px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.78rem; box-shadow:0 4px 14px var(--primary-glow); transition:all 0.2s ease;">
-                        <i class="fa-solid fa-circle-check"></i> Resolved
+                    <button onclick="updateStatus('forwarded')" title="Forward ticket to Panchayati Raj / External PWD Authority" style="flex:1.1; background:linear-gradient(135deg, #8b5cf6, #6d28d9); color:white; border:none; padding:9px 6px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.75rem; box-shadow:0 4px 14px rgba(139, 92, 246, 0.3); transition:all 0.2s ease;">
+                        <i class="fa-solid fa-share-nodes"></i> Forward
+                    </button>
+                    <button onclick="updateStatus('resolved')" style="flex:1.1; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; padding:9px 6px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.75rem; box-shadow:0 4px 14px var(--primary-glow); transition:all 0.2s ease;">
+                        <i class="fa-solid fa-circle-check"></i> Resolve
                     </button>
                 </div>
+
             </div>
         </div>
     </div>
@@ -498,8 +530,22 @@
             switchMapTile("dark");
             markersGroup = L.layerGroup().addTo(map);
 
+            // Draw Official Municipal Jurisdiction Boundary Overlay (BMC)
+            const municipalBoundary = L.rectangle([
+                [20.1500, 85.6500],
+                [20.4500, 85.9500]
+            ], {
+                color: '#10b981',
+                weight: 2,
+                dashArray: '6, 6',
+                fillColor: '#10b981',
+                fillOpacity: 0.03
+            }).addTo(map);
+            municipalBoundary.bindTooltip("🏢 Official Municipal Jurisdiction (BMC)", { sticky: true });
+
             await loadAdminData();
         });
+
 
         function switchMapTile(mode) {
             if (currentTileLayer) map.removeLayer(currentTileLayer);
@@ -614,19 +660,43 @@
             if (el) el.scrollIntoView({ behavior: 'smooth' });
         }
 
+        const cityCenterCoords = {
+            "BMC": [20.2961, 85.8245],
+            "CMC": [20.4625, 85.8828],
+            "PURI": [19.8135, 85.8312],
+            "RMC": [22.2604, 84.8536]
+        };
+
         function filterTickets() {
             const q = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase().trim() : '';
             const statusF = document.getElementById('statusFilter') ? document.getElementById('statusFilter').value : 'ALL';
+            const jF = document.getElementById('jurisdictionFilter') ? document.getElementById('jurisdictionFilter').value : 'ALL';
 
             filteredTickets = ticketsData.filter(t => {
-                const matchQ = (t.id && t.id.toLowerCase().includes(q)) || (t.category && t.category.toLowerCase().includes(q));
+                const matchQ = (t.id && t.id.toLowerCase().includes(q)) || (t.category && t.category.toLowerCase().includes(q)) || (t.governing_authority && t.governing_authority.toLowerCase().includes(q));
                 const matchStatus = statusF === 'ALL' || (t.status || 'reported') === statusF;
-                return matchQ && matchStatus;
+                
+                let matchJurisdiction = true;
+                if (jF !== 'ALL') {
+                    if (jF === 'EXTERNAL') {
+                        matchJurisdiction = (t.in_jurisdiction === 0 || t.in_jurisdiction === false);
+                    } else {
+                        const auth = (t.governing_authority || "").toLowerCase();
+                        matchJurisdiction = auth.includes(jF.toLowerCase());
+                    }
+                }
+                return matchQ && matchStatus && matchJurisdiction;
             });
+
+            if (jF !== 'ALL' && cityCenterCoords[jF] && map) {
+                map.flyTo(cityCenterCoords[jF], 13, { animate: true });
+            }
 
             renderMetrics();
             renderTableAndMap();
         }
+
+
 
         // --- Garbage Truck Polyline Dispatch Routing & Moving Truck Marker ---
         function drawTruckRoute() {
@@ -653,7 +723,7 @@
 
             const truckIcon = L.divIcon({
                 className: 'moving-truck-pin',
-                html: '<div class="moving-truck-icon">🚛</div>',
+                html: '<div class="moving-truck-icon"><i class="fa-solid fa-truck-fast"></i></div>',
                 iconSize: [36, 36],
                 iconAnchor: [18, 18]
             });
@@ -689,13 +759,14 @@
 
             filteredTickets.forEach(t => {
                 let pinColor = t.status === 'resolved' ? '#06b6d4' : (t.urgency_score >= 7.0 ? '#ef4444' : t.urgency_score >= 4.0 ? '#f59e0b' : '#10b981');
-                let categoryIcon = '🗑️';
-                if (t.is_drain_blocked) categoryIcon = '🌊';
-                else if (t.is_fire_hazard) categoryIcon = '🔥';
-                else if (t.category === 'Plastic Waste') categoryIcon = '🥤';
-                else if (t.category === 'Construction Debris') categoryIcon = '🏗️';
-                else if (t.category === 'E-Waste') categoryIcon = '🔋';
-                else if (t.category === 'Hazardous') categoryIcon = '☣️';
+                let categoryIcon = '<i class="fa-solid fa-trash-can"></i>';
+                if (t.is_drain_blocked) categoryIcon = '<i class="fa-solid fa-water"></i>';
+                else if (t.is_fire_hazard) categoryIcon = '<i class="fa-solid fa-fire-flame-curved"></i>';
+                else if (t.category === 'Plastic Waste') categoryIcon = '<i class="fa-solid fa-bottle-water"></i>';
+                else if (t.category === 'Construction Debris') categoryIcon = '<i class="fa-solid fa-trowel-bricks"></i>';
+                else if (t.category === 'E-Waste') categoryIcon = '<i class="fa-solid fa-plug"></i>';
+                else if (t.category === 'Hazardous') categoryIcon = '<i class="fa-solid fa-biohazard"></i>';
+
 
                 const customIcon = L.divIcon({
                     className: '',
@@ -730,26 +801,29 @@
                 marker.on('click', () => inspect(t.id));
 
                 const isSelected = currentInspectId === t.id;
-                const statusBadgeBg = t.status === 'resolved' ? 'rgba(6, 182, 212, 0.2)' : t.status === 'in_progress' ? 'rgba(245, 158, 11, 0.2)' : 'rgba(255, 255, 255, 0.1)';
-                const statusBadgeColor = t.status === 'resolved' ? 'var(--accent-cyan)' : t.status === 'in_progress' ? 'var(--accent-amber)' : 'var(--text-muted)';
+                const statusBadgeBg = t.status === 'resolved' ? 'rgba(6, 182, 212, 0.2)' : t.status === 'in_progress' ? 'rgba(245, 158, 11, 0.2)' : t.status === 'forwarded' ? 'rgba(139, 92, 246, 0.25)' : 'rgba(255, 255, 255, 0.1)';
+                const statusBadgeColor = t.status === 'resolved' ? 'var(--accent-cyan)' : t.status === 'in_progress' ? 'var(--accent-amber)' : t.status === 'forwarded' ? '#a78bfa' : 'var(--text-muted)';
+                const externalBadge = (t.in_jurisdiction === 0 || t.in_jurisdiction === false) ? '<br><span style="font-size:0.68rem; color:#a78bfa; font-weight:700;"><i class="fa-solid fa-share-nodes"></i> External Zone</span>' : '';
 
                 tbody.innerHTML += `
                     <tr class="${isSelected ? 'selected-row' : ''}" onclick="inspect('${t.id}')">
                         <td><b>${t.id}</b> <span style="font-size:0.68rem; padding:3px 8px; border-radius:6px; font-weight:800; background:${statusBadgeBg}; color:${statusBadgeColor};">${t.status || 'reported'}</span></td>
-                        <td>${t.category || 'N/A'}</td>
+                        <td>${t.category || 'N/A'}${t.is_sensitive_area ? '<br><span style="font-size:0.68rem; color:var(--accent-amber); font-weight:700;"><i class="fa-solid fa-shield-halved"></i> Sensitive</span>' : ''}${externalBadge}</td>
                         <td>${t.volume_band || 'N/A'}</td>
                         <td><span style="background:${pinColor}; color:white; font-weight:800; padding:3px 8px; border-radius:6px;">${t.urgency_score}/10</span></td>
+                        <td><span style="font-size:0.72rem; font-weight:800; background:rgba(16, 185, 129, 0.15); color:var(--primary); padding:3px 8px; border-radius:6px;">${t.dispatch_unit || 'Manual Sanitation Crew'}</span></td>
                         <td>+${t.duplicate_count || 0}</td>
-                        <td>${t.faces_blurred}F / ${t.plates_blurred}P</td>
                         <td><button onclick="event.stopPropagation(); inspect('${t.id}');" style="background:linear-gradient(135deg, var(--accent-cyan), #0284c7); color:white; border:none; padding:5px 10px; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">Inspect</button></td>
                     </tr>
                 `;
+
             });
 
             if (filteredTickets.length > 0 && !currentInspectId) {
                 inspect(filteredTickets[0].id);
             }
         }
+
 
         function updateDispatchVisuals(t) {
             const cat = (t.category || "").toLowerCase();
@@ -860,8 +934,49 @@
             }
         }
 
+        function openVerificationModal() {
+            if (!currentInspectId) return;
+            const modal = document.getElementById('verificationModal');
+            if (modal) modal.style.display = 'flex';
+        }
+
+        function closeVerificationModal() {
+            const modal = document.getElementById('verificationModal');
+            if (modal) modal.style.display = 'none';
+        }
+
+        async function confirmResolveWithProof() {
+            if (!currentInspectId) return;
+            const fileInput = document.getElementById('verifyImageInput');
+            const formData = new FormData();
+            formData.append('status', 'resolved');
+            if (fileInput && fileInput.files && fileInput.files[0]) {
+                formData.append('verification_image', fileInput.files[0]);
+            }
+
+            try {
+                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/report/${currentInspectId}/status`, {
+                    method: 'PATCH',
+                    body: formData
+                });
+                const result = await res.json();
+                if (result.status === 'success') {
+                    closeVerificationModal();
+                    await loadAdminData();
+                    inspect(currentInspectId);
+                }
+            } catch(e) {
+                console.error("Failed to update status with proof:", e);
+                alert("Failed to save cleanup verification photo.");
+            }
+        }
+
         async function updateStatus(newStatus) {
             if (!currentInspectId) return;
+            if (newStatus === 'resolved') {
+                openVerificationModal();
+                return;
+            }
             try {
                 const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/report/${currentInspectId}/status`, {
                     method: 'PATCH',
@@ -877,6 +992,7 @@
                 console.error("Failed to update status:", e);
             }
         }
+
 
         // --- Text-to-Speech Speaker ---
         function speakCurrentNote() {
@@ -1075,6 +1191,65 @@
         }
     </script>
 
+    <!-- CLEANUP VERIFICATION MODAL -->
+    <div id="verificationModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
+        <div class="card-admin" style="max-width:480px; width:90%; text-align:center; padding:28px;">
+            <div style="width:60px; height:60px; border-radius:50%; background:rgba(16, 185, 129, 0.15); display:flex; align-items:center; justify-content:center; margin:0 auto 16px auto;">
+                <i class="fa-solid fa-camera-retro" style="font-size:1.8rem; color:var(--primary);"></i>
+            </div>
+            <h3 style="font-family:'Outfit',sans-serif; font-weight:800; color:white; margin-bottom:6px;">Upload Cleanup Verification</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Attach site photo to verify complete waste clearance & close ticket.</p>
+            <input type="file" id="verifyImageInput" accept="image/*" style="margin-bottom:20px; color:white; width:100%; background:rgba(255,255,255,0.05); padding:10px; border-radius:12px; border:1px solid var(--glass-border);">
+            <div style="display:flex; gap:12px; justify-content:center;">
+                <button type="button" onclick="closeVerificationModal()" class="action-btn-pill" style="padding:10px 20px;">Cancel</button>
+                <button type="button" onclick="confirmResolveWithProof()" class="action-btn-pill" style="background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; padding:10px 20px; border:none;">Submit & Resolve Ticket</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- MUNICIPALITY CONFIGURATION MODAL -->
+    <div id="cityModal" class="modal-backdrop">
+        <div class="modal-content" style="max-width:500px;">
+            <button onclick="closeCityModal()" style="position:absolute; top:20px; right:20px; border:none; background:rgba(255,255,255,0.06); color:var(--text-muted); width:32px; height:32px; border-radius:8px; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-xmark"></i></button>
+            
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
+                <div style="width:40px; height:40px; border-radius:10px; background:rgba(16, 185, 129, 0.15); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                    <i class="fa-solid fa-city"></i>
+                </div>
+                <div>
+                    <h3 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.2rem; color:white;">Select City Jurisdiction</h3>
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Configure Active Geofence & Boundary Limits</span>
+                </div>
+            </div>
+
+            <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
+                <button onclick="selectCityPreset('BMC')" class="action-btn-pill" style="padding:12px 16px; width:100%; justify-content:space-between; text-align:left;">
+                    <span>🏛️ <strong>Bhubaneswar (BMC)</strong></span>
+                    <span style="font-size:0.72rem; color:var(--primary);">Smart City Capital</span>
+                </button>
+                <button onclick="selectCityPreset('CMC')" class="action-btn-pill" style="padding:12px 16px; width:100%; justify-content:space-between; text-align:left;">
+                    <span>🏙️ <strong>Cuttack (CMC)</strong></span>
+                    <span style="font-size:0.72rem; color:var(--accent-cyan);">Millennium City Ward</span>
+                </button>
+                <button onclick="selectCityPreset('PURI')" class="action-btn-pill" style="padding:12px 16px; width:100%; justify-content:space-between; text-align:left;">
+                    <span>🏢 <strong>Puri Municipality</strong></span>
+                    <span style="font-size:0.72rem; color:var(--accent-amber);">Coastal Tourist Zone</span>
+                </button>
+                <button onclick="selectCityPreset('RMC')" class="action-btn-pill" style="padding:12px 16px; width:100%; justify-content:space-between; text-align:left;">
+                    <span>🌆 <strong>Rourkela (RMC)</strong></span>
+                    <span style="font-size:0.72rem; color:#a855f7;">Steel City Region</span>
+                </button>
+            </div>
+
+            <div style="background:rgba(8, 12, 10, 0.6); border:1px solid var(--glass-border); padding:14px; border-radius:12px;">
+                <span style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; display:block; margin-bottom:6px;">Active Boundary Config:</span>
+                <div id="activeCityDetails" style="font-size:0.8rem; color:var(--text-main); line-height:1.5;">
+                    Loading active boundary details...
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- MOBILE FLOATING BOTTOM DOCK NAVBAR -->
     <div class="mobile-bottom-dock" id="mobileBottomNav">
         <button onclick="scrollToSection('mapCardSection')" class="dock-btn"><i class="fa-solid fa-map-location-dot"></i><span>Map</span></button>
@@ -1082,5 +1257,56 @@
         <button onclick="scrollToSection('inspectCardSection')" class="dock-btn"><i class="fa-solid fa-magnifying-glass"></i><span>Inspector</span></button>
         <button onclick="toggleChatWindow()" class="dock-btn"><i class="fa-solid fa-robot"></i><span>AI Chat</span></button>
     </div>
+
+    <script src="assets/config.js"></script>
+    <script src="js/i18n.js"></script>
+    <script>
+        function openCityModal() {
+            fetchActiveCityConfig();
+            document.getElementById('cityModal').style.display = 'flex';
+        }
+
+        function closeCityModal() {
+            document.getElementById('cityModal').style.display = 'none';
+        }
+
+        async function fetchActiveCityConfig() {
+            try {
+                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/config/municipality`);
+                const data = await res.json();
+                if (data.status === 'success') {
+                    const cfg = data.config;
+                    document.getElementById('activeCityDetails').innerHTML = `
+                        <strong>${cfg.municipality_name}</strong><br>
+                        Center GPS: ${cfg.center_lat || 20.2961}, ${cfg.center_lng || 85.8245}<br>
+                        Lat Bounds: ${cfg.min_lat} → ${cfg.max_lat}<br>
+                        Lng Bounds: ${cfg.min_lng} → ${cfg.max_lng}
+                    `;
+                }
+            } catch(e) { console.error("Error fetching city config:", e); }
+        }
+
+        async function selectCityPreset(code) {
+            try {
+                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/config/municipality`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ city_code: code })
+                });
+                const data = await res.json();
+                if (data.status === 'success') {
+                    closeCityModal();
+                    const cfg = data.config;
+                    alert(`✅ Municipal Jurisdiction switched to: ${cfg.municipality_name}`);
+                    
+                    // Re-center map & update municipal boundary rectangle
+                    if (map) {
+                        map.flyTo([cfg.center_lat, cfg.center_lng], 13);
+                    }
+                    loadAdminData();
+                }
+            } catch(e) { alert("Failed to switch municipality."); }
+        }
+    </script>
 </body>
 </html>

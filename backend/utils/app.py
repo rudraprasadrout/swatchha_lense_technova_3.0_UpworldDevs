@@ -33,8 +33,9 @@ if os.path.exists(ENV_FILE):
 from anonymizer import anonymize_image_bytes
 from db import get_conn, init_db
 from dedup import find_existing_nearby_ticket, merge_duplicate_ticket
-from scoring import calculate_algorithmic_urgency
+from scoring import calculate_algorithmic_urgency, check_municipal_jurisdiction
 from vision import analyze_image_with_mistral
+
 
 app = Flask(__name__, static_folder=FRONTEND_DIR)
 
@@ -110,32 +111,41 @@ def officer_login():
 # --- CITIZEN REPORT INGESTION ENDPOINT ---
 @app.route("/api/v1/report", methods=["POST"])
 def submit_report():
-    if "image" not in request.files:
-        return jsonify({"status": "error", "message": "No image file provided"}), 400
-
-    file = request.files["image"]
-    lat = float(request.form.get("lat", 20.2961))
-    lng = float(request.form.get("lng", 85.8245))
-    note = request.form.get("note", "")
-    lang = request.form.get("lang", "or-IN")
-    api_key = request.form.get("api_key")
-
-    raw_bytes = file.read()
-    if not raw_bytes:
-        return jsonify({"status": "error", "message": "Uploaded image file is empty"}), 400
-
+    api_key = os.environ.get("MISTRAL_API_KEY", "")
     conn = None
     try:
-        # Step 1: Anonymize Image Bytes (YuNet ONNX Faces + Haar License Plates)
-        anonymized_bytes, faces_blurred, plates_blurred = anonymize_image_bytes(raw_bytes)
+        data = request.form.to_dict()
+        lat = float(data.get("lat", 20.2961))
+        lng = float(data.get("lng", 85.8245))
+        note = data.get("note", "").strip()
+        lang = data.get("lang", "or-IN").strip()
 
+        # Location Sensitivity Zone Support
+        is_sensitive = data.get("is_sensitive_area", "0") in ["1", "true", "True"]
+        sensitive_type = data.get("sensitive_area_type", "None").strip()
+
+        file = request.files.get("image")
+        if not file:
+            return jsonify({"status": "error", "message": "No image provided"}), 400
+
+        img_bytes = file.read()
+        if not img_bytes:
+            return jsonify({"status": "error", "message": "Empty image uploaded"}), 400
+
+        # Step 1: Run Edge Privacy Anonymization
+        anonymized_bytes, faces_blurred, plates_blurred = anonymize_image_bytes(img_bytes)
+
+        # Step 1.5: Validate Municipal Geofence Jurisdiction
+        jurisdiction_info = check_municipal_jurisdiction(lat, lng)
+        in_jurisdiction = 1 if jurisdiction_info["in_jurisdiction"] else 0
+        authority_name = jurisdiction_info["authority"]
+
+        # Step 2: Spatial Deduplication Check (20m Haversine)
         conn = get_conn(DB_PATH)
+        duplicate_match = find_existing_nearby_ticket(conn, lat=lat, lng=lng, max_distance_meters=20.0)
 
-        # Step 2: Spatial Deduplication Check (20m Haversine Radius)
-        duplicate_match = find_existing_nearby_ticket(conn, lat, lng, max_distance_meters=20.0)
 
         if duplicate_match:
-            # Merge report into existing active ticket & recalculate urgency score
             merge_duplicate_ticket(conn, existing_ticket=duplicate_match)
             conn.close()
 
@@ -145,6 +155,9 @@ def submit_report():
                     "action": "merged_duplicate",
                     "message": "Report matched an existing active ticket within 20m. Priority incremented.",
                     "ticket_id": duplicate_match["id"],
+                    "in_jurisdiction": in_jurisdiction,
+                    "governing_authority": authority_name,
+                    "jurisdiction_note": jurisdiction_info["jurisdiction_note"]
                 }
             )
 
@@ -155,6 +168,7 @@ def submit_report():
 
         is_drain = bool(ai_data.get("is_drain_blocked", False))
         is_fire = bool(ai_data.get("is_fire_hazard", False))
+        dispatch_unit = ai_data.get("dispatch_unit", "Manual Sanitation Crew")
 
         # Step 4: Calculate Deterministic Algorithmic Urgency Score
         computed_urgency = calculate_algorithmic_urgency(
@@ -162,6 +176,7 @@ def submit_report():
             volume_band=ai_data.get("volume_band", "Medium (0.2-1.0m³)"),
             is_drain_blocked=is_drain,
             is_fire_hazard=is_fire,
+            is_sensitive_area=is_sensitive,
             duplicate_count=0,
             is_monsoon_season=True,
         )
@@ -172,14 +187,15 @@ def submit_report():
         ticket_id = f"SW-{uuid.uuid4().hex[:8].upper()}"
         now_str = datetime.utcnow().isoformat()
 
-        # Step 6: Insert Ticket into Database
+        # Step 6: Insert Ticket into Database with Jurisdiction Data
         conn.execute(
             """
             INSERT INTO tickets (
                 id, lat, lng, category, volume_band, hazard_level, is_drain_blocked, is_fire_hazard, description,
                 confidence, urgency_score, status, faces_blurred, plates_blurred,
-                image_b64, note, note_summary_en, lang, created_at, last_seen, duplicate_count
-            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                image_b64, note, note_summary_en, lang, created_at, last_seen, duplicate_count,
+                is_sensitive_area, sensitive_area_type, dispatch_unit, in_jurisdiction, governing_authority
+            ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         """,
             (
                 ticket_id,
@@ -203,6 +219,11 @@ def submit_report():
                 now_str,
                 now_str,
                 0,
+                1 if is_sensitive else 0,
+                sensitive_type,
+                dispatch_unit,
+                in_jurisdiction,
+                authority_name
             ),
         )
         conn.commit()
@@ -218,14 +239,21 @@ def submit_report():
                     "hazard_level": 1 if (is_drain or is_fire) else 0,
                     "urgency_score": computed_urgency,
                     "description": ai_data.get("description"),
+                    "dispatch_unit": dispatch_unit,
+                    "is_sensitive_area": 1 if is_sensitive else 0,
+                    "sensitive_area_type": sensitive_type,
                     "note_summary_en": ai_data.get("note_summary_en", note),
                     "faces_blurred": faces_blurred,
                     "plates_blurred": plates_blurred,
                     "lat": lat,
                     "lng": lng,
+                    "in_jurisdiction": bool(in_jurisdiction),
+                    "governing_authority": authority_name,
+                    "jurisdiction_note": jurisdiction_info["jurisdiction_note"]
                 },
             }
         )
+
 
     except Exception as e:
         return jsonify({"status": "error", "message": str(e)}), 500
@@ -234,8 +262,26 @@ def submit_report():
             conn.close()
 
 
+# --- MUNICIPALITY GEOFENCE CONFIGURATION ENDPOINTS ---
+@app.route("/api/v1/config/municipality", methods=["GET", "POST"])
+def manage_municipality_config():
+    """Allows municipal command staff to dynamically configure or switch active city jurisdiction boundaries."""
+    from scoring import MUNICIPAL_BOUNDS, CITY_PRESETS, set_active_municipality
+    if request.method == "POST":
+        data = request.get_json() or {}
+        city_code = data.get("city_code")
+        if city_code and city_code in CITY_PRESETS:
+            new_bounds = set_active_municipality(city_code)
+        else:
+            new_bounds = set_active_municipality(data)
+        return jsonify({"status": "success", "config": new_bounds, "presets": CITY_PRESETS})
+
+    return jsonify({"status": "success", "config": MUNICIPAL_BOUNDS, "presets": CITY_PRESETS})
+
+
 # --- ADMIN DASHBOARD MAP TICKETS ENDPOINT ---
 @app.route("/api/v1/reports", methods=["GET"])
+
 def get_reports():
     """Returns all active civic tickets formatted for Leaflet.js map integration."""
     conn = get_conn(DB_PATH)
@@ -454,15 +500,69 @@ def analyze_city_telemetry():
 # --- UPDATE TICKET STATUS ENDPOINT ---
 @app.route("/api/v1/report/<ticket_id>/status", methods=["PATCH", "POST"])
 def update_ticket_status(ticket_id):
-    """Updates status (e.g. 'reported', 'in_progress', 'resolved') for a ticket."""
-    data = request.get_json() or {}
-    new_status = data.get("status", "in_progress")
+    """Updates status (e.g. 'reported', 'in_progress', 'resolved') for a ticket with optional verification photo."""
+    new_status = "in_progress"
+    verification_b64 = None
+
+    if request.is_json and request.get_json():
+        data = request.get_json()
+        new_status = data.get("status", "in_progress")
+        verification_b64 = data.get("verification_image_b64")
+    elif request.form:
+        new_status = request.form.get("status", "in_progress")
+
+    if "verification_image" in request.files:
+        v_file = request.files["verification_image"]
+        v_bytes = v_file.read()
+        if v_bytes:
+            verification_b64 = base64.b64encode(v_bytes).decode("utf-8")
+
+    now_str = datetime.utcnow().isoformat()
     conn = get_conn(DB_PATH)
     cursor = conn.cursor()
-    cursor.execute("UPDATE tickets SET status = ? WHERE id = ?", (new_status, ticket_id))
+
+    if new_status == "resolved" and verification_b64:
+        cursor.execute(
+            "UPDATE tickets SET status = ?, verification_image_b64 = ?, resolved_at = ? WHERE id = ?",
+            (new_status, verification_b64, now_str, ticket_id)
+        )
+    elif new_status == "resolved":
+        cursor.execute(
+            "UPDATE tickets SET status = ?, resolved_at = ? WHERE id = ?",
+            (new_status, now_str, ticket_id)
+        )
+    else:
+        cursor.execute("UPDATE tickets SET status = ? WHERE id = ?", (new_status, ticket_id))
+
     conn.commit()
     conn.close()
-    return jsonify({"status": "success", "ticket_id": ticket_id, "new_status": new_status})
+    return jsonify({
+        "status": "success",
+        "ticket_id": ticket_id,
+        "new_status": new_status,
+        "has_verification": bool(verification_b64)
+    })
+
+
+# --- TICKET VERIFICATION IMAGE ENDPOINT ---
+@app.route("/api/v1/report/<ticket_id>/verification-image", methods=["GET"])
+def get_ticket_verification_image(ticket_id):
+    """Returns base64 cleanup verification image payload for a resolved ticket."""
+    conn = get_conn(DB_PATH)
+    row = conn.execute(
+        "SELECT verification_image_b64, resolved_at FROM tickets WHERE id = ?", (ticket_id,)
+    ).fetchone()
+    conn.close()
+
+    if not row or not row["verification_image_b64"]:
+        return jsonify({"status": "error", "message": "Verification image not found"}), 404
+
+    return jsonify({
+        "status": "success",
+        "verification_image_b64": row["verification_image_b64"],
+        "resolved_at": row["resolved_at"]
+    })
+
 
 
 # --- STATIC FRONTEND ASSET PROXY ROUTE ---

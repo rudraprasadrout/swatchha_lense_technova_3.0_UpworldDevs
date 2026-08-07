@@ -34,19 +34,23 @@ def run_tests():
     test_lat = 20.2961 + rand_offset
     test_lng = 85.8245 + rand_offset
 
-    print("\n--- 4. Submitting Citizen Report ---")
+    print("\n--- 4. Submitting Citizen Report with Location Sensitivity ---")
     data = {
         "image": (io.BytesIO(img_bytes), "test.jpg"),
         "lat": str(test_lat),
         "lng": str(test_lng),
-        "note": "Plastic waste overflow blocking nalla drain",
-        "lang": "or-IN"
+        "note": "Plastic waste overflow blocking nalla drain near hospital",
+        "lang": "or-IN",
+        "is_sensitive_area": "1",
+        "sensitive_area_type": "School / Hospital Zone"
     }
     res = client.post("/api/v1/report", data=data, content_type='multipart/form-data')
     print("Submit response:", res.status_code, res.get_json())
     assert res.status_code == 200
     res_data = res.get_json()
     ticket_id = res_data["ticket"]["id"]
+    assert "dispatch_unit" in res_data["ticket"]
+    assert res_data["ticket"]["is_sensitive_area"] == 1
 
     print("\n--- 5. Submitting Duplicate Report (within 20m radius) ---")
     data_dup = {
@@ -71,10 +75,20 @@ def run_tests():
     print("Image retrieval response:", res_img.status_code, "Image b64 len:", len(res_img.get_json().get("image_b64", "")))
     assert res_img.status_code == 200
 
-    print("\n--- 8. Testing Update Status ---")
-    res_status = client.patch(f"/api/v1/report/{ticket_id}/status", json={"status": "in_progress"})
+    print("\n--- 8. Testing Update Status with Verification Photo ---")
+    res_status = client.patch(
+        f"/api/v1/report/{ticket_id}/status",
+        data={"status": "resolved", "verification_image": (io.BytesIO(img_bytes), "verified.jpg")},
+        content_type='multipart/form-data'
+    )
     print("Update status response:", res_status.status_code, res_status.get_json())
     assert res_status.status_code == 200
+    assert res_status.get_json()["has_verification"] == True
+
+    print("\n--- 9. Testing Verification Image Retrieval ---")
+    res_v_img = client.get(f"/api/v1/report/{ticket_id}/verification-image")
+    print("Verification image response:", res_v_img.status_code)
+    assert res_v_img.status_code == 200
 
     # Cleanup test ticket created during test run so database stays clean
     from db import get_conn, DB_PATH
@@ -87,3 +101,4 @@ def run_tests():
 
 if __name__ == "__main__":
     run_tests()
+

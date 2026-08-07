@@ -51,5 +51,21 @@ def init_db(db_path):
         cursor.execute("ALTER TABLE tickets ADD COLUMN is_fire_hazard INTEGER DEFAULT 0")
     if "note_summary_en" not in existing_cols:
         cursor.execute("ALTER TABLE tickets ADD COLUMN note_summary_en TEXT")
+    if "is_sensitive_area" not in existing_cols:
+        cursor.execute("ALTER TABLE tickets ADD COLUMN is_sensitive_area INTEGER DEFAULT 0")
+    if "sensitive_area_type" not in existing_cols:
+        cursor.execute("ALTER TABLE tickets ADD COLUMN sensitive_area_type TEXT DEFAULT 'None'")
+    if "dispatch_unit" not in existing_cols:
+        cursor.execute("ALTER TABLE tickets ADD COLUMN dispatch_unit TEXT")
+    if "verification_image_b64" not in existing_cols:
+        cursor.execute("ALTER TABLE tickets ADD COLUMN verification_image_b64 TEXT")
+    if "resolved_at" not in existing_cols:
+        cursor.execute("ALTER TABLE tickets ADD COLUMN resolved_at TEXT")
+    if "in_jurisdiction" not in existing_cols:
+        cursor.execute("ALTER TABLE tickets ADD COLUMN in_jurisdiction INTEGER DEFAULT 1")
+    if "governing_authority" not in existing_cols:
+        cursor.execute("ALTER TABLE tickets ADD COLUMN governing_authority TEXT DEFAULT 'Bhubaneswar Municipal Corporation (BMC)'")
     conn.commit()
     conn.close()
+
+
