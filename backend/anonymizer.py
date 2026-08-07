@@ -13,21 +13,35 @@ MODEL_PATH = os.path.join(MODELS_DIR, "face_detection_yunet_2023mar.onnx")
 
 # Auto-download model weights if not present in the current directory
 if not os.path.exists(MODEL_PATH):
-    print("Downloading YuNet Face Detector weights (~300 KB)...")
-    url = "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx"
-    urllib.request.urlretrieve(url, MODEL_PATH)
+    try:
+        print("Downloading YuNet Face Detector weights (~300 KB)...")
+        url = "https://github.com/opencv/opencv_zoo/raw/main/models/face_detection_yunet/face_detection_yunet_2023mar.onnx"
+        urllib.request.urlretrieve(url, MODEL_PATH)
+    except Exception as e:
+        print(f"Notice: Model weight download exception: {e}")
 
-# Initialize YuNet Face Detector
-_detector = cv2.FaceDetectorYN.create(
-    model=MODEL_PATH,
-    config="",
-    input_size=(320, 320),
-    score_threshold=0.3,  # Lowered from 0.6 to capture lower contrast / partial faces
-    nms_threshold=0.3
-)
+# Initialize YuNet Face Detector safely
+_detector = None
+try:
+    if hasattr(cv2, "FaceDetectorYN") and os.path.exists(MODEL_PATH):
+        _detector = cv2.FaceDetectorYN.create(
+            model=MODEL_PATH,
+            config="",
+            input_size=(320, 320),
+            score_threshold=0.3,
+            nms_threshold=0.3
+        )
+except Exception as e:
+    print(f"Notice: YuNet FaceDetectorYN initialization exception: {e}")
 
-# License Plate Haar Cascade
-_plate_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_russian_plate_number.xml")
+# Initialize License Plate Haar Cascade safely
+_plate_cascade = None
+try:
+    if hasattr(cv2, "CascadeClassifier") and hasattr(cv2, "data") and hasattr(cv2.data, "haarcascades"):
+        cascade_path = cv2.data.haarcascades + "haarcascade_russian_plate_number.xml"
+        _plate_cascade = cv2.CascadeClassifier(cascade_path)
+except Exception as e:
+    print(f"Notice: CascadeClassifier initialization exception: {e}")
 
 
 def _pixelate_region(img, x, y, w, h, blocks=8, pad_percent=0.2):
@@ -73,25 +87,32 @@ def anonymize_image_bytes(image_bytes: bytes):
     plates_count = 0
 
     # 1. Face Detection with YuNet
-    _detector.setInputSize((w_img, h_img))
-    _, faces = _detector.detect(img)
-
-    if faces is not None:
-        for face in faces:
-            x, y, w, h = map(int, face[:4])
-            _pixelate_region(img, x, y, w, h)
-            faces_count += 1
+    if _detector is not None:
+        try:
+            _detector.setInputSize((w_img, h_img))
+            _, faces = _detector.detect(img)
+            if faces is not None:
+                for face in faces:
+                    x, y, w, h = map(int, face[:4])
+                    _pixelate_region(img, x, y, w, h)
+                    faces_count += 1
+        except Exception as e:
+            print(f"Notice: Face detection execution exception: {e}")
 
     # 2. License Plate Detection
-    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    gray = cv2.equalizeHist(gray)
-    plates = _plate_cascade.detectMultiScale(
-        gray, scaleFactor=1.03, minNeighbors=3, minSize=(30, 10)
-    )
-
-    for (x, y, w, h) in plates:
-        _pixelate_region(img, x, y, w, h)
-        plates_count += 1
+    if _plate_cascade is not None and not _plate_cascade.empty():
+        try:
+            gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+            gray = cv2.equalizeHist(gray)
+            plates = _plate_cascade.detectMultiScale(
+                gray, scaleFactor=1.03, minNeighbors=3, minSize=(30, 10)
+            )
+            if plates is not None:
+                for (x, y, w, h) in plates:
+                    _pixelate_region(img, x, y, w, h)
+                    plates_count += 1
+        except Exception as e:
+            print(f"Notice: Plate detection execution exception: {e}")
 
     ok, buf = cv2.imencode(".jpg", img, [cv2.IMWRITE_JPEG_QUALITY, 85])
     out_bytes = buf.tobytes() if ok else image_bytes

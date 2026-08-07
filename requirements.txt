@@ -1,7 +1,9 @@
 flask
 flask-cors
 mistralai
-opencv-python-headless
+opencv-python-headless>=4.8.0,<5.0.0
 pillow
 numpy
 gunicorn
+firebase-admin
+requests
