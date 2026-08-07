@@ -1,5 +1,5 @@
-let currentLat = CONFIG.DEFAULT_LAT;
-let currentLng = CONFIG.DEFAULT_LNG;
+let currentLat = (typeof CONFIG !== 'undefined' && CONFIG.DEFAULT_LAT) ? CONFIG.DEFAULT_LAT : 20.2961;
+let currentLng = (typeof CONFIG !== 'undefined' && CONFIG.DEFAULT_LNG) ? CONFIG.DEFAULT_LNG : 85.8245;
 
 document.addEventListener("DOMContentLoaded", () => {
     updateTime();
@@ -32,6 +32,16 @@ document.addEventListener("DOMContentLoaded", () => {
                 };
                 reader.readAsDataURL(file);
                 updateTime();
+            }
+        });
+    }
+
+    // Tap anywhere on capture box to open file picker
+    const captureBox = document.getElementById('captureBox');
+    if (captureBox && imgInput) {
+        captureBox.addEventListener('click', (e) => {
+            if (e.target !== imgInput) {
+                imgInput.click();
             }
         });
     }
