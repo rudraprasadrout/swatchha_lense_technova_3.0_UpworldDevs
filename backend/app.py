@@ -62,8 +62,6 @@ init_db(DB_PATH)
 # --- ROOT INDEX ENDPOINT ---
 @app.route("/", methods=["GET"])
 def index():
-    if os.path.exists(os.path.join(FRONTEND_DIR, "index.html")):
-        return send_from_directory(FRONTEND_DIR, "index.html")
     return jsonify(
         {
             "system": "SwachhLens AI Backend Engine",
