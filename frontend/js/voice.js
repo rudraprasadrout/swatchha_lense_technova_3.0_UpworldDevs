@@ -1,5 +1,6 @@
 let recognition = null;
 let isRecording = false;
+let finalSpeech = '';
 
 function toggleSpeech() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -20,6 +21,8 @@ function toggleSpeech() {
             recognition.continuous = true;
             recognition.interimResults = true;
 
+            finalSpeech = speechText ? speechText.value : '';
+
             recognition.onstart = () => {
                 isRecording = true;
                 if (micBtn) micBtn.classList.add('recording');
@@ -27,19 +30,25 @@ function toggleSpeech() {
             };
 
             recognition.onresult = (event) => {
-                let finalTranscript = '';
+                let interim = '';
                 for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    const trans = event.results[i][0].transcript;
                     if (event.results[i].isFinal) {
-                        finalTranscript += event.results[i][0].transcript + ' ';
+                        finalSpeech += trans + ' ';
+                    } else {
+                        interim += trans;
                     }
                 }
-                if (finalTranscript && speechText) {
-                    speechText.value += finalTranscript;
+                if (speechText) {
+                    speechText.value = finalSpeech + interim;
                 }
             };
 
             recognition.onerror = (e) => {
-                console.warn("Speech recognition error:", e.error);
+                console.warn("Speech error:", e.error);
+                if (e.error === 'not-allowed') {
+                    alert("Microphone access blocked. Please allow microphone access in your browser site settings.");
+                }
                 stopSpeech();
             };
 
