@@ -15,8 +15,7 @@ function toggleSpeech() {
 
     if (!isRecording) {
         recognition = new SpeechRecognition();
-        let selectedLang = langSelect ? langSelect.value : 'or';
-        if (selectedLang === 'or-IN') selectedLang = 'or'; // BCP-47 tag for Chrome Odia Script recognizer
+        let selectedLang = langSelect ? langSelect.value : 'ori-IN';
         
         recognition.lang = selectedLang;
         recognition.continuous = true;
