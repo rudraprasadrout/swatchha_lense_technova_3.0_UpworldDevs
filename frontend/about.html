@@ -130,8 +130,8 @@
     </style>
     <script>
         (function() {
-            document.documentElement.setAttribute("data-theme", "dark");
-            localStorage.setItem("swachh_theme", "dark");
+            const savedTheme = localStorage.getItem("swachh_theme") || "dark";
+            document.documentElement.setAttribute("data-theme", savedTheme);
         })();
     </script>
 </head>
@@ -141,14 +141,17 @@
     <header class="app-header">
         <div style="display:flex; align-items:center; gap:16px;">
             <a href="index.html" class="nav-back-btn">
-                <i class="fa-solid fa-arrow-left"></i> <span data-i18n="navBack">Back to Gateway</span>
+                <i class="fa-solid fa-arrow-left"></i> <span data-i18n="navBack">Back to Home</span>
             </a>
             <a href="index.html" class="brand-logo"><i class="fa-solid fa-leaf"></i> SwachhLens</a>
         </div>
         
         <div style="display:flex; align-items:center; gap:12px;">
-            <a href="citizen.html" class="nav-back-btn"><i class="fa-solid fa-camera"></i> <span data-i18n="navCitizen">Citizen App</span></a>
-            <a href="admin.html" class="nav-back-btn"><i class="fa-solid fa-building-shield"></i> <span data-i18n="navCommand">Municipal Command</span></a>
+            <button onclick="toggleTheme()" class="theme-toggle-btn themeIconBtn" title="Toggle Light/Dark Theme">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <a href="citizen.html" class="nav-back-btn"><i class="fa-solid fa-camera"></i> <span data-i18n="navCitizen">Report Issue</span></a>
+            <a href="admin.html" class="nav-back-btn"><i class="fa-solid fa-building-shield"></i> <span data-i18n="navCommand">Officer Portal</span></a>
             
             <!-- Universal Language Selector -->
             <select id="uiLangSelect" onchange="changeUiLanguage(this.value)" style="background:rgba(16, 185, 129, 0.12); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.3); font-weight:700; font-size:0.78rem; padding:6px 12px; border-radius:8px; outline:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;">
