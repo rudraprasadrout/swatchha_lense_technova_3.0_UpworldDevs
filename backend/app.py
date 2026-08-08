@@ -38,7 +38,7 @@ from firebase_db import (
     find_existing_nearby_ticket_fs, merge_duplicate_ticket_fs, delete_ticket_fs
 )
 
-app = Flask(__name__, static_folder=FRONTEND_DIR)
+app = Flask(__name__)
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.after_request
@@ -54,20 +54,21 @@ init_db(DB_PATH)
 
 @app.route("/", methods=["GET"])
 def index():
-    if os.path.exists(os.path.join(FRONTEND_DIR, "index.html")) and "text/html" in request.headers.get("Accept", ""):
-        return send_from_directory(FRONTEND_DIR, "index.html")
     return jsonify(
         {
-            "system": "SwachhLens Engine",
+            "system": "SwachhLens Core API Engine",
             "status": "online",
             "version": "v1.0",
+            "frontend_portal": "https://swatchlensupworlddev.netlify.app",
             "endpoints": {
-                "health": "/health",
+                "health": "GET /health",
                 "auth": "POST /api/v1/auth",
                 "submit_report": "POST /api/v1/report",
                 "get_reports": "GET /api/v1/reports",
                 "get_image": "GET /api/v1/report/<ticket_id>/image",
                 "update_status": "PATCH /api/v1/report/<ticket_id>/status",
+                "ai_summary": "POST /api/v1/reports/summary",
+                "ai_analyze_city": "POST /api/v1/ai/analyze-city",
             },
         }
     )
@@ -483,11 +484,9 @@ def get_ticket_verification_image(ticket_id):
     })
 
 
-@app.route("/<path:path>", methods=["GET"])
-def static_proxy(path):
-    if os.path.exists(os.path.join(FRONTEND_DIR, path)):
-        return send_from_directory(FRONTEND_DIR, path)
-    return jsonify({"status": "error", "message": "File not found"}), 404
+@app.errorhandler(404)
+def not_found_api(e):
+    return jsonify({"status": "error", "message": "API endpoint not found. Refer to GET / for API documentation."}), 404
 
 
 if __name__ == "__main__":

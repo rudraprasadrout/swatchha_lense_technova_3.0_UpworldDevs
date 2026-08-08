@@ -1,10 +1,11 @@
 let recognition = null;
 let isRecording = false;
+let accumulatedTranscript = '';
 
 function toggleSpeech() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        alert("Web Speech API is not supported in this browser. Use Chrome or Edge.");
+        alert("Web Speech API is not supported in this browser. Please use Google Chrome, Microsoft Edge, or Safari.");
         return;
     }
 
@@ -14,38 +15,75 @@ function toggleSpeech() {
     const langSelect = document.getElementById('langSelect');
 
     if (!isRecording) {
-        recognition = new SpeechRecognition();
-        recognition.lang = langSelect.value;
-        recognition.continuous = true;
-        recognition.interimResults = true;
+        try {
+            recognition = new SpeechRecognition();
+            recognition.lang = (langSelect && langSelect.value) ? langSelect.value : 'or-IN';
+            recognition.continuous = true;
+            recognition.interimResults = true;
 
-        recognition.onstart = () => {
-            isRecording = true;
-            micBtn.classList.add('recording');
-            micCaption.innerText = "Listening...";
-        };
+            accumulatedTranscript = speechText ? speechText.value : '';
 
-        recognition.onresult = (event) => {
-            let finalTranscript = '';
-            for (let i = event.resultIndex; i < event.results.length; ++i) {
-                if (event.results[i].isFinal) {
-                    finalTranscript += event.results[i][0].transcript + ' ';
+            recognition.onstart = () => {
+                isRecording = true;
+                if (micBtn) micBtn.classList.add('recording');
+                if (micCaption) micCaption.innerText = "Listening...";
+            };
+
+            recognition.onresult = (event) => {
+                let interimTranscript = '';
+                let newFinals = '';
+
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    const transcriptStr = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        newFinals += transcriptStr + ' ';
+                    } else {
+                        interimTranscript += transcriptStr;
+                    }
                 }
-            }
-            if (finalTranscript) speechText.value += finalTranscript;
-        };
 
-        recognition.onerror = () => stopSpeech();
-        recognition.onend = () => { if (isRecording) stopSpeech(); };
-        recognition.start();
+                if (newFinals) {
+                    accumulatedTranscript += newFinals;
+                }
+
+                if (speechText) {
+                    speechText.value = accumulatedTranscript + interimTranscript;
+                }
+            };
+
+            recognition.onerror = (event) => {
+                console.warn("Speech recognition error:", event.error);
+                if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                    alert("Microphone access was denied. Please allow microphone permissions in your browser settings to use voice input.");
+                }
+                stopSpeech();
+            };
+
+            recognition.onend = () => {
+                if (isRecording) {
+                    stopSpeech();
+                }
+            };
+
+            recognition.start();
+
+        } catch (e) {
+            console.error("Failed to start speech recognition:", e);
+            stopSpeech();
+        }
     } else {
         stopSpeech();
     }
 
     function stopSpeech() {
         isRecording = false;
-        if (recognition) recognition.stop();
-        micBtn.classList.remove('recording');
-        micCaption.innerText = "Tap Voice";
+        if (recognition) {
+            try {
+                recognition.stop();
+            } catch(e) {}
+            recognition = null;
+        }
+        if (micBtn) micBtn.classList.remove('recording');
+        if (micCaption) micCaption.innerText = "Tap Voice";
     }
 }
