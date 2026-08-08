@@ -261,13 +261,7 @@ def manage_municipality_config():
 @app.route("/api/v1/reports", methods=["GET"])
 def get_reports():
     rows = get_all_tickets()
-
-    reports = []
-    for r in rows:
-        ticket = dict(r)
-        ticket.pop("image_b64", None)
-        reports.append(ticket)
-
+    reports = [dict(r) for r in rows]
     return jsonify({"status": "success", "data": reports})
 
 

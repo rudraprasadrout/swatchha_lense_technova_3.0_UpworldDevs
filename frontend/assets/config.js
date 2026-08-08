@@ -1,12 +1,13 @@
 // SwachhLens Global Application Configuration
-const isLocalhost = (typeof window !== 'undefined') && 
-    (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1' || window.location.hostname === '');
+const isFileProtocol = typeof window !== 'undefined' && window.location.protocol === 'file:';
+const originUrl = (typeof window !== 'undefined' && window.location.origin && window.location.origin !== 'null' && !isFileProtocol)
+    ? window.location.origin
+    : "http://127.0.0.1:5000";
 
 const CONFIG = window.CONFIG = {
-    // Uses local Flask backend when testing on localhost, and your live Render API when deployed on Netlify/Cloud
     API_BASE_URL: (typeof window !== 'undefined' && window.SWACHH_API_URL) 
         ? window.SWACHH_API_URL 
-        : (isLocalhost ? "http://127.0.0.1:5000" : "https://swachhlens-backend-upworlddev.onrender.com"),
+        : originUrl,
     DEFAULT_LAT: 20.2961,
     DEFAULT_LNG: 85.8245
 };

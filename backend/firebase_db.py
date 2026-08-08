@@ -106,32 +106,34 @@ def save_ticket(ticket_dict: dict) -> bool:
 
 
 def get_all_tickets() -> list:
-    """Retrieves all reports from Firebase Firestore (with fallback to SQLite)."""
-    try:
-        url = f"{FIRESTORE_BASE_URL}/{COLLECTION_NAME}"
-        res = requests.get(url, timeout=5)
-        if res.status_code == 200:
-            data = res.json()
-            docs = data.get("documents", [])
-            tickets = [doc_to_ticket_dict(doc) for doc in docs if doc]
-            if tickets:
-                # Return sorted by urgency score descending
-                tickets.sort(key=lambda x: x.get("urgency_score", 0.0), reverse=True)
-                return tickets
-    except Exception as e:
-        logging.warning(f"Firebase Firestore get_all_tickets failed: {e}")
-
-    # Fallback to local SQLite DB
+    """Fast local-first retrieval of all ticket records including image payload."""
     try:
         conn = get_conn(DB_PATH)
         cursor = conn.cursor()
         cursor.execute("SELECT * FROM tickets ORDER BY urgency_score DESC")
         rows = cursor.fetchall()
         conn.close()
-        return [dict(row) for row in rows]
+        if rows:
+            return [dict(row) for row in rows]
     except Exception as e:
-        logging.error(f"SQLite get_all_tickets fallback failed: {e}")
-        return []
+        logging.error(f"SQLite fast get_all_tickets failed: {e}")
+
+    try:
+        url = f"{FIRESTORE_BASE_URL}/{COLLECTION_NAME}"
+        res = requests.get(url, timeout=3)
+        if res.status_code == 200:
+            data = res.json()
+            docs = data.get("documents", [])
+            tickets = [doc_to_ticket_dict(doc) for doc in docs if doc]
+            if tickets:
+                tickets.sort(key=lambda x: x.get("urgency_score", 0.0), reverse=True)
+                for t in tickets:
+                    t.pop("image_b64", None)
+                return tickets
+    except Exception as e:
+        logging.warning(f"Firebase Firestore get_all_tickets failed: {e}")
+
+    return []
 
 
 def get_ticket(ticket_id: str) -> dict:

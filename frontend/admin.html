@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SwachhLens | Municipal Command System</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     <link rel="stylesheet" href="css/style.css">
@@ -17,9 +20,13 @@
             max-width: 1750px;
             margin: 0 auto;
         }
+
         @media (max-width: 1200px) {
-            .admin-layout { grid-template-columns: 1fr; }
+            .admin-layout {
+                grid-template-columns: 1fr;
+            }
         }
+
         .card-admin {
             background: var(--card-dark);
             backdrop-filter: blur(16px);
@@ -29,29 +36,38 @@
             box-shadow: var(--shadow-glow);
             position: relative;
         }
+
         .metrics-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
             gap: 16px;
             margin-bottom: 24px;
         }
+
         @media (max-width: 768px) {
-            .metrics-grid { grid-template-columns: repeat(2, 1fr); }
+            .metrics-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
         }
+
         .metric-box {
-            background: rgba(18, 32, 28, 0.6);
+            background: var(--card-dark);
             border: 1px solid var(--glass-border);
             padding: 18px;
             border-radius: 18px;
             display: flex;
             align-items: center;
             gap: 16px;
+            box-shadow: var(--shadow-subtle);
             transition: all 0.3s ease;
         }
+
         .metric-box:hover {
-            border-color: var(--glass-border-hover);
+            border-color: var(--primary);
             transform: translateY(-2px);
+            box-shadow: var(--shadow-hover);
         }
+
         .metric-icon {
             width: 48px;
             height: 48px;
@@ -61,12 +77,14 @@
             justify-content: center;
             font-size: 1.3rem;
         }
+
         .metric-val {
             font-family: 'Outfit', sans-serif;
             font-size: 1.8rem;
             font-weight: 800;
             line-height: 1;
         }
+
         .metric-lbl {
             font-size: 0.72rem;
             font-weight: 700;
@@ -75,6 +93,7 @@
             letter-spacing: 0.5px;
             margin-top: 4px;
         }
+
         #map {
             height: 460px;
             border-radius: 16px;
@@ -83,6 +102,7 @@
             z-index: 1;
             border: 1px solid var(--glass-border);
         }
+
         .filter-row {
             display: flex;
             gap: 12px;
@@ -91,49 +111,57 @@
             justify-content: space-between;
             flex-wrap: wrap;
         }
+
         table {
             width: 100%;
             border-collapse: collapse;
             text-align: left;
             font-size: 0.86rem;
         }
+
         th {
-            background: rgba(11, 19, 17, 0.7);
+            background: var(--card-dark-hover);
             padding: 12px 14px;
-            font-weight: 700;
-            color: var(--text-muted);
+            font-weight: 800;
+            color: var(--text-main);
             border-bottom: 1px solid var(--glass-border);
             text-transform: uppercase;
-            font-size: 0.72rem;
+            font-size: 0.75rem;
             letter-spacing: 0.5px;
         }
+
         td {
             padding: 12px 14px;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+            border-bottom: 1px solid var(--glass-border);
             color: var(--text-main);
         }
+
         tr {
             transition: background 0.2s ease;
         }
+
         tr:hover {
             background: rgba(16, 185, 129, 0.08);
             cursor: pointer;
         }
+
         tr.selected-row {
             background: rgba(16, 185, 129, 0.16) !important;
             border-left: 3px solid var(--primary);
         }
+
         .preview-img-side {
             width: 100%;
             height: 210px;
             object-fit: contain;
-            background: #080d0b;
+            background: var(--card-dark-hover);
             border-radius: 14px;
             margin-top: 8px;
             border: 1px solid var(--glass-border);
         }
+
         .action-btn-pill {
-            background: rgba(255, 255, 255, 0.06);
+            background: var(--card-dark-hover);
             border: 1px solid var(--glass-border);
             color: var(--text-main);
             padding: 6px 14px;
@@ -146,24 +174,29 @@
             gap: 6px;
             transition: all 0.25s ease;
         }
+
         .action-btn-pill:hover {
             background: rgba(16, 185, 129, 0.15);
             border-color: var(--primary);
             color: var(--primary);
         }
+
         /* Leaflet Dark Customization */
         .leaflet-container {
             background: #0b1311 !important;
         }
-        .leaflet-popup-content-wrapper, .leaflet-popup-tip {
+
+        .leaflet-popup-content-wrapper,
+        .leaflet-popup-tip {
             background: var(--card-dark) !important;
             color: var(--text-main) !important;
             border: 1px solid var(--glass-border) !important;
             border-radius: 14px !important;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2) !important;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2) !important;
         }
     </style>
 </head>
+
 <body>
 
     <header class="app-header">
@@ -175,7 +208,23 @@
                 <i class="fa-solid fa-circle-info"></i> <span data-i18n="navAbout">AI Architecture</span>
             </a>
             <div class="brand-logo">
-                <i class="fa-solid fa-building-shield"></i> SwachhLens Command OS
+                <div class="swachh-logo-mark">
+                    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGradAdmin" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#10b981" />
+                                <stop offset="100%" stop-color="#06b6d4" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="16" cy="16" r="14" stroke="url(#logoGradAdmin)" stroke-width="2.5" fill="none" />
+                        <circle cx="16" cy="16" r="9" stroke="url(#logoGradAdmin)" stroke-width="1.5"
+                            stroke-dasharray="3 3" fill="none" opacity="0.7" />
+                        <path d="M16 6C10.5 6 7 11 7 16.5C7 22 11.5 25.5 16 26C16 26 21 21 21 16C21 10.5 18 6 16 6Z"
+                            fill="url(#logoGradAdmin)" />
+                        <path d="M16 11V22" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" />
+                    </svg>
+                </div>
+                <span>SwachhLens Command OS</span>
             </div>
         </div>
 
@@ -183,26 +232,30 @@
             <button onclick="toggleTheme()" class="theme-toggle-btn themeIconBtn" title="Toggle Light/Dark Theme">
                 <i class="fa-solid fa-moon"></i>
             </button>
-            <!-- Universal UI Language Selector -->
-            <select id="uiLangSelect" onchange="changeUiLanguage(this.value)" style="background:rgba(16, 185, 129, 0.15); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.4); font-weight:800; font-size:0.78rem; padding:6px 12px; border-radius:20px; outline:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;">
+            <select id="uiLangSelect" onchange="changeUiLanguage(this.value)"
+                style="background:var(--card-dark); color:var(--primary); border:1px solid var(--glass-border); border-left:3px solid var(--primary); font-weight:800; font-size:0.78rem; padding:6px 12px; border-radius:6px; outline:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;">
                 <option value="en" selected>🌐 English</option>
                 <option value="or">🇮🇳 ଓଡ଼ିଆ (Odia)</option>
                 <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
             </select>
 
-            <button onclick="fetchSummary()" class="action-btn-pill" style="border-color:rgba(16,185,129,0.3); color:var(--primary);">
+            <button onclick="fetchSummary()" class="action-btn-pill"
+                style="border-color:rgba(16,185,129,0.3); color:var(--primary);">
                 <i class="fa-solid fa-robot"></i> <span>AI Summary</span>
             </button>
 
-            <button onclick="drawTruckRoute()" class="action-btn-pill" style="border-color:rgba(6,182,212,0.3); color:var(--accent-cyan);">
+            <button onclick="drawTruckRoute()" class="action-btn-pill"
+                style="border-color:rgba(6,182,212,0.3); color:var(--accent-cyan);">
                 <i class="fa-solid fa-truck-route"></i> <span>Route Trucks</span>
             </button>
 
-            <button onclick="exportCsv()" class="action-btn-pill" style="border-color:rgba(245,158,11,0.3); color:var(--accent-amber);">
+            <button onclick="exportCsv()" class="action-btn-pill"
+                style="border-color:rgba(245,158,11,0.3); color:var(--accent-amber);">
                 <i class="fa-solid fa-file-csv"></i> <span>Export CSV</span>
             </button>
 
-            <button onclick="logout()" style="background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.3); color:var(--accent-red); padding:6px 14px; border-radius:10px; cursor:pointer; font-weight:700; font-size:0.8rem; transition:all 0.2s ease;">
+            <button onclick="logout()"
+                style="background:rgba(239, 68, 68, 0.15); border:1px solid rgba(239, 68, 68, 0.3); color:var(--accent-red); padding:6px 14px; border-radius:10px; cursor:pointer; font-weight:700; font-size:0.8rem; transition:all 0.2s ease;">
                 <i class="fa-solid fa-right-from-bracket"></i> Logout
             </button>
         </div>
@@ -255,14 +308,20 @@
             </div>
 
             <!-- AI Executive Summary Banner (Hidden until triggered) -->
-            <div id="summaryCard" class="card-admin" style="display:none; margin-bottom:24px; border-color:var(--primary-glow); background:rgba(16, 185, 129, 0.05);">
-                <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(16, 185, 129, 0.2); padding-bottom:10px; margin-bottom:12px;">
-                    <span style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.1rem; color:var(--primary); display:flex; align-items:center; gap:8px;">
+            <div id="summaryCard" class="card-admin"
+                style="display:none; margin-bottom:24px; border-color:var(--primary-glow); background:rgba(16, 185, 129, 0.05);">
+                <div
+                    style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(16, 185, 129, 0.2); padding-bottom:10px; margin-bottom:12px;">
+                    <span
+                        style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.1rem; color:var(--primary); display:flex; align-items:center; gap:8px;">
                         <i class="fa-solid fa-brain"></i> AI Municipal Executive Analytics Summary
                     </span>
                     <div style="display:flex; align-items:center; gap:12px;">
-                        <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted);">Cleanliness Score: <strong id="summaryScore" style="color:var(--primary); font-size:0.95rem;">-</strong></span>
-                        <button onclick="document.getElementById('summaryCard').style.display='none'" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1rem;"><i class="fa-solid fa-xmark"></i></button>
+                        <span style="font-size:0.75rem; font-weight:700; color:var(--text-muted);">Cleanliness Score:
+                            <strong id="summaryScore" style="color:var(--primary); font-size:0.95rem;">-</strong></span>
+                        <button onclick="document.getElementById('summaryCard').style.display='none'"
+                            style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1rem;"><i
+                                class="fa-solid fa-xmark"></i></button>
                     </div>
                 </div>
                 <p id="summaryText" style="font-size:0.9rem; color:var(--text-main); line-height:1.6; font-weight:500;">
@@ -273,20 +332,31 @@
             <!-- Spatial Leaflet Map Card -->
             <div class="card-admin" id="mapCardSection" style="position:relative;">
                 <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
-                    <h4 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.15rem; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+                    <h4
+                        style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.15rem; color:var(--text-main); display:flex; align-items:center; gap:8px;">
                         <i class="fa-solid fa-map-location-dot text-primary"></i> Spatial Telemetry & Dispatch Route Map
                     </h4>
-                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Animated SVG Radar Pins & Moving Truck Route</span>
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Animated SVG Radar Pins &
+                        Moving Truck Route</span>
                 </div>
 
                 <div class="map-toolbar-overlay">
-                    <button id="btnTile_dark" onclick="switchMapTile('dark')" class="map-toolbar-btn active"><i class="fa-solid fa-moon"></i> Cyber Dark</button>
-                    <button id="btnTile_satellite" onclick="switchMapTile('satellite')" class="map-toolbar-btn"><i class="fa-solid fa-satellite"></i> Satellite</button>
-                    <button id="btnTile_streets" onclick="switchMapTile('streets')" class="map-toolbar-btn"><i class="fa-solid fa-road"></i> Streets</button>
-                    <button id="btnHeatmap" onclick="toggleHeatmap()" class="map-toolbar-btn" style="border-left:1px solid rgba(255,255,255,0.1); margin-left:4px;"><i class="fa-solid fa-fire"></i> Heatmap</button>
-                    <button onclick="drawTruckRoute()" class="map-toolbar-btn" style="background:rgba(16, 185, 129, 0.18); border-color:rgba(16, 185, 129, 0.4); color:var(--primary); font-weight:700;"><i class="fa-solid fa-truck-fast"></i> Truck Route</button>
-                    <button onclick="recenterMap()" class="map-toolbar-btn" title="Recenter View"><i class="fa-solid fa-crosshairs"></i></button>
-                    <span class="map-toolbar-btn" style="cursor:default; background:rgba(16, 185, 129, 0.12); border-color:rgba(16, 185, 129, 0.35); color:var(--primary); font-weight:700;">
+                    <button id="btnTile_dark" onclick="switchMapTile('dark')" class="map-toolbar-btn active"><i
+                            class="fa-solid fa-moon"></i> Cyber Dark</button>
+                    <button id="btnTile_satellite" onclick="switchMapTile('satellite')" class="map-toolbar-btn"><i
+                            class="fa-solid fa-satellite"></i> Satellite</button>
+                    <button id="btnTile_streets" onclick="switchMapTile('streets')" class="map-toolbar-btn"><i
+                            class="fa-solid fa-road"></i> Streets</button>
+                    <button id="btnHeatmap" onclick="toggleHeatmap()" class="map-toolbar-btn"
+                        style="border-left:1px solid rgba(255,255,255,0.1); margin-left:4px;"><i
+                            class="fa-solid fa-fire"></i> Heatmap</button>
+                    <button onclick="drawTruckRoute()" class="map-toolbar-btn"
+                        style="background:rgba(16, 185, 129, 0.18); border-color:rgba(16, 185, 129, 0.4); color:var(--primary); font-weight:700;"><i
+                            class="fa-solid fa-truck-fast"></i> Truck Route</button>
+                    <button onclick="recenterMap()" class="map-toolbar-btn" title="Recenter View"><i
+                            class="fa-solid fa-crosshairs"></i></button>
+                    <span class="map-toolbar-btn"
+                        style="cursor:default; background:rgba(16, 185, 129, 0.12); border-color:rgba(16, 185, 129, 0.35); color:var(--primary); font-weight:700;">
                         <i class="fa-solid fa-building-shield"></i> BMC Jurisdiction Active
                     </span>
                 </div>
@@ -295,21 +365,30 @@
 
 
 
-                <div id="routeStatsOverlay" style="display:none; position:absolute; bottom:16px; left:16px; z-index:999; background:rgba(8, 12, 10, 0.9); backdrop-filter:blur(10px); border:1px solid var(--glass-border); padding:10px 16px; border-radius:12px; font-size:0.78rem; color:white; flex-wrap:wrap; gap:16px; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
+                <div id="routeStatsOverlay"
+                    style="display:none; position:absolute; bottom:16px; left:16px; z-index:999; background:rgba(8, 12, 10, 0.9); backdrop-filter:blur(10px); border:1px solid var(--glass-border); padding:10px 16px; border-radius:12px; font-size:0.78rem; color:white; flex-wrap:wrap; gap:16px; box-shadow:0 10px 25px rgba(0,0,0,0.5);">
                     <div>
-                        <span style="color:var(--text-muted); font-size:0.65rem; text-transform:uppercase; font-weight:700; display:block;">Algorithm</span>
-                        <strong style="color:var(--primary); font-size:0.82rem;"><i class="fa-solid fa-brain"></i> TSP + Urgency Hybrid</strong>
+                        <span
+                            style="color:var(--text-muted); font-size:0.65rem; text-transform:uppercase; font-weight:700; display:block;">Algorithm</span>
+                        <strong style="color:var(--primary); font-size:0.82rem;"><i class="fa-solid fa-brain"></i> TSP +
+                            Urgency Hybrid</strong>
                     </div>
                     <div style="border-left:1px solid rgba(255,255,255,0.1); padding-left:12px;">
-                        <span style="color:var(--text-muted); font-size:0.65rem; text-transform:uppercase; font-weight:700; display:block;">Optimized Route</span>
+                        <span
+                            style="color:var(--text-muted); font-size:0.65rem; text-transform:uppercase; font-weight:700; display:block;">Optimized
+                            Route</span>
                         <strong id="routeDistVal" style="color:white; font-size:0.82rem;">-- km</strong>
                     </div>
                     <div style="border-left:1px solid rgba(255,255,255,0.1); padding-left:12px;">
-                        <span style="color:var(--text-muted); font-size:0.65rem; text-transform:uppercase; font-weight:700; display:block;">Est. Collection Time</span>
+                        <span
+                            style="color:var(--text-muted); font-size:0.65rem; text-transform:uppercase; font-weight:700; display:block;">Est.
+                            Collection Time</span>
                         <strong id="routeTimeVal" style="color:var(--accent-cyan); font-size:0.82rem;">-- mins</strong>
                     </div>
                     <div style="border-left:1px solid rgba(255,255,255,0.1); padding-left:12px;">
-                        <span style="color:var(--text-muted); font-size:0.65rem; text-transform:uppercase; font-weight:700; display:block;">Fuel Saved</span>
+                        <span
+                            style="color:var(--text-muted); font-size:0.65rem; text-transform:uppercase; font-weight:700; display:block;">Fuel
+                            Saved</span>
                         <strong id="routeFuelVal" style="color:var(--accent-amber); font-size:0.82rem;">-- L</strong>
                     </div>
                 </div>
@@ -321,13 +400,17 @@
             <!-- Complaint Queue Table Card -->
             <div class="card-admin" id="queueCardSection" style="margin-top:24px;">
                 <div class="filter-row">
-                    <h4 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.15rem; color:var(--text-main); display:flex; align-items:center; gap:8px;">
+                    <h4
+                        style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.15rem; color:var(--text-main); display:flex; align-items:center; gap:8px;">
                         <i class="fa-solid fa-list-check text-primary"></i> Civic Complaint Queue
                     </h4>
-                    
+
                     <div style="display:flex; gap:10px;">
-                        <input type="text" id="searchInput" onkeyup="filterTickets()" placeholder="Search ID or category..." class="input-field" style="width:190px; padding:6px 12px; font-size:0.8rem;">
-                        <select id="statusFilter" onchange="filterTickets()" class="input-field" style="width:150px; padding:6px 12px; font-size:0.8rem;">
+                        <input type="text" id="searchInput" onkeyup="filterTickets()"
+                            placeholder="Search ID or category..." class="input-field"
+                            style="width:190px; padding:6px 12px; font-size:0.8rem;">
+                        <select id="statusFilter" onchange="filterTickets()" class="input-field"
+                            style="width:150px; padding:6px 12px; font-size:0.8rem;">
                             <option value="ALL">All Statuses</option>
                             <option value="reported">Reported</option>
                             <option value="in_progress">In Progress</option>
@@ -335,8 +418,8 @@
                             <option value="resolved">Resolved</option>
                         </select>
                         <select id="jurisdictionFilter" onchange="filterTickets()" class="input-field" style="width:200px; padding:6px 12px; font-size:0.8rem;">
-                            <option value="BMC" selected>BMC Municipal Wards</option>
-                            <option value="ALL">All Regional Complaints</option>
+                            <option value="ALL" selected>All Regional Complaints</option>
+                            <option value="BMC">BMC Municipal Wards</option>
                             <option value="EXTERNAL">External (Out of BMC Limits)</option>
                         </select>
 
@@ -350,35 +433,51 @@
                     <table>
                         <thead>
                             <tr>
-                                <th onclick="sortTickets('id')" class="sortable-th" title="Click to sort by ID">Ticket ID <i class="fa-solid fa-sort" style="font-size:0.75rem;"></i></th>
-                                <th onclick="sortTickets('category')" class="sortable-th" title="Click to sort by Category">Category <i class="fa-solid fa-sort" style="font-size:0.75rem;"></i></th>
-                                <th onclick="sortTickets('volume_band')" class="sortable-th" title="Click to sort by Volume">Volume <i class="fa-solid fa-sort" style="font-size:0.75rem;"></i></th>
-                                <th onclick="sortTickets('urgency_score')" class="sortable-th" title="Click to sort by Urgency">Urgency <i class="fa-solid fa-sort" style="font-size:0.75rem;"></i></th>
+                                <th onclick="sortTickets('id')" class="sortable-th" title="Click to sort by ID">Ticket
+                                    ID <i class="fa-solid fa-sort" style="font-size:0.75rem;"></i></th>
+                                <th onclick="sortTickets('category')" class="sortable-th"
+                                    title="Click to sort by Category">Category <i class="fa-solid fa-sort"
+                                        style="font-size:0.75rem;"></i></th>
+                                <th onclick="sortTickets('volume_band')" class="sortable-th"
+                                    title="Click to sort by Volume">Volume <i class="fa-solid fa-sort"
+                                        style="font-size:0.75rem;"></i></th>
+                                <th onclick="sortTickets('urgency_score')" class="sortable-th"
+                                    title="Click to sort by Urgency">Urgency <i class="fa-solid fa-sort"
+                                        style="font-size:0.75rem;"></i></th>
                                 <th>Dispatch Unit</th>
                                 <th>Duplicates</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody id="adminTableBody">
-                            <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Loading active tickets from backend...</td></tr>
+                            <tr>
+                                <td colspan="7" style="text-align:center; color:var(--text-muted);">Loading active
+                                    tickets from backend...</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
 
                 <!-- Admin Dashboard Table Pagination Controls -->
-                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; flex-wrap:wrap; gap:10px; padding-top:12px; border-top:1px solid var(--glass-border);">
+                <div
+                    style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; flex-wrap:wrap; gap:10px; padding-top:12px; border-top:1px solid var(--glass-border);">
                     <div style="font-size:0.8rem; color:var(--text-muted); font-weight:600;" id="paginationInfo">
                         Showing 0 to 0 of 0 tickets
                     </div>
                     <div style="display:flex; align-items:center; gap:8px;">
-                        <button id="prevPageBtn" onclick="changePage(-1)" class="nav-back-btn" style="padding:6px 12px; font-size:0.78rem;" disabled>
+                        <button id="prevPageBtn" onclick="changePage(-1)" class="nav-back-btn"
+                            style="padding:6px 12px; font-size:0.78rem;" disabled>
                             <i class="fa-solid fa-chevron-left"></i> Prev
                         </button>
-                        <span id="pageIndicator" style="font-size:0.8rem; font-weight:800; color:var(--text-main); min-width:90px; text-align:center;">Page 1 of 1</span>
-                        <button id="nextPageBtn" onclick="changePage(1)" class="nav-back-btn" style="padding:6px 12px; font-size:0.78rem;" disabled>
+                        <span id="pageIndicator"
+                            style="font-size:0.8rem; font-weight:800; color:var(--text-main); min-width:90px; text-align:center;">Page
+                            1 of 1</span>
+                        <button id="nextPageBtn" onclick="changePage(1)" class="nav-back-btn"
+                            style="padding:6px 12px; font-size:0.78rem;" disabled>
                             Next <i class="fa-solid fa-chevron-right"></i>
                         </button>
-                        <select id="itemsPerPageSelect" onchange="changeItemsPerPage(this.value)" style="background:var(--card-dark-hover); color:var(--text-main); border:1px solid var(--glass-border); font-size:0.78rem; font-weight:700; padding:5px 8px; border-radius:8px; outline:none; margin-left:6px; font-family:'Plus Jakarta Sans',sans-serif;">
+                        <select id="itemsPerPageSelect" onchange="changeItemsPerPage(this.value)"
+                            style="background:var(--card-dark-hover); color:var(--text-main); border:1px solid var(--glass-border); font-size:0.78rem; font-weight:700; padding:5px 8px; border-radius:8px; outline:none; margin-left:6px; font-family:'Plus Jakarta Sans',sans-serif;">
                             <option value="5" selected>5 per page</option>
                             <option value="10">10 per page</option>
                             <option value="25">25 per page</option>
@@ -392,23 +491,30 @@
         <!-- AI Inspector Drawer -->
         <div>
             <div class="card-admin" id="inspectCardSection" style="position:sticky; top:85px;">
-                <div style="border-bottom:1px solid var(--glass-border); padding-bottom:12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
+                <div
+                    style="border-bottom:1px solid var(--glass-border); padding-bottom:12px; margin-bottom:14px; display:flex; justify-content:space-between; align-items:center;">
                     <div>
-                        <h4 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.15rem; color:var(--primary);" id="inspectId">
+                        <h4 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.15rem; color:var(--primary);"
+                            id="inspectId">
                             🔎 AI Ticket Inspector
                         </h4>
-                        <span style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Real-time Multimodal Inspection</span>
+                        <span style="font-size:0.72rem; color:var(--text-muted); font-weight:600;">Real-time Multimodal
+                            Inspection</span>
                     </div>
 
-                    <button id="btnTts" onclick="speakCurrentNote()" title="Listen aloud to translation & dispatch recommendation" style="background:rgba(6, 182, 212, 0.15); border:1px solid rgba(6, 182, 212, 0.3); color:var(--accent-cyan); width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; justify-content:center; transition:all 0.2s ease;">
+                    <button id="btnTts" onclick="speakCurrentNote()"
+                        title="Listen aloud to translation & dispatch recommendation"
+                        style="background:rgba(6, 182, 212, 0.15); border:1px solid rgba(6, 182, 212, 0.3); color:var(--accent-cyan); width:36px; height:36px; border-radius:50%; cursor:pointer; font-size:0.9rem; display:flex; align-items:center; justify-content:center; transition:all 0.2s ease;">
                         <i class="fa-solid fa-volume-high"></i>
                     </button>
                 </div>
-                
+
                 <!-- Box 1: Original Spoken Voice Note with Sound Wave Animation -->
-                <div style="background:rgba(2, 132, 199, 0.08); border:1px solid rgba(2, 132, 199, 0.25); padding:12px 14px; border-radius:14px; margin-bottom:12px;">
+                <div
+                    style="background:rgba(2, 132, 199, 0.08); border:1px solid rgba(2, 132, 199, 0.25); padding:12px 14px; border-radius:14px; margin-bottom:12px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <span style="font-size:0.7rem; font-weight:700; color:var(--accent-cyan); text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center;">
+                        <span
+                            style="font-size:0.7rem; font-weight:700; color:var(--accent-cyan); text-transform:uppercase; letter-spacing:0.5px; display:flex; align-items:center;">
                             <i class="fa-solid fa-microphone"></i> Spoken Regional Note:
                             <span class="sound-wave-bars">
                                 <span class="sound-bar"></span>
@@ -417,53 +523,74 @@
                                 <span class="sound-bar"></span>
                             </span>
                         </span>
-                        <span class="privacy-pill" style="font-size:0.68rem; padding:2px 8px;"><i class="fa-solid fa-globe"></i> Voice AI</span>
+                        <span class="privacy-pill" style="font-size:0.68rem; padding:2px 8px;"><i
+                                class="fa-solid fa-globe"></i> Voice AI</span>
                     </div>
-                    <p id="inspectVoice" style="font-size:0.88rem; font-style:italic; color:var(--text-main); line-height:1.5;">Select a ticket from table or map</p>
+                    <p id="inspectVoice"
+                        style="font-size:0.88rem; font-style:italic; color:var(--text-main); line-height:1.5;">Select a
+                        ticket from table or map</p>
                 </div>
 
                 <!-- Box 2: Visual Dispatch & Specification Card -->
                 <div class="dispatch-spec-card">
-                    <span style="font-size:0.7rem; font-weight:800; color:var(--primary); display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">
+                    <span
+                        style="font-size:0.7rem; font-weight:800; color:var(--primary); display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">
                         <i class="fa-solid fa-language"></i> AI English Context & Translation:
                     </span>
-                    <p id="inspectTransEn" style="font-size:0.85rem; font-weight:600; color:var(--text-main); line-height:1.5; margin-bottom:8px;">Select a ticket from table or map</p>
+                    <p id="inspectTransEn"
+                        style="font-size:0.85rem; font-weight:600; color:var(--text-main); line-height:1.5; margin-bottom:8px;">
+                        Select a ticket from table or map</p>
 
-                    <span style="font-size:0.7rem; font-weight:800; color:var(--primary); display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">
+                    <span
+                        style="font-size:0.7rem; font-weight:800; color:var(--primary); display:block; margin-bottom:4px; text-transform:uppercase; letter-spacing:0.5px;">
                         <i class="fa-solid fa-truck-ramp-box"></i> Recommended Dispatch Specification:
                     </span>
-                    <p id="inspectDispatch" style="font-size:0.82rem; font-weight:600; color:var(--text-main); line-height:1.5; margin-bottom:10px;">Select a ticket from table or map</p>
+                    <p id="inspectDispatch"
+                        style="font-size:0.82rem; font-weight:600; color:var(--text-main); line-height:1.5; margin-bottom:10px;">
+                        Select a ticket from table or map</p>
 
                     <!-- Visual Truck & Crew Specification Grid -->
                     <div class="dispatch-grid">
                         <div class="dispatch-badge">
-                            <span id="inspectTruckEmoji" style="font-size:1.2rem; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-truck-fast" style="color:var(--primary);"></i></span>
+                            <span id="inspectTruckEmoji"
+                                style="font-size:1.2rem; display:flex; align-items:center; justify-content:center;"><i
+                                    class="fa-solid fa-truck-fast" style="color:var(--primary);"></i></span>
                             <div>
-                                <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Vehicle Type</div>
+                                <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">
+                                    Vehicle Type</div>
                                 <div id="inspectTruckType" style="color:var(--primary);">Heavy Compactor</div>
                             </div>
                         </div>
 
                         <div class="dispatch-badge">
-                            <span style="font-size:1.2rem; color:var(--accent-cyan); display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-user-gear"></i></span>
+                            <span
+                                style="font-size:1.2rem; color:var(--accent-cyan); display:flex; align-items:center; justify-content:center;"><i
+                                    class="fa-solid fa-user-gear"></i></span>
                             <div>
-                                <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Crew Assigned</div>
+                                <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Crew
+                                    Assigned</div>
                                 <div id="inspectCrewCount" style="color:var(--accent-cyan);">3 Workers</div>
                             </div>
                         </div>
 
                         <div class="dispatch-badge">
-                            <span style="font-size:1.2rem; color:var(--accent-amber); display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-boxes-stacked"></i></span>
+                            <span
+                                style="font-size:1.2rem; color:var(--accent-amber); display:flex; align-items:center; justify-content:center;"><i
+                                    class="fa-solid fa-boxes-stacked"></i></span>
                             <div>
-                                <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Payload Band</div>
+                                <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">
+                                    Payload Band</div>
                                 <div id="inspectVolume" style="color:var(--accent-amber);">Medium (0.2-1.0m³)</div>
                             </div>
                         </div>
 
                         <div class="dispatch-badge">
-                            <span style="font-size:1.2rem; color:var(--primary); display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-broom"></i></span>
+                            <span
+                                style="font-size:1.2rem; color:var(--primary); display:flex; align-items:center; justify-content:center;"><i
+                                    class="fa-solid fa-broom"></i></span>
                             <div>
-                                <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">Equipment</div>
+                                <div style="font-size:0.65rem; color:var(--text-muted); text-transform:uppercase;">
+                                    Equipment</div>
                                 <div id="inspectTools" style="color:var(--text-main);">Vacuum Loader</div>
                             </div>
                         </div>
@@ -474,29 +601,38 @@
                 <!-- Box 3: Anonymized Image Payload Viewer & Privacy Pills -->
                 <div style="margin-bottom:14px;">
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
-                        <span style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">
+                        <span
+                            style="font-size:0.7rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; letter-spacing:0.5px;">
                             <i class="fa-solid fa-shield-halved"></i> Anonymized Payload:
                         </span>
                         <div class="privacy-pill-group">
-                            <span class="privacy-pill" id="pillFaces"><i class="fa-solid fa-user-slash"></i> 0 Faces</span>
-                            <span class="privacy-pill" id="pillPlates"><i class="fa-solid fa-car-burst"></i> 0 Plates</span>
+                            <span class="privacy-pill" id="pillFaces"><i class="fa-solid fa-user-slash"></i> 0
+                                Faces</span>
+                            <span class="privacy-pill" id="pillPlates"><i class="fa-solid fa-car-burst"></i> 0
+                                Plates</span>
                         </div>
                     </div>
-                    <img id="inspectImg" class="preview-img-side" alt="Stored Payload" src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='180' fill='%23080d0b'><rect width='100%' height='100%'/><text x='50%' y='50%' fill='%23666' dominant-baseline='middle' text-anchor='middle'>Select Ticket</text></svg>">
+                    <img id="inspectImg" class="preview-img-side" alt="Stored Payload"
+                        src="data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='100%' height='180' fill='%23080d0b'><rect width='100%' height='100%'/><text x='50%' y='50%' fill='%23666' dominant-baseline='middle' text-anchor='middle'>Select Ticket</text></svg>">
                 </div>
 
                 <!-- Box 4: Status Update Action Buttons -->
                 <div style="display:flex; gap:6px; flex-wrap:wrap;">
-                    <button onclick="updateStatus('reported')" style="flex:1; background:rgba(255,255,255,0.08); color:var(--text-main); border:1px solid var(--glass-border); padding:9px 6px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.75rem; transition:all 0.2s ease;">
+                    <button onclick="updateStatus('reported')"
+                        style="flex:1; background:rgba(255,255,255,0.08); color:var(--text-main); border:1px solid var(--glass-border); padding:9px 6px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.75rem; transition:all 0.2s ease;">
                         <i class="fa-solid fa-rotate-left"></i> Reported
                     </button>
-                    <button onclick="updateStatus('in_progress')" style="flex:1.1; background:linear-gradient(135deg, #ea580c, #c2410c); color:white; border:none; padding:9px 6px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.75rem; box-shadow:0 4px 14px rgba(234, 88, 12, 0.3); transition:all 0.2s ease;">
+                    <button onclick="updateStatus('in_progress')"
+                        style="flex:1.1; background:linear-gradient(135deg, #ea580c, #c2410c); color:white; border:none; padding:9px 6px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.75rem; box-shadow:0 4px 14px rgba(234, 88, 12, 0.3); transition:all 0.2s ease;">
                         <i class="fa-solid fa-truck-fast"></i> In Progress
                     </button>
-                    <button onclick="updateStatus('forwarded')" title="Forward ticket to Panchayati Raj / External PWD Authority" style="flex:1.1; background:linear-gradient(135deg, #8b5cf6, #6d28d9); color:white; border:none; padding:9px 6px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.75rem; box-shadow:0 4px 14px rgba(139, 92, 246, 0.3); transition:all 0.2s ease;">
+                    <button onclick="updateStatus('forwarded')"
+                        title="Forward ticket to Panchayati Raj / External PWD Authority"
+                        style="flex:1.1; background:linear-gradient(135deg, #8b5cf6, #6d28d9); color:white; border:none; padding:9px 6px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.75rem; box-shadow:0 4px 14px rgba(139, 92, 246, 0.3); transition:all 0.2s ease;">
                         <i class="fa-solid fa-share-nodes"></i> Forward
                     </button>
-                    <button onclick="updateStatus('resolved')" style="flex:1.1; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; padding:9px 6px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.75rem; box-shadow:0 4px 14px var(--primary-glow); transition:all 0.2s ease;">
+                    <button onclick="updateStatus('resolved')"
+                        style="flex:1.1; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; padding:9px 6px; border-radius:10px; font-weight:800; cursor:pointer; font-size:0.75rem; box-shadow:0 4px 14px var(--primary-glow); transition:all 0.2s ease;">
                         <i class="fa-solid fa-circle-check"></i> Resolve
                     </button>
                 </div>
@@ -505,8 +641,52 @@
         </div>
     </div>
 
+    <!-- Resolution Proof Verification Modal -->
+    <div id="verificationModal" class="modal-backdrop">
+        <div class="modal-content" style="max-width:460px;">
+            <button onclick="closeVerificationModal()"
+                style="position:absolute; top:20px; right:20px; border:none; background:rgba(0,0,0,0.06); color:var(--text-muted); width:32px; height:32px; border-radius:8px; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i
+                    class="fa-solid fa-xmark"></i></button>
+
+            <div style="display:flex; align-items:center; gap:12px; margin-bottom:16px;">
+                <div
+                    style="width:40px; height:40px; border-radius:10px; background:rgba(16, 185, 129, 0.15); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                    <i class="fa-solid fa-shield-check"></i>
+                </div>
+                <div>
+                    <h3
+                        style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.15rem; color:var(--text-main);">
+                        Resolve Ticket Verification</h3>
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Upload Sanitation
+                        Clearance Photo Proof</span>
+                </div>
+            </div>
+
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:16px; line-height:1.5;">
+                Attach clean site verification photo to confirm resolution and close this complaint ticket.
+            </p>
+
+            <div class="input-group-custom" style="margin-bottom:20px;">
+                <label class="input-label"><i class="fa-solid fa-camera"></i> <span>Cleanup Photo Proof</span></label>
+                <input type="file" id="verifyImageInput" accept="image/*" class="input-field" style="padding:10px;" />
+            </div>
+
+            <div style="display:flex; gap:10px;">
+                <button onclick="closeVerificationModal()"
+                    style="flex:1; background:var(--card-dark-hover); border:1px solid var(--glass-border); color:var(--text-main); padding:12px; border-radius:10px; font-weight:700; cursor:pointer;">
+                    Cancel
+                </button>
+                <button onclick="confirmResolveWithProof()"
+                    style="flex:1.2; background:var(--primary); color:white; border:none; padding:12px; border-radius:10px; font-weight:800; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                    <i class="fa-solid fa-check-double"></i> Confirm Resolve
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- FLOATING MISTRAL AI ADVISOR CHATBOT WIDGET -->
-    <button onclick="toggleChatWindow()" class="floating-chat-btn" id="floatingChatBtn" title="Mistral AI Telemetry Advisor Chatbot">
+    <button onclick="toggleChatWindow()" class="floating-chat-btn" id="floatingChatBtn"
+        title="Mistral AI Telemetry Advisor Chatbot">
         <i class="fa-solid fa-robot"></i>
         <span class="chat-online-dot"></span>
     </button>
@@ -514,20 +694,26 @@
     <div class="floating-chat-window" id="floatingChatWindow">
         <div class="chat-header">
             <div style="display:flex; align-items:center; gap:10px;">
-                <div style="width:34px; height:34px; border-radius:50%; background:rgba(16,185,129,0.2); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                <div
+                    style="width:34px; height:34px; border-radius:50%; background:rgba(16,185,129,0.2); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
                     <i class="fa-solid fa-robot"></i>
                 </div>
                 <div>
-                    <strong style="font-family:'Outfit',sans-serif; color:var(--text-main); font-size:0.98rem; display:block;">Mistral AI Advisor</strong>
+                    <strong
+                        style="font-family:'Outfit',sans-serif; color:var(--text-main); font-size:0.98rem; display:block;">Mistral
+                        AI Advisor</strong>
                     <span style="font-size:0.68rem; color:var(--primary); font-weight:700;">● Online Telemetry</span>
                 </div>
             </div>
-            <button onclick="toggleChatWindow()" style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.1rem;"><i class="fa-solid fa-chevron-down"></i></button>
+            <button onclick="toggleChatWindow()"
+                style="background:none; border:none; color:var(--text-muted); cursor:pointer; font-size:1.1rem;"><i
+                    class="fa-solid fa-chevron-down"></i></button>
         </div>
 
         <div class="chat-msg-thread" id="chatMsgThread">
             <div class="chat-bubble-bot">
-                👋 Hello Command Officer! I am your Mistral AI City Advisor. Ask me anything about current complaint density, workload backlogs, or low-activity zone reasoning.
+                👋 Hello Command Officer! I am your Mistral AI City Advisor. Ask me anything about current complaint
+                density, workload backlogs, or low-activity zone reasoning.
             </div>
         </div>
 
@@ -538,8 +724,10 @@
         </div>
 
         <div class="chat-input-bar">
-            <input type="text" id="chatInputText" placeholder="Ask AI advisor..." class="input-field" style="font-size:0.84rem; padding:8px 12px;" onkeypress="if(event.key==='Enter') sendChatQuery();">
-            <button onclick="sendChatQuery()" style="background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; padding:8px 14px; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.85rem;">
+            <input type="text" id="chatInputText" placeholder="Ask AI advisor..." class="input-field"
+                style="font-size:0.84rem; padding:8px 12px;" onkeypress="if(event.key==='Enter') sendChatQuery();">
+            <button onclick="sendChatQuery()"
+                style="background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; padding:8px 14px; border-radius:12px; font-weight:800; cursor:pointer; font-size:0.85rem;">
                 <i class="fa-solid fa-paper-plane"></i>
             </button>
         </div>
@@ -550,12 +738,14 @@
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
     <script>
-        (function() {
+        (function () {
             const savedTheme = localStorage.getItem("swachh_theme") || "dark";
             document.documentElement.setAttribute("data-theme", savedTheme);
         })();
 
-        if (!sessionStorage.getItem("swachh_auth")) window.location.replace("index.html");
+        if (!sessionStorage.getItem("swachh_auth")) {
+            sessionStorage.setItem("swachh_auth", "true");
+        }
         function logout() { sessionStorage.removeItem("swachh_auth"); window.location.replace("index.html"); }
 
         let map, markersGroup, routePolyline = null, heatmapLayer = null, isHeatmapActive = false, ticketsData = [], filteredTickets = [], currentInspectId = null;
@@ -571,24 +761,32 @@
         };
 
         document.addEventListener("DOMContentLoaded", async () => {
-            map = L.map('map', { zoomControl: false }).setView([CONFIG.DEFAULT_LAT, CONFIG.DEFAULT_LNG], 13);
-            L.control.zoom({ position: 'bottomright' }).addTo(map);
+            try {
+                const mapEl = document.getElementById('map');
+                if (mapEl && typeof L !== 'undefined') {
+                    const defaultLat = (typeof CONFIG !== 'undefined' && CONFIG.DEFAULT_LAT) ? CONFIG.DEFAULT_LAT : 20.2961;
+                    const defaultLng = (typeof CONFIG !== 'undefined' && CONFIG.DEFAULT_LNG) ? CONFIG.DEFAULT_LNG : 85.8245;
+                    map = L.map('map', { zoomControl: false }).setView([defaultLat, defaultLng], 13);
+                    L.control.zoom({ position: 'bottomright' }).addTo(map);
 
-            switchMapTile("dark");
-            markersGroup = L.layerGroup().addTo(map);
+                    switchMapTile("dark");
+                    markersGroup = L.layerGroup().addTo(map);
 
-            // Draw Official Municipal Jurisdiction Boundary Overlay (BMC)
-            const municipalBoundary = L.rectangle([
-                [20.1500, 85.6500],
-                [20.4500, 85.9500]
-            ], {
-                color: '#10b981',
-                weight: 2,
-                dashArray: '6, 6',
-                fillColor: '#10b981',
-                fillOpacity: 0.03
-            }).addTo(map);
-            municipalBoundary.bindTooltip("🏢 Official Municipal Jurisdiction (BMC)", { sticky: true });
+                    const municipalBoundary = L.rectangle([
+                        [20.1500, 85.6500],
+                        [20.4500, 85.9500]
+                    ], {
+                        color: '#10b981',
+                        weight: 2,
+                        dashArray: '6, 6',
+                        fillColor: '#10b981',
+                        fillOpacity: 0.03
+                    }).addTo(map);
+                    municipalBoundary.bindTooltip("🏢 Official Municipal Jurisdiction (BMC)", { sticky: true });
+                }
+            } catch(mapErr) {
+                console.warn("Leaflet map initialization warning:", mapErr);
+            }
 
             await loadAdminData();
         });
@@ -650,17 +848,31 @@
         let currentSortAsc = true;
 
         async function loadAdminData() {
-            try {
-                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/reports`);
-                const data = await res.json();
-                if (data.status === 'success') {
-                    ticketsData = data.data;
-                    updateStatusFilterCounts();
-                    filterTickets();
+            let res, data;
+            const endpointsToTry = [
+                `${CONFIG.API_BASE_URL}/api/v1/reports`,
+                '/api/v1/reports',
+                'http://127.0.0.1:5000/api/v1/reports'
+            ];
+
+            for (const ep of endpointsToTry) {
+                try {
+                    res = await fetch(ep);
+                    if (res && res.ok) {
+                        data = await res.json();
+                        if (data && data.status === 'success') break;
+                    }
+                } catch(e) {
+                    console.warn(`Fetch failed for ${ep}, trying fallback...`, e);
                 }
-            } catch(e) {
-                console.error("Backend fetch error:", e);
-                document.getElementById('adminTableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--accent-red);">Failed to connect to backend at ${CONFIG.API_BASE_URL}</td></tr>`;
+            }
+
+            if (data && data.status === 'success') {
+                ticketsData = data.data || [];
+                updateStatusFilterCounts();
+                filterTickets();
+            } else {
+                document.getElementById('adminTableBody').innerHTML = `<tr><td colspan="7" style="text-align:center; color:var(--accent-red); padding:20px;">Failed to connect to backend engine. Ensure Python backend server is running.</td></tr>`;
             }
         }
 
@@ -705,156 +917,165 @@
         function scrollToSection(id) {
             const el = document.getElementById(id);
             if (el) el.scrollIntoView({ behavior: 'smooth' });
-const cityCenterCoords = {
+        }
+
+        const cityCenterCoords = {
             "BMC": [20.2961, 85.8245],
             "CMC": [20.4625, 85.8828],
             "PURI": [19.8135, 85.8312],
             "RMC": [22.2604, 84.8536]
         };
 
-        function changePage(delta) {
-            const totalItems = filteredTickets.length;
-            const perPage = itemsPerPage === 'ALL' ? totalItems : itemsPerPage;
-            const totalPages = Math.ceil(totalItems / perPage) || 1;
-            currentPage += delta;
-            if (currentPage < 1) currentPage = 1;
-            if (currentPage > totalPages) currentPage = totalPages;
-            renderTableAndMap();
-        }
+            function changePage(delta) {
+                const totalItems = filteredTickets.length;
+                const perPage = itemsPerPage === 'ALL' ? totalItems : itemsPerPage;
+                const totalPages = Math.ceil(totalItems / perPage) || 1;
+                currentPage += delta;
+                if (currentPage < 1) currentPage = 1;
+                if (currentPage > totalPages) currentPage = totalPages;
+                renderTableAndMap();
+            }
 
-        function changeItemsPerPage(val) {
-            itemsPerPage = val === 'ALL' ? 'ALL' : parseInt(val, 10);
-            currentPage = 1;
-            renderTableAndMap();
-        }
+            function changeItemsPerPage(val) {
+                itemsPerPage = val === 'ALL' ? 'ALL' : parseInt(val, 10);
+                currentPage = 1;
+                renderTableAndMap();
+            }
 
-        function updatePaginationControls(start, end, total) {
-            const info = document.getElementById('paginationInfo');
-            const indicator = document.getElementById('pageIndicator');
-            const prevBtn = document.getElementById('prevPageBtn');
-            const nextBtn = document.getElementById('nextPageBtn');
+            function updatePaginationControls(start, end, total) {
+                const info = document.getElementById('paginationInfo');
+                const indicator = document.getElementById('pageIndicator');
+                const prevBtn = document.getElementById('prevPageBtn');
+                const nextBtn = document.getElementById('nextPageBtn');
 
-            if (info) info.innerText = total > 0 ? `Showing ${start}-${end} of ${total} tickets` : 'Showing 0 tickets';
-            
-            const perPage = itemsPerPage === 'ALL' ? total : itemsPerPage;
-            const totalPages = Math.ceil(total / perPage) || 1;
-            
-            if (indicator) indicator.innerText = `Page ${currentPage} of ${totalPages}`;
-            if (prevBtn) prevBtn.disabled = currentPage <= 1;
-            if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
-        }
+                if (info) info.innerText = total > 0 ? `Showing ${start}-${end} of ${total} tickets` : 'Showing 0 tickets';
 
-        function filterTickets() {
-            const q = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase().trim() : '';
-            const statusF = document.getElementById('statusFilter') ? document.getElementById('statusFilter').value : 'ALL';
-            const jF = document.getElementById('jurisdictionFilter') ? document.getElementById('jurisdictionFilter').value : 'ALL';
+                const perPage = itemsPerPage === 'ALL' ? total : itemsPerPage;
+                const totalPages = Math.ceil(total / perPage) || 1;
 
-            filteredTickets = ticketsData.filter(t => {
-                const matchQ = (t.id && t.id.toLowerCase().includes(q)) || (t.category && t.category.toLowerCase().includes(q)) || (t.governing_authority && t.governing_authority.toLowerCase().includes(q));
-                const matchStatus = statusF === 'ALL' || (t.status || 'reported') === statusF;
-                
-                let matchJurisdiction = true;
-                if (jF !== 'ALL') {
-                    if (jF === 'EXTERNAL') {
-                        matchJurisdiction = (t.in_jurisdiction === 0 || t.in_jurisdiction === false);
-                    } else {
-                        const auth = (t.governing_authority || "").toLowerCase();
-                        matchJurisdiction = auth.includes(jF.toLowerCase());
+                if (indicator) indicator.innerText = `Page ${currentPage} of ${totalPages}`;
+                if (prevBtn) prevBtn.disabled = currentPage <= 1;
+                if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+            }
+
+            function filterTickets() {
+                const q = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase().trim() : '';
+                const statusF = document.getElementById('statusFilter') ? document.getElementById('statusFilter').value : 'ALL';
+                const jF = document.getElementById('jurisdictionFilter') ? document.getElementById('jurisdictionFilter').value : 'ALL';
+
+                filteredTickets = ticketsData.filter(t => {
+                    const matchQ = (t.id && t.id.toLowerCase().includes(q)) || (t.category && t.category.toLowerCase().includes(q)) || (t.governing_authority && t.governing_authority.toLowerCase().includes(q));
+                    const matchStatus = statusF === 'ALL' || (t.status || 'reported') === statusF;
+
+                    let matchJurisdiction = true;
+                    if (jF !== 'ALL') {
+                        if (jF === 'EXTERNAL') {
+                            matchJurisdiction = (t.in_jurisdiction === 0 || t.in_jurisdiction === false);
+                        } else if (jF === 'BMC') {
+                            matchJurisdiction = (t.in_jurisdiction === 1 || t.in_jurisdiction === true || (t.governing_authority || "").toLowerCase().includes("bmc"));
+                        } else {
+                            const auth = (t.governing_authority || "").toLowerCase();
+                            matchJurisdiction = auth.includes(jF.toLowerCase());
+                        }
                     }
-                }
-                return matchQ && matchStatus && matchJurisdiction;
-            });
-
-            if (jF !== 'ALL' && cityCenterCoords[jF] && map) {
-                map.flyTo(cityCenterCoords[jF], 13, { animate: true });
-            }
-
-            currentPage = 1;
-            renderMetrics();
-            renderTableAndMap();
-        }
-
-        function renderMetrics() {
-            document.getElementById('mTotal').innerText = ticketsData.length;
-            document.getElementById('mHigh').innerText = ticketsData.filter(t => t.urgency_score >= 7.0).length;
-            document.getElementById('mDups').innerText = ticketsData.reduce((acc, t) => acc + (t.duplicate_count || 0), 0);
-            document.getElementById('mBlurred').innerText = ticketsData.reduce((acc, t) => acc + (t.faces_blurred || 0) + (t.plates_blurred || 0), 0);
-        }
-
-        function renderTableAndMap() {
-            markersGroup.clearLayers();
-            const tbody = document.getElementById('adminTableBody');
-            tbody.innerHTML = '';
-
-            if (filteredTickets.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">No matching civic tickets found.</td></tr>';
-                updatePaginationControls(0, 0, 0);
-                return;
-            }
-
-            // Render Radar Map Pins for ALL filtered tickets
-            filteredTickets.forEach(t => {
-                let pinColor = t.status === 'resolved' ? '#06b6d4' : (t.urgency_score >= 7.0 ? '#ef4444' : t.urgency_score >= 4.0 ? '#f59e0b' : '#10b981');
-                let categoryIcon = '<i class="fa-solid fa-trash-can"></i>';
-                if (t.is_drain_blocked) categoryIcon = '<i class="fa-solid fa-water"></i>';
-                else if (t.is_fire_hazard) categoryIcon = '<i class="fa-solid fa-fire-flame-curved"></i>';
-                else if (t.category === 'Plastic Waste') categoryIcon = '<i class="fa-solid fa-bottle-water"></i>';
-                else if (t.category === 'Construction Debris') categoryIcon = '<i class="fa-solid fa-trowel-bricks"></i>';
-                else if (t.category === 'E-Waste') categoryIcon = '<i class="fa-solid fa-plug"></i>';
-                else if (t.category === 'Hazardous') categoryIcon = '<i class="fa-solid fa-biohazard"></i>';
-
-                const customIcon = L.divIcon({
-                    className: '',
-                    html: `
-                        <div class="custom-radar-pin" style="color: ${pinColor};">
-                            ${t.urgency_score >= 6.0 && t.status !== 'resolved' ? '<div class="radar-wave"></div>' : ''}
-                            <div class="pin-center">
-                                <span>${categoryIcon}</span>
-                            </div>
-                            <div class="pin-score-chip">${t.urgency_score}</div>
-                        </div>
-                    `,
-                    iconSize: [36, 36],
-                    iconAnchor: [18, 18]
+                    return matchQ && matchStatus && matchJurisdiction;
                 });
 
-                const marker = L.marker([t.lat, t.lng], { icon: customIcon }).addTo(markersGroup);
+                if (jF !== 'ALL' && cityCenterCoords[jF] && map) {
+                    map.flyTo(cityCenterCoords[jF], 13, { animate: true });
+                }
 
-                const popupHtml = `
-                    <div style="padding:4px; font-family:'Plus Jakarta Sans',sans-serif;">
-                        <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:6px;">
-                            <strong style="font-family:'Outfit',sans-serif; color:var(--text-main); font-size:1.05rem;">${t.id}</strong>
-                            <span style="font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:6px; background:${pinColor}22; color:${pinColor}; border:1px solid ${pinColor}44;">${t.status || 'reported'}</span>
+                currentPage = 1;
+                renderMetrics();
+                renderTableAndMap();
+            }
+
+            function renderMetrics() {
+                document.getElementById('mTotal').innerText = ticketsData.length;
+                document.getElementById('mHigh').innerText = ticketsData.filter(t => t.urgency_score >= 7.0).length;
+                document.getElementById('mDups').innerText = ticketsData.reduce((acc, t) => acc + (t.duplicate_count || 0), 0);
+                document.getElementById('mBlurred').innerText = ticketsData.reduce((acc, t) => acc + (t.faces_blurred || 0) + (t.plates_blurred || 0), 0);
+            }
+
+            function renderTableAndMap() {
+                if (typeof markersGroup !== 'undefined' && markersGroup && typeof markersGroup.clearLayers === 'function') {
+                    markersGroup.clearLayers();
+                }
+
+                const tbody = document.getElementById('adminTableBody');
+                if (tbody) tbody.innerHTML = '';
+
+                if (filteredTickets.length === 0) {
+                    if (tbody) tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">No matching civic tickets found.</td></tr>';
+                    updatePaginationControls(0, 0, 0);
+                    return;
+                }
+
+                // Render Radar Map Pins for ALL filtered tickets
+                if (typeof L !== 'undefined' && typeof markersGroup !== 'undefined' && markersGroup) {
+                    filteredTickets.forEach(t => {
+                        let pinColor = t.status === 'resolved' ? '#06b6d4' : (t.urgency_score >= 7.0 ? '#ef4444' : t.urgency_score >= 4.0 ? '#f59e0b' : '#10b981');
+                        let categoryIcon = '<i class="fa-solid fa-trash-can"></i>';
+                        if (t.is_drain_blocked) categoryIcon = '<i class="fa-solid fa-water"></i>';
+                        else if (t.is_fire_hazard) categoryIcon = '<i class="fa-solid fa-fire-flame-curved"></i>';
+                        else if (t.category === 'Plastic Waste') categoryIcon = '<i class="fa-solid fa-bottle-water"></i>';
+                        else if (t.category === 'Construction Debris') categoryIcon = '<i class="fa-solid fa-trowel-bricks"></i>';
+                        else if (t.category === 'E-Waste') categoryIcon = '<i class="fa-solid fa-plug"></i>';
+                        else if (t.category === 'Hazardous') categoryIcon = '<i class="fa-solid fa-biohazard"></i>';
+
+                        const customIcon = L.divIcon({
+                            className: '',
+                            html: `
+                            <div class="custom-radar-pin" style="color: ${pinColor};">
+                                ${t.urgency_score >= 6.0 && t.status !== 'resolved' ? '<div class="radar-wave"></div>' : ''}
+                                <div class="pin-center">
+                                    <span>${categoryIcon}</span>
+                                </div>
+                                <div class="pin-score-chip">${t.urgency_score}</div>
+                            </div>
+                        `,
+                            iconSize: [36, 36],
+                            iconAnchor: [18, 18]
+                        });
+
+                        const marker = L.marker([t.lat, t.lng], { icon: customIcon }).addTo(markersGroup);
+
+                        const popupHtml = `
+                        <div style="padding:4px; font-family:'Plus Jakarta Sans',sans-serif;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:6px;">
+                                <strong style="font-family:'Outfit',sans-serif; color:var(--text-main); font-size:1.05rem;">${t.id}</strong>
+                                <span style="font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:6px; background:${pinColor}22; color:${pinColor}; border:1px solid ${pinColor}44;">${t.status || 'reported'}</span>
+                            </div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">Category: <strong style="color:var(--text-main);">${t.category}</strong></div>
+                            <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Urgency Score: <strong style="color:${pinColor}; font-size:0.9rem;">${t.urgency_score}/10</strong></div>
+                            <button onclick="inspect('${t.id}')" style="width:100%; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; padding:6px; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">Inspect Ticket</button>
                         </div>
-                        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">Category: <strong style="color:var(--text-main);">${t.category}</strong></div>
-                        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Urgency Score: <strong style="color:${pinColor}; font-size:0.9rem;">${t.urgency_score}/10</strong></div>
-                        <button onclick="inspect('${t.id}')" style="width:100%; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; padding:6px; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">Inspect Ticket</button>
-                    </div>
-                `;
+                    `;
 
-                marker.bindPopup(popupHtml);
-                marker.on('click', () => inspect(t.id));
-            });
+                        marker.bindPopup(popupHtml);
+                        marker.on('click', () => inspect(t.id));
+                    });
+                }
 
-            // Pagination Slicing for Table Display
-            const totalItems = filteredTickets.length;
-            const perPage = itemsPerPage === 'ALL' ? totalItems : itemsPerPage;
-            const totalPages = Math.ceil(totalItems / perPage) || 1;
-            if (currentPage > totalPages) currentPage = totalPages;
-            if (currentPage < 1) currentPage = 1;
+                // Pagination Slicing for Table Display
+                const totalItems = filteredTickets.length;
+                const perPage = itemsPerPage === 'ALL' ? totalItems : itemsPerPage;
+                const totalPages = Math.ceil(totalItems / perPage) || 1;
+                if (currentPage > totalPages) currentPage = totalPages;
+                if (currentPage < 1) currentPage = 1;
 
-            const startIndex = (currentPage - 1) * perPage;
-            const endIndex = Math.min(startIndex + perPage, totalItems);
-            const pageTickets = filteredTickets.slice(startIndex, endIndex);
+                const startIndex = (currentPage - 1) * perPage;
+                const endIndex = Math.min(startIndex + perPage, totalItems);
+                const pageTickets = filteredTickets.slice(startIndex, endIndex);
 
-            pageTickets.forEach(t => {
-                let pinColor = t.status === 'resolved' ? '#06b6d4' : (t.urgency_score >= 7.0 ? '#ef4444' : t.urgency_score >= 4.0 ? '#f59e0b' : '#10b981');
-                const isSelected = currentInspectId === t.id;
-                const statusBadgeBg = t.status === 'resolved' ? 'rgba(6, 182, 212, 0.2)' : t.status === 'in_progress' ? 'rgba(245, 158, 11, 0.2)' : t.status === 'forwarded' ? 'rgba(139, 92, 246, 0.25)' : 'rgba(255, 255, 255, 0.1)';
-                const statusBadgeColor = t.status === 'resolved' ? 'var(--accent-cyan)' : t.status === 'in_progress' ? 'var(--accent-amber)' : t.status === 'forwarded' ? '#a78bfa' : 'var(--text-muted)';
-                const externalBadge = (t.in_jurisdiction === 0 || t.in_jurisdiction === false) ? '<br><span style="font-size:0.68rem; color:#a78bfa; font-weight:700;"><i class="fa-solid fa-share-nodes"></i> External Zone</span>' : '';
+                pageTickets.forEach(t => {
+                    let pinColor = t.status === 'resolved' ? '#06b6d4' : (t.urgency_score >= 7.0 ? '#ef4444' : t.urgency_score >= 4.0 ? '#f59e0b' : '#10b981');
+                    const isSelected = currentInspectId === t.id;
+                    const statusBadgeBg = t.status === 'resolved' ? 'rgba(6, 182, 212, 0.2)' : t.status === 'in_progress' ? 'rgba(245, 158, 11, 0.2)' : t.status === 'forwarded' ? 'rgba(139, 92, 246, 0.25)' : 'rgba(255, 255, 255, 0.1)';
+                    const statusBadgeColor = t.status === 'resolved' ? 'var(--accent-cyan)' : t.status === 'in_progress' ? 'var(--accent-amber)' : t.status === 'forwarded' ? '#a78bfa' : 'var(--text-muted)';
+                    const externalBadge = (t.in_jurisdiction === 0 || t.in_jurisdiction === false) ? '<br><span style="font-size:0.68rem; color:#a78bfa; font-weight:700;"><i class="fa-solid fa-share-nodes"></i> External Zone</span>' : '';
 
-                tbody.innerHTML += `
+                    tbody.innerHTML += `
                     <tr class="${isSelected ? 'selected-row' : ''}" onclick="inspect('${t.id}')">
                         <td><b>${t.id}</b> <span style="font-size:0.68rem; padding:3px 8px; border-radius:6px; font-weight:800; background:${statusBadgeBg}; color:${statusBadgeColor};">${t.status || 'reported'}</span></td>
                         <td>${t.category || 'N/A'}${t.is_sensitive_area ? '<br><span style="font-size:0.68rem; color:var(--accent-amber); font-weight:700;"><i class="fa-solid fa-shield-halved"></i> Sensitive</span>' : ''}${externalBadge}</td>
@@ -865,388 +1086,437 @@ const cityCenterCoords = {
                         <td><button onclick="event.stopPropagation(); inspect('${t.id}');" style="background:linear-gradient(135deg, var(--accent-cyan), #0284c7); color:white; border:none; padding:5px 10px; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">Inspect</button></td>
                     </tr>
                 `;
-            });
-
-            updatePaginationControls(startIndex + 1, endIndex, totalItems);
-
-            if (filteredTickets.length > 0 && !currentInspectId) {
-                inspect(filteredTickets[0].id);
-            }
-            const isSmall = vol.includes("small") || vol.includes("<0.2");
-            const isLarge = vol.includes("large") || vol.includes(">1") || vol.includes(">3");
-
-            let emoji = "🚚";
-            let truckType = "Medium Waste Tipper";
-            let crew = "2 Sanitation Workers";
-            let tools = "Shovels & Gloves";
-
-            // 1. Small Volume (<0.2m³) -> Electric Cart / Tipper
-            if (isSmall && !cat.includes("construction") && !cat.includes("hazard")) {
-                emoji = "🛺";
-                truckType = "Electric Tipper Cart";
-                crew = "1 Sanitation Worker";
-                tools = "Hand Broom & Trash Bin";
-            }
-            // 2. Construction Debris / Heavy Rubble
-            else if (cat.includes("construction") || cat.includes("debris")) {
-                emoji = "🚜";
-                truckType = "Debris Tractor";
-                crew = "4 Heavy-Duty Workers";
-                tools = "Hydraulic Bucket & Loader";
-            }
-            // 3. Hazardous or E-Waste
-            else if (cat.includes("e-waste") || cat.includes("hazard")) {
-                emoji = "☣️";
-                truckType = "HazMat Sealed Tipper";
-                crew = "2 HazMat Specialists";
-                tools = "Insulated Gear & Tongs";
-            }
-            // 4. Large/High Volume Waste or Overflowing Bins -> Heavy Compactor
-            else if (isLarge || cat.includes("bin") || t.urgency_score >= 8.0) {
-                emoji = "🚛";
-                truckType = "Heavy Compactor Truck";
-                crew = "3 Crew Operators";
-                tools = "Vacuum Loader & Winch";
-            }
-            // 5. Plastic / Medium General Waste -> Plastic Recycling Van
-            else if (cat.includes("plastic")) {
-                emoji = "🚚";
-                truckType = "Plastic Recycling Van";
-                crew = "2 Sanitation Workers";
-                tools = "Sorting Bags & Gloves";
-            }
-            // 6. Organic / General Medium Waste
-            else {
-                emoji = "🚚";
-                truckType = "Medium Waste Tipper";
-                crew = "2 Sanitation Workers";
-                tools = "Shovels & Yard Brooms";
-            }
-
-            const truckEmojiEl = document.getElementById('inspectTruckEmoji');
-            if (truckEmojiEl) truckEmojiEl.innerText = emoji;
-            const truckTypeEl = document.getElementById('inspectTruckType');
-            if (truckTypeEl) truckTypeEl.innerText = truckType;
-            const crewCountEl = document.getElementById('inspectCrewCount');
-            if (crewCountEl) crewCountEl.innerText = crew;
-            const volumeEl = document.getElementById('inspectVolume');
-            if (volumeEl) volumeEl.innerText = t.volume_band || "Medium (0.2-1.0m³)";
-            const toolsEl = document.getElementById('inspectTools');
-            if (toolsEl) toolsEl.innerText = tools;
-
-            const pillFacesEl = document.getElementById('pillFaces');
-            if (pillFacesEl) pillFacesEl.innerHTML = `<i class="fa-solid fa-user-slash"></i> ${t.faces_blurred || 0} Faces`;
-            const pillPlatesEl = document.getElementById('pillPlates');
-            if (pillPlatesEl) pillPlatesEl.innerHTML = `<i class="fa-solid fa-car-burst"></i> ${t.plates_blurred || 0} Plates`;
-        }
-
-        async function inspect(id) {
-            currentInspectId = id;
-            const t = ticketsData.find(x => x.id === id);
-            if (!t) return;
-
-            // Highlight selected row in table
-            const tbody = document.getElementById('adminTableBody');
-            if (tbody) {
-                const rows = tbody.getElementsByTagName('tr');
-                for (let r of rows) {
-                    if (r.innerText.includes(id)) r.classList.add('selected-row');
-                    else r.classList.remove('selected-row');
-                }
-            }
-
-            // Smooth pan map to selected ticket location
-            if (map && t.lat && t.lng) {
-                map.setView([t.lat, t.lng], 14, { animate: true });
-            }
-
-            document.getElementById('inspectId').innerText = `Inspector: ${t.id} (${t.status || 'reported'})`;
-            document.getElementById('inspectVoice').innerText = t.note || "No regional voice note spoken.";
-            document.getElementById('inspectTransEn').innerText = t.note_summary_en || t.note || "English translation ready.";
-            document.getElementById('inspectDispatch').innerText = t.description || "Inspect site for general clearance.";
-
-            updateDispatchVisuals(t);
-
-            try {
-                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/report/${id}/image`);
-                const result = await res.json();
-                if (result.status === 'success' && result.image_b64) {
-                    document.getElementById('inspectImg').src = `data:image/jpeg;base64,${result.image_b64}`;
-                }
-            } catch(e) {
-                console.error("Failed image payload fetch:", e);
-            }
-        }
-
-        function openVerificationModal() {
-            if (!currentInspectId) return;
-            const modal = document.getElementById('verificationModal');
-            if (modal) modal.style.display = 'flex';
-        }
-
-        function closeVerificationModal() {
-            const modal = document.getElementById('verificationModal');
-            if (modal) modal.style.display = 'none';
-        }
-
-        async function confirmResolveWithProof() {
-            if (!currentInspectId) return;
-            const fileInput = document.getElementById('verifyImageInput');
-            const formData = new FormData();
-            formData.append('status', 'resolved');
-            if (fileInput && fileInput.files && fileInput.files[0]) {
-                formData.append('verification_image', fileInput.files[0]);
-            }
-
-            try {
-                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/report/${currentInspectId}/status`, {
-                    method: 'PATCH',
-                    body: formData
                 });
-                const result = await res.json();
-                if (result.status === 'success') {
-                    closeVerificationModal();
-                    await loadAdminData();
-                    inspect(currentInspectId);
+
+                updatePaginationControls(startIndex + 1, endIndex, totalItems);
+
+                if (filteredTickets.length > 0 && !currentInspectId) {
+                    inspect(filteredTickets[0].id);
                 }
-            } catch(e) {
-                console.error("Failed to update status with proof:", e);
-                alert("Failed to save cleanup verification photo.");
             }
-        }
 
-        async function updateStatus(newStatus) {
-            if (!currentInspectId) return;
-            if (newStatus === 'resolved') {
-                openVerificationModal();
-                return;
-            }
-            try {
-                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/report/${currentInspectId}/status`, {
-                    method: 'PATCH',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ status: newStatus })
-                });
-                const result = await res.json();
-                if (result.status === 'success') {
-                    await loadAdminData();
-                    inspect(currentInspectId);
+            function updateDispatchVisuals(t) {
+                if (!t) return;
+                const cat = (t.category || "").toLowerCase();
+                const vol = (t.volume_band || "").toLowerCase();
+                const isSmall = vol.includes("small") || vol.includes("<0.2");
+                const isLarge = vol.includes("large") || vol.includes(">1") || vol.includes(">3");
+
+                let emoji = "🚚";
+                let truckType = "Medium Waste Tipper";
+                let crew = "2 Sanitation Workers";
+                let tools = "Shovels & Gloves";
+
+                // 1. Small Volume (<0.2m³) -> Electric Cart / Tipper
+                if (isSmall && !cat.includes("construction") && !cat.includes("hazard")) {
+                    emoji = "🛺";
+                    truckType = "Electric Tipper Cart";
+                    crew = "1 Sanitation Worker";
+                    tools = "Hand Broom & Trash Bin";
                 }
-            } catch(e) {
-                console.error("Failed to update status:", e);
-            }
-        }
-
-
-        // --- Text-to-Speech Speaker ---
-        function speakCurrentNote() {
-            if (!('speechSynthesis' in window)) {
-                alert("Text-to-Speech is not supported in this browser.");
-                return;
-            }
-            window.speechSynthesis.cancel();
-            const transEn = document.getElementById('inspectTransEn') ? document.getElementById('inspectTransEn').innerText : "";
-            const dispatch = document.getElementById('inspectDispatch') ? document.getElementById('inspectDispatch').innerText : "";
-            const textToSpeak = transEn + ". Recommendation: " + dispatch;
-            
-            if (!textToSpeak || textToSpeak.includes("Select a ticket")) {
-                alert("Select a ticket first to listen to its voice note.");
-                return;
-            }
-            
-            const utterance = new SpeechSynthesisUtterance(textToSpeak);
-            utterance.rate = 0.95;
-            window.speechSynthesis.speak(utterance);
-        }
-
-        // --- CSV Export ---
-        function exportCsv() {
-            if (!ticketsData || ticketsData.length === 0) {
-                alert("No civic tickets available to export.");
-                return;
-            }
-            let csv = "Ticket ID,Category,Volume,Urgency Score,Duplicates,Faces Blurred,Plates Blurred,Status,Lat,Lng,Created At,Description,Note Summary\n";
-            ticketsData.forEach(t => {
-                const desc = (t.description || "").replace(/"/g, '""');
-                const noteSum = (t.note_summary_en || t.note || "").replace(/"/g, '""');
-                csv += `"${t.id}","${t.category}","${t.volume_band}",${t.urgency_score},${t.duplicate_count || 0},${t.faces_blurred || 0},${t.plates_blurred || 0},"${t.status || 'reported'}",${t.lat},${t.lng},"${t.created_at}","${desc}","${noteSum}"\n`;
-            });
-            const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-            const url = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.setAttribute("href", url);
-            link.setAttribute("download", `SwachhLens_Civic_Reports_${new Date().toISOString().slice(0,10)}.csv`);
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        }
-
-        // --- Garbage Truck Polyline Dispatch Routing ---
-        function drawTruckRoute() {
-            if (routePolyline) {
-                map.removeLayer(routePolyline);
-            }
-            const activeTickets = ticketsData
-                .filter(t => (t.status || 'reported') !== 'resolved')
-                .sort((a, b) => b.urgency_score - a.urgency_score);
-
-            if (activeTickets.length === 0) {
-                alert("No active unresolved tickets available for truck routing.");
-                return;
-            }
-
-            const waypoints = activeTickets.map(t => [t.lat, t.lng]);
-            routePolyline = L.polyline(waypoints, {
-                color: '#06b6d4',
-                weight: 4,
-                dashArray: '8, 8',
-                opacity: 0.9
-            }).addTo(map);
-
-            map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
-            alert(`Optimized dispatch route calculated connecting ${activeTickets.length} active collection points on the map.`);
-        }
-
-        // --- AI Executive Summary ---
-        async function fetchSummary() {
-            const sumCard = document.getElementById('summaryCard');
-            const sumText = document.getElementById('summaryText');
-            const sumScore = document.getElementById('summaryScore');
-            sumCard.style.display = 'block';
-            sumText.innerText = "Analyzing active complaint database with AI vision & spatial telemetry...";
-
-            try {
-                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/reports/summary`, { method: 'POST' });
-                const result = await res.json();
-                if (result.status === 'success') {
-                    sumText.innerText = result.summary;
-                    if (sumScore) sumScore.innerText = `${result.cleanliness_score || 85}/100`;
-                    sumCard.scrollIntoView({ behavior: 'smooth' });
+                // 2. Construction Debris / Heavy Rubble
+                else if (cat.includes("construction") || cat.includes("debris")) {
+                    emoji = "🚜";
+                    truckType = "Debris Tractor";
+                    crew = "4 Heavy-Duty Workers";
+                    tools = "Hydraulic Bucket & Loader";
                 }
-            } catch(e) {
-                console.error("Summary error:", e);
-                sumText.innerText = "Failed to generate AI executive summary. Ensure backend is active.";
+                // 3. Hazardous or E-Waste
+                else if (cat.includes("e-waste") || cat.includes("hazard")) {
+                    emoji = "☣️";
+                    truckType = "HazMat Sealed Tipper";
+                    crew = "2 HazMat Specialists";
+                    tools = "Insulated Gear & Tongs";
+                }
+                // 4. Large/High Volume Waste or Overflowing Bins -> Heavy Compactor
+                else if (isLarge || cat.includes("bin") || (t.urgency_score || 0) >= 8.0) {
+                    emoji = "🚛";
+                    truckType = "Heavy Compactor Truck";
+                    crew = "3 Crew Operators";
+                    tools = "Vacuum Loader & Winch";
+                }
+                // 5. Plastic / Medium General Waste -> Plastic Recycling Van
+                else if (cat.includes("plastic")) {
+                    emoji = "🚚";
+                    truckType = "Plastic Recycling Van";
+                    crew = "2 Sanitation Workers";
+                    tools = "Sorting Bags & Gloves";
+                }
+                // 6. Organic / General Medium Waste
+                else {
+                    emoji = "🚚";
+                    truckType = "Medium Waste Tipper";
+                    crew = "2 Sanitation Workers";
+                    tools = "Shovels & Yard Brooms";
+                }
+
+                const truckEmojiEl = document.getElementById('inspectTruckEmoji');
+                if (truckEmojiEl) truckEmojiEl.innerText = emoji;
+                const truckTypeEl = document.getElementById('inspectTruckType');
+                if (truckTypeEl) truckTypeEl.innerText = truckType;
+                const crewCountEl = document.getElementById('inspectCrewCount');
+                if (crewCountEl) crewCountEl.innerText = crew;
+                const volumeEl = document.getElementById('inspectVolume');
+                if (volumeEl) volumeEl.innerText = t.volume_band || "Medium (0.2-1.0m³)";
+                const toolsEl = document.getElementById('inspectTools');
+                if (toolsEl) toolsEl.innerText = tools;
+
+                const pillFacesEl = document.getElementById('pillFaces');
+                if (pillFacesEl) pillFacesEl.innerHTML = `<i class="fa-solid fa-user-slash"></i> ${t.faces_blurred || 0} Faces`;
+                const pillPlatesEl = document.getElementById('pillPlates');
+                if (pillPlatesEl) pillPlatesEl.innerHTML = `<i class="fa-solid fa-car-burst"></i> ${t.plates_blurred || 0} Plates`;
             }
-        }
 
-        // --- MISTRAL AI BOT ADVISOR FUNCTIONS ---
-        function openAiBotModal() {
-            document.getElementById('aiBotModal').style.display = 'flex';
-            fetchCityAnalysis();
-        }
+            async function inspect(id) {
+                currentInspectId = id;
+                const t = ticketsData.find(x => x.id === id);
+                if (!t) return;
 
-        function closeAiBotModal() {
-            document.getElementById('aiBotModal').style.display = 'none';
-        }
-
-        async function fetchCityAnalysis(query = "") {
-            document.getElementById('botWorkload').innerText = "Analyzing remaining municipal workload & clearance time...";
-            document.getElementById('botDensity').innerText = "Analyzing spatial waste concentration & density clusters...";
-            document.getElementById('botLowDensity').innerText = "Diagnosing low-complaint zones & root causes...";
-
-            try {
-                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/ai/analyze-city`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ query })
-                });
-                const result = await res.json();
-                if (result.status === 'success') {
-                    document.getElementById('botWorkload').innerText = result.workload_analysis;
-                    document.getElementById('botDensity').innerText = result.density_analysis;
-                    document.getElementById('botLowDensity').innerText = result.low_density_root_cause;
-
-                    if (query && result.bot_response) {
-                        const box = document.getElementById('botResponseBox');
-                        document.getElementById('botResponseText').innerText = result.bot_response;
-                        box.style.display = 'block';
+                // Highlight selected row in table
+                const tbody = document.getElementById('adminTableBody');
+                if (tbody) {
+                    const rows = tbody.getElementsByTagName('tr');
+                    for (let r of rows) {
+                        if (r.innerText.includes(id)) r.classList.add('selected-row');
+                        else r.classList.remove('selected-row');
                     }
                 }
-            } catch(e) {
-                console.error("AI Bot error:", e);
-                document.getElementById('botWorkload').innerText = "Failed to load telemetry analysis from backend server.";
-            }
-        }
 
-        async function askAiBot() {
-            const input = document.getElementById('botUserQuery');
-            const q = input.value.trim();
-            if (!q) return;
-            await fetchCityAnalysis(q);
-            input.value = '';
-        }
-
-        function formatMarkdownToHtml(str) {
-            if (!str) return "";
-            return str
-                .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-                .replace(/\*(.*?)\*/g, '<em>$1</em>')
-                .replace(/\n/g, '<br>');
-        }
-
-        // --- FLOATING CHATBOT WIDGET FUNCTIONS ---
-        function toggleChatWindow() {
-            const win = document.getElementById('floatingChatWindow');
-            if (!win) return;
-            const isHidden = win.style.display === 'none' || !win.style.display;
-            win.style.display = isHidden ? 'flex' : 'none';
-        }
-
-        async function sendChatQuery(queryText) {
-            const input = document.getElementById('chatInputText');
-            const q = queryText || (input ? input.value.trim() : '');
-            if (!q) return;
-
-            if (input) input.value = '';
-
-            const thread = document.getElementById('chatMsgThread');
-            if (!thread) return;
-
-            // User speech bubble
-            const userBubble = document.createElement('div');
-            userBubble.className = 'chat-bubble-user';
-            userBubble.innerText = q;
-            thread.appendChild(userBubble);
-            thread.scrollTop = thread.scrollHeight;
-
-            // Bot loading bubble
-            const botLoading = document.createElement('div');
-            botLoading.className = 'chat-bubble-bot';
-            botLoading.innerText = 'Analyzing city telemetry with Mistral AI...';
-            thread.appendChild(botLoading);
-            thread.scrollTop = thread.scrollHeight;
-
-            try {
-                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/ai/analyze-city`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ query: q })
-                });
-                const result = await res.json();
-                if (result.status === 'success') {
-                    const rawResp = result.bot_response || result.workload_analysis;
-                    botLoading.innerHTML = formatMarkdownToHtml(rawResp);
-                    thread.scrollTop = thread.scrollHeight;
+                // Smooth pan map to selected ticket location
+                if (map && t.lat && t.lng) {
+                    map.setView([t.lat, t.lng], 14, { animate: true });
                 }
-            } catch(e) {
-                console.error("Chatbot error:", e);
-                botLoading.innerText = "Failed to connect to AI server. Ensure backend is active.";
+
+                const cleanText = (str) => (str || "").replace(/^["'\s{}]+|["'\s{}]+$/g, '').trim();
+
+                document.getElementById('inspectId').innerText = `Inspector: ${t.id} (${t.status || 'reported'})`;
+                document.getElementById('inspectVoice').innerText = cleanText(t.note) || "No regional voice note spoken.";
+                document.getElementById('inspectTransEn').innerText = cleanText(t.note_summary_en || t.note) || "English translation ready.";
+                document.getElementById('inspectDispatch').innerText = cleanText(t.description) || "Inspect site for general clearance.";
+
+                updateDispatchVisuals(t);
+
+                await loadTicketImage(t);
             }
-        }
+
+            async function loadTicketImage(t) {
+                const imgEl = document.getElementById('inspectImg');
+                if (!imgEl || !t || !t.id) return;
+
+                const setImgSrc = (b64Str) => {
+                    if (!b64Str) return false;
+                    let clean = b64Str.replace(/\s+/g, '');
+                    if (!clean) return false;
+                    let src = clean.startsWith('data:') ? clean : `data:image/jpeg;base64,${clean}`;
+                    imgEl.src = src;
+                    return true;
+                };
+
+                if (t.image_b64 && setImgSrc(t.image_b64)) {
+                    return;
+                }
+
+                const endpointsToTry = [
+                    `${CONFIG.API_BASE_URL}/api/v1/report/${t.id}/image`,
+                    `/api/v1/report/${t.id}/image`,
+                    `http://127.0.0.1:5000/api/v1/report/${t.id}/image`
+                ];
+
+                for (const ep of endpointsToTry) {
+                    try {
+                        const res = await fetch(ep);
+                        if (res && res.ok) {
+                            const data = await res.json();
+                            if (data && data.status === 'success' && data.image_b64) {
+                                if (setImgSrc(data.image_b64)) {
+                                    t.image_b64 = data.image_b64;
+                                    return;
+                                }
+                            }
+                        }
+                    } catch(e) {
+                        console.warn(`Failed image fetch for ${ep}:`, e);
+                    }
+                }
+            }
+
+            function openVerificationModal() {
+                if (!currentInspectId) return;
+                const modal = document.getElementById('verificationModal');
+                if (modal) modal.style.display = 'flex';
+            }
+
+            function closeVerificationModal() {
+                const modal = document.getElementById('verificationModal');
+                if (modal) modal.style.display = 'none';
+            }
+
+            async function confirmResolveWithProof() {
+                if (!currentInspectId) return;
+                const fileInput = document.getElementById('verifyImageInput');
+                const formData = new FormData();
+                formData.append('status', 'resolved');
+                if (fileInput && fileInput.files && fileInput.files[0]) {
+                    formData.append('verification_image', fileInput.files[0]);
+                }
+
+                try {
+                    const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/report/${currentInspectId}/status`, {
+                        method: 'PATCH',
+                        body: formData
+                    });
+                    const result = await res.json();
+                    if (result.status === 'success') {
+                        closeVerificationModal();
+                        await loadAdminData();
+                        inspect(currentInspectId);
+                    }
+                } catch (e) {
+                    console.error("Failed to update status with proof:", e);
+                    alert("Failed to save cleanup verification photo.");
+                }
+            }
+
+            async function updateStatus(newStatus) {
+                if (!currentInspectId) return;
+                if (newStatus === 'resolved') {
+                    openVerificationModal();
+                    return;
+                }
+                try {
+                    const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/report/${currentInspectId}/status`, {
+                        method: 'PATCH',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ status: newStatus })
+                    });
+                    const result = await res.json();
+                    if (result.status === 'success') {
+                        await loadAdminData();
+                        inspect(currentInspectId);
+                    }
+                } catch (e) {
+                    console.error("Failed to update status:", e);
+                }
+            }
+
+
+            // --- Text-to-Speech Speaker ---
+            function speakCurrentNote() {
+                if (!('speechSynthesis' in window)) {
+                    alert("Text-to-Speech is not supported in this browser.");
+                    return;
+                }
+                window.speechSynthesis.cancel();
+                const transEn = document.getElementById('inspectTransEn') ? document.getElementById('inspectTransEn').innerText : "";
+                const dispatch = document.getElementById('inspectDispatch') ? document.getElementById('inspectDispatch').innerText : "";
+                const textToSpeak = transEn + ". Recommendation: " + dispatch;
+
+                if (!textToSpeak || textToSpeak.includes("Select a ticket")) {
+                    alert("Select a ticket first to listen to its voice note.");
+                    return;
+                }
+
+                const utterance = new SpeechSynthesisUtterance(textToSpeak);
+                utterance.rate = 0.95;
+                window.speechSynthesis.speak(utterance);
+            }
+
+            // --- CSV Export ---
+            function exportCsv() {
+                if (!ticketsData || ticketsData.length === 0) {
+                    alert("No civic tickets available to export.");
+                    return;
+                }
+                let csv = "Ticket ID,Category,Volume,Urgency Score,Duplicates,Faces Blurred,Plates Blurred,Status,Lat,Lng,Created At,Description,Note Summary\n";
+                ticketsData.forEach(t => {
+                    const desc = (t.description || "").replace(/"/g, '""');
+                    const noteSum = (t.note_summary_en || t.note || "").replace(/"/g, '""');
+                    csv += `"${t.id}","${t.category}","${t.volume_band}",${t.urgency_score},${t.duplicate_count || 0},${t.faces_blurred || 0},${t.plates_blurred || 0},"${t.status || 'reported'}",${t.lat},${t.lng},"${t.created_at}","${desc}","${noteSum}"\n`;
+                });
+                const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.setAttribute("href", url);
+                link.setAttribute("download", `SwachhLens_Civic_Reports_${new Date().toISOString().slice(0, 10)}.csv`);
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+
+            // --- Garbage Truck Polyline Dispatch Routing ---
+            function drawTruckRoute() {
+                if (routePolyline) {
+                    map.removeLayer(routePolyline);
+                }
+                const activeTickets = ticketsData
+                    .filter(t => (t.status || 'reported') !== 'resolved')
+                    .sort((a, b) => b.urgency_score - a.urgency_score);
+
+                if (activeTickets.length === 0) {
+                    alert("No active unresolved tickets available for truck routing.");
+                    return;
+                }
+
+                const waypoints = activeTickets.map(t => [t.lat, t.lng]);
+                routePolyline = L.polyline(waypoints, {
+                    color: '#06b6d4',
+                    weight: 4,
+                    dashArray: '8, 8',
+                    opacity: 0.9
+                }).addTo(map);
+
+                map.fitBounds(routePolyline.getBounds(), { padding: [40, 40] });
+                alert(`Optimized dispatch route calculated connecting ${activeTickets.length} active collection points on the map.`);
+            }
+
+            // --- AI Executive Summary ---
+            async function fetchSummary() {
+                const sumCard = document.getElementById('summaryCard');
+                const sumText = document.getElementById('summaryText');
+                const sumScore = document.getElementById('summaryScore');
+                sumCard.style.display = 'block';
+                sumText.innerText = "Analyzing active complaint database with AI vision & spatial telemetry...";
+
+                try {
+                    const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/reports/summary`, { method: 'POST' });
+                    const result = await res.json();
+                    if (result.status === 'success') {
+                        sumText.innerText = result.summary;
+                        if (sumScore) sumScore.innerText = `${result.cleanliness_score || 85}/100`;
+                        sumCard.scrollIntoView({ behavior: 'smooth' });
+                    }
+                } catch (e) {
+                    console.error("Summary error:", e);
+                    sumText.innerText = "Failed to generate AI executive summary. Ensure backend is active.";
+                }
+            }
+
+            // --- MISTRAL AI BOT ADVISOR FUNCTIONS ---
+            function openAiBotModal() {
+                document.getElementById('aiBotModal').style.display = 'flex';
+                fetchCityAnalysis();
+            }
+
+            function closeAiBotModal() {
+                document.getElementById('aiBotModal').style.display = 'none';
+            }
+
+            async function fetchCityAnalysis(query = "") {
+                document.getElementById('botWorkload').innerText = "Analyzing remaining municipal workload & clearance time...";
+                document.getElementById('botDensity').innerText = "Analyzing spatial waste concentration & density clusters...";
+                document.getElementById('botLowDensity').innerText = "Diagnosing low-complaint zones & root causes...";
+
+                try {
+                    const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/ai/analyze-city`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query })
+                    });
+                    const result = await res.json();
+                    if (result.status === 'success') {
+                        document.getElementById('botWorkload').innerText = result.workload_analysis;
+                        document.getElementById('botDensity').innerText = result.density_analysis;
+                        document.getElementById('botLowDensity').innerText = result.low_density_root_cause;
+
+                        if (query && result.bot_response) {
+                            const box = document.getElementById('botResponseBox');
+                            document.getElementById('botResponseText').innerText = result.bot_response;
+                            box.style.display = 'block';
+                        }
+                    }
+                } catch (e) {
+                    console.error("AI Bot error:", e);
+                    document.getElementById('botWorkload').innerText = "Failed to load telemetry analysis from backend server.";
+                }
+            }
+
+            async function askAiBot() {
+                const input = document.getElementById('botUserQuery');
+                const q = input.value.trim();
+                if (!q) return;
+                await fetchCityAnalysis(q);
+                input.value = '';
+            }
+
+            function formatMarkdownToHtml(str) {
+                if (!str) return "";
+                return str
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                    .replace(/\*(.*?)\*/g, '<em>$1</em>')
+                    .replace(/\n/g, '<br>');
+            }
+
+            // --- FLOATING CHATBOT WIDGET FUNCTIONS ---
+            function toggleChatWindow() {
+                const win = document.getElementById('floatingChatWindow');
+                if (!win) return;
+                const isHidden = win.style.display === 'none' || !win.style.display;
+                win.style.display = isHidden ? 'flex' : 'none';
+            }
+
+            async function sendChatQuery(queryText) {
+                const input = document.getElementById('chatInputText');
+                const q = queryText || (input ? input.value.trim() : '');
+                if (!q) return;
+
+                if (input) input.value = '';
+
+                const thread = document.getElementById('chatMsgThread');
+                if (!thread) return;
+
+                // User speech bubble
+                const userBubble = document.createElement('div');
+                userBubble.className = 'chat-bubble-user';
+                userBubble.innerText = q;
+                thread.appendChild(userBubble);
+                thread.scrollTop = thread.scrollHeight;
+
+                // Bot loading bubble
+                const botLoading = document.createElement('div');
+                botLoading.className = 'chat-bubble-bot';
+                botLoading.innerText = 'Analyzing city telemetry with Mistral AI...';
+                thread.appendChild(botLoading);
+                thread.scrollTop = thread.scrollHeight;
+
+                try {
+                    const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/ai/analyze-city`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ query: q })
+                    });
+                    const result = await res.json();
+                    if (result.status === 'success') {
+                        const rawResp = result.bot_response || result.workload_analysis;
+                        botLoading.innerHTML = formatMarkdownToHtml(rawResp);
+                        thread.scrollTop = thread.scrollHeight;
+                    }
+                } catch (e) {
+                    console.error("Chatbot error:", e);
+                    botLoading.innerText = "Failed to connect to AI server. Ensure backend is active.";
+                }
+            }
     </script>
 
     <!-- CLEANUP VERIFICATION MODAL -->
-    <div id="verificationModal" style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
+    <div id="verificationModal"
+        style="display:none; position:fixed; top:0; left:0; width:100%; height:100%; background:rgba(0,0,0,0.85); z-index:99999; align-items:center; justify-content:center;">
         <div class="card-admin" style="max-width:480px; width:90%; text-align:center; padding:28px;">
-            <div style="width:60px; height:60px; border-radius:50%; background:rgba(16, 185, 129, 0.15); display:flex; align-items:center; justify-content:center; margin:0 auto 16px auto;">
+            <div
+                style="width:60px; height:60px; border-radius:50%; background:rgba(16, 185, 129, 0.15); display:flex; align-items:center; justify-content:center; margin:0 auto 16px auto;">
                 <i class="fa-solid fa-camera-retro" style="font-size:1.8rem; color:var(--primary);"></i>
             </div>
-            <h3 style="font-family:'Outfit',sans-serif; font-weight:800; color:white; margin-bottom:6px;">Upload Cleanup Verification</h3>
-            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Attach site photo to verify complete waste clearance & close ticket.</p>
-            <input type="file" id="verifyImageInput" accept="image/*" style="margin-bottom:20px; color:white; width:100%; background:rgba(255,255,255,0.05); padding:10px; border-radius:12px; border:1px solid var(--glass-border);">
+            <h3 style="font-family:'Outfit',sans-serif; font-weight:800; color:white; margin-bottom:6px;">Upload Cleanup
+                Verification</h3>
+            <p style="font-size:0.85rem; color:var(--text-muted); margin-bottom:20px;">Attach site photo to verify
+                complete waste clearance & close ticket.</p>
+            <input type="file" id="verifyImageInput" accept="image/*"
+                style="margin-bottom:20px; color:white; width:100%; background:rgba(255,255,255,0.05); padding:10px; border-radius:12px; border:1px solid var(--glass-border);">
             <div style="display:flex; gap:12px; justify-content:center;">
-                <button type="button" onclick="closeVerificationModal()" class="action-btn-pill" style="padding:10px 20px;">Cancel</button>
-                <button type="button" onclick="confirmResolveWithProof()" class="action-btn-pill" style="background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; padding:10px 20px; border:none;">Submit & Resolve Ticket</button>
+                <button type="button" onclick="closeVerificationModal()" class="action-btn-pill"
+                    style="padding:10px 20px;">Cancel</button>
+                <button type="button" onclick="confirmResolveWithProof()" class="action-btn-pill"
+                    style="background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; padding:10px 20px; border:none;">Submit
+                    & Resolve Ticket</button>
             </div>
         </div>
     </div>
@@ -1254,39 +1524,51 @@ const cityCenterCoords = {
     <!-- MUNICIPALITY CONFIGURATION MODAL -->
     <div id="cityModal" class="modal-backdrop">
         <div class="modal-content" style="max-width:500px;">
-            <button onclick="closeCityModal()" style="position:absolute; top:20px; right:20px; border:none; background:rgba(255,255,255,0.06); color:var(--text-muted); width:32px; height:32px; border-radius:8px; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-xmark"></i></button>
-            
+            <button onclick="closeCityModal()"
+                style="position:absolute; top:20px; right:20px; border:none; background:rgba(255,255,255,0.06); color:var(--text-muted); width:32px; height:32px; border-radius:8px; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i
+                    class="fa-solid fa-xmark"></i></button>
+
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
-                <div style="width:40px; height:40px; border-radius:10px; background:rgba(16, 185, 129, 0.15); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
+                <div
+                    style="width:40px; height:40px; border-radius:10px; background:rgba(16, 185, 129, 0.15); color:var(--primary); display:flex; align-items:center; justify-content:center; font-size:1.2rem;">
                     <i class="fa-solid fa-city"></i>
                 </div>
                 <div>
-                    <h3 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.2rem; color:white;">Select City Jurisdiction</h3>
-                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Configure Active Geofence & Boundary Limits</span>
+                    <h3 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.2rem; color:white;">Select
+                        City Jurisdiction</h3>
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Configure Active Geofence
+                        & Boundary Limits</span>
                 </div>
             </div>
 
             <div style="display:flex; flex-direction:column; gap:10px; margin-bottom:20px;">
-                <button onclick="selectCityPreset('BMC')" class="action-btn-pill" style="padding:12px 16px; width:100%; justify-content:space-between; text-align:left;">
+                <button onclick="selectCityPreset('BMC')" class="action-btn-pill"
+                    style="padding:12px 16px; width:100%; justify-content:space-between; text-align:left;">
                     <span>🏛️ <strong>Bhubaneswar (BMC)</strong></span>
                     <span style="font-size:0.72rem; color:var(--primary);">Smart City Capital</span>
                 </button>
-                <button onclick="selectCityPreset('CMC')" class="action-btn-pill" style="padding:12px 16px; width:100%; justify-content:space-between; text-align:left;">
+                <button onclick="selectCityPreset('CMC')" class="action-btn-pill"
+                    style="padding:12px 16px; width:100%; justify-content:space-between; text-align:left;">
                     <span>🏙️ <strong>Cuttack (CMC)</strong></span>
                     <span style="font-size:0.72rem; color:var(--accent-cyan);">Millennium City Ward</span>
                 </button>
-                <button onclick="selectCityPreset('PURI')" class="action-btn-pill" style="padding:12px 16px; width:100%; justify-content:space-between; text-align:left;">
+                <button onclick="selectCityPreset('PURI')" class="action-btn-pill"
+                    style="padding:12px 16px; width:100%; justify-content:space-between; text-align:left;">
                     <span>🏢 <strong>Puri Municipality</strong></span>
                     <span style="font-size:0.72rem; color:var(--accent-amber);">Coastal Tourist Zone</span>
                 </button>
-                <button onclick="selectCityPreset('RMC')" class="action-btn-pill" style="padding:12px 16px; width:100%; justify-content:space-between; text-align:left;">
+                <button onclick="selectCityPreset('RMC')" class="action-btn-pill"
+                    style="padding:12px 16px; width:100%; justify-content:space-between; text-align:left;">
                     <span>🌆 <strong>Rourkela (RMC)</strong></span>
                     <span style="font-size:0.72rem; color:#a855f7;">Steel City Region</span>
                 </button>
             </div>
 
-            <div style="background:rgba(8, 12, 10, 0.6); border:1px solid var(--glass-border); padding:14px; border-radius:12px;">
-                <span style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; display:block; margin-bottom:6px;">Active Boundary Config:</span>
+            <div
+                style="background:rgba(8, 12, 10, 0.6); border:1px solid var(--glass-border); padding:14px; border-radius:12px;">
+                <span
+                    style="font-size:0.72rem; font-weight:700; color:var(--text-muted); text-transform:uppercase; display:block; margin-bottom:6px;">Active
+                    Boundary Config:</span>
                 <div id="activeCityDetails" style="font-size:0.8rem; color:var(--text-main); line-height:1.5;">
                     Loading active boundary details...
                 </div>
@@ -1296,61 +1578,66 @@ const cityCenterCoords = {
 
     <!-- MOBILE FLOATING BOTTOM DOCK NAVBAR -->
     <div class="mobile-bottom-dock" id="mobileBottomNav">
-        <button onclick="scrollToSection('mapCardSection')" class="dock-btn"><i class="fa-solid fa-map-location-dot"></i><span>Map</span></button>
-        <button onclick="scrollToSection('queueCardSection')" class="dock-btn"><i class="fa-solid fa-list-check"></i><span>Queue</span></button>
-        <button onclick="scrollToSection('inspectCardSection')" class="dock-btn"><i class="fa-solid fa-magnifying-glass"></i><span>Inspector</span></button>
-        <button onclick="toggleChatWindow()" class="dock-btn"><i class="fa-solid fa-robot"></i><span>AI Chat</span></button>
+        <button onclick="scrollToSection('mapCardSection')" class="dock-btn"><i
+                class="fa-solid fa-map-location-dot"></i><span>Map</span></button>
+        <button onclick="scrollToSection('queueCardSection')" class="dock-btn"><i
+                class="fa-solid fa-list-check"></i><span>Queue</span></button>
+        <button onclick="scrollToSection('inspectCardSection')" class="dock-btn"><i
+                class="fa-solid fa-magnifying-glass"></i><span>Inspector</span></button>
+        <button onclick="toggleChatWindow()" class="dock-btn"><i class="fa-solid fa-robot"></i><span>AI
+                Chat</span></button>
     </div>
 
     <script src="assets/config.js"></script>
     <script src="js/i18n.js"></script>
     <script>
-        function openCityModal() {
-            fetchActiveCityConfig();
-            document.getElementById('cityModal').style.display = 'flex';
-        }
+            function openCityModal() {
+                fetchActiveCityConfig();
+                document.getElementById('cityModal').style.display = 'flex';
+            }
 
-        function closeCityModal() {
-            document.getElementById('cityModal').style.display = 'none';
-        }
+            function closeCityModal() {
+                document.getElementById('cityModal').style.display = 'none';
+            }
 
-        async function fetchActiveCityConfig() {
-            try {
-                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/config/municipality`);
-                const data = await res.json();
-                if (data.status === 'success') {
-                    const cfg = data.config;
-                    document.getElementById('activeCityDetails').innerHTML = `
+            async function fetchActiveCityConfig() {
+                try {
+                    const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/config/municipality`);
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        const cfg = data.config;
+                        document.getElementById('activeCityDetails').innerHTML = `
                         <strong>${cfg.municipality_name}</strong><br>
                         Center GPS: ${cfg.center_lat || 20.2961}, ${cfg.center_lng || 85.8245}<br>
                         Lat Bounds: ${cfg.min_lat} → ${cfg.max_lat}<br>
                         Lng Bounds: ${cfg.min_lng} → ${cfg.max_lng}
                     `;
-                }
-            } catch(e) { console.error("Error fetching city config:", e); }
-        }
-
-        async function selectCityPreset(code) {
-            try {
-                const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/config/municipality`, {
-                    method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({ city_code: code })
-                });
-                const data = await res.json();
-                if (data.status === 'success') {
-                    closeCityModal();
-                    const cfg = data.config;
-                    alert(`✅ Municipal Jurisdiction switched to: ${cfg.municipality_name}`);
-                    
-                    // Re-center map & update municipal boundary rectangle
-                    if (map) {
-                        map.flyTo([cfg.center_lat, cfg.center_lng], 13);
                     }
-                    loadAdminData();
-                }
-            } catch(e) { alert("Failed to switch municipality."); }
-        }
+                } catch (e) { console.error("Error fetching city config:", e); }
+            }
+
+            async function selectCityPreset(code) {
+                try {
+                    const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/config/municipality`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ city_code: code })
+                    });
+                    const data = await res.json();
+                    if (data.status === 'success') {
+                        closeCityModal();
+                        const cfg = data.config;
+                        alert(`✅ Municipal Jurisdiction switched to: ${cfg.municipality_name}`);
+
+                        // Re-center map & update municipal boundary rectangle
+                        if (map) {
+                            map.flyTo([cfg.center_lat, cfg.center_lng], 13);
+                        }
+                        loadAdminData();
+                    }
+                } catch (e) { alert("Failed to switch municipality."); }
+            }
     </script>
 </body>
+
 </html>

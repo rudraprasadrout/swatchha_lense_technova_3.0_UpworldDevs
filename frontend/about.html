@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwachhLens | System Architecture & Workflow</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <title>SwachhLens | Multi-Agent AI System Architecture & Infographic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <style>
         .about-wrapper {
-            max-width: 1060px;
-            margin: 36px auto;
+            max-width: 1200px;
+            margin: 32px auto;
             padding: 0 24px 80px 24px;
         }
 
@@ -18,114 +18,411 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.25);
-            color: var(--primary);
-            font-size: 0.78rem;
-            font-weight: 700;
-            padding: 5px 12px;
-            border-radius: 8px;
-            margin-bottom: 16px;
-        }
-
-        .stepper-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
-            gap: 14px;
-            margin: 32px 0 44px 0;
-        }
-
-        .stepper-card {
             background: var(--card-dark);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 18px;
+            border-left: 3px solid var(--primary);
+            color: var(--primary);
+            font-size: 0.78rem;
+            font-weight: 800;
+            padding: 6px 14px;
+            border-radius: 6px;
+            margin-bottom: 16px;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        /* INFOGRAPHIC PIPELINE FLOW */
+        .pipeline-card {
+            background: var(--card-dark);
+            border: 1px solid var(--glass-border);
+            border-radius: 24px;
+            padding: 32px;
+            margin: 36px 0;
+            box-shadow: var(--shadow-subtle);
+            position: relative;
+            overflow: visible;
+        }
+
+        .pipeline-title {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.35rem;
+            font-weight: 800;
+            color: var(--text-main);
+            margin-bottom: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 12px;
+        }
+
+        .flow-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 14px;
+            position: relative;
+            z-index: 2;
+        }
+
+        @media (max-width: 1024px) {
+            .flow-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        @media (max-width: 600px) {
+            .flow-grid { grid-template-columns: 1fr; }
+        }
+
+        .flow-step-box {
+            background: var(--card-dark-hover);
+            border: 1px solid var(--glass-border);
+            border-radius: 16px;
+            padding: 20px 16px;
             display: flex;
             flex-direction: column;
-            gap: 8px;
-            transition: all 0.2s ease;
+            align-items: center;
+            text-align: center;
+            position: relative;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
         }
 
-        .stepper-card:hover {
+        .flow-step-box:hover, .flow-step-box.active-step {
             border-color: var(--primary);
-            transform: translateY(-2px);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 28px rgba(16, 185, 129, 0.18);
         }
 
-        .step-number {
+        .step-icon-wrapper {
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.4rem;
+            margin-bottom: 14px;
+            position: relative;
+        }
+
+        /* Pulsing Ring for Active Nodes */
+        .pulse-ring {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border-radius: 14px;
+            border: 2px solid currentColor;
+            animation: pulseWave 2s infinite ease-out;
+            opacity: 0.6;
+        }
+
+        @keyframes pulseWave {
+            0% { transform: scale(1); opacity: 0.8; }
+            100% { transform: scale(1.4); opacity: 0; }
+        }
+
+        .flow-num {
+            font-family: 'Outfit', sans-serif;
+            font-size: 0.72rem;
+            font-weight: 800;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 4px;
+        }
+
+        .flow-name {
             font-family: 'Outfit', sans-serif;
             font-weight: 800;
-            font-size: 0.8rem;
-            color: var(--primary);
-            letter-spacing: 0.5px;
-            text-transform: uppercase;
+            font-size: 1rem;
+            color: var(--text-main);
+            margin-bottom: 6px;
         }
 
-        .step-name {
-            font-family: 'Outfit', sans-serif;
-            font-weight: 700;
-            font-size: 0.98rem;
-            color: white;
-        }
-
-        .step-desc {
-            font-size: 0.78rem;
+        .flow-desc {
+            font-size: 0.76rem;
             color: var(--text-muted);
             line-height: 1.45;
         }
 
-        .arch-section {
-            background: var(--card-dark);
-            border: 1px solid var(--glass-border);
-            border-radius: 14px;
-            padding: 32px;
-            margin-bottom: 28px;
+        /* ANIMATED RECYCLING TRUCK PIPELINE TRAIL */
+        .truck-track-wrapper {
+            position: relative;
+            width: 100%;
+            height: 36px;
+            margin: 10px 0 20px 0;
+            display: flex;
+            align-items: center;
         }
 
-        .arch-grid {
+        .connector-track {
+            width: 100%;
+            height: 6px;
+            background: var(--card-dark-hover);
+            border: 1px solid var(--glass-border);
+            border-radius: 4px;
+            position: relative;
+            overflow: visible;
+        }
+
+        .connector-progress-fill {
+            position: absolute;
+            top: 0;
+            left: 0;
+            height: 100%;
+            width: 10%;
+            background: linear-gradient(90deg, var(--primary), var(--accent-cyan));
+            border-radius: 4px;
+            transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            box-shadow: 0 0 12px var(--primary-glow);
+        }
+
+        .animated-recycle-truck {
+            position: absolute;
+            top: -24px;
+            left: 10%;
+            transform: translateX(-50%) scaleX(-1);
+            font-size: 2.2rem;
+            filter: drop-shadow(0 4px 10px rgba(16, 185, 129, 0.4));
+            transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+            z-index: 10;
+            cursor: pointer;
+            animation: truckBounce 1.2s infinite alternate ease-in-out;
+            display: inline-block;
+        }
+
+        @keyframes truckBounce {
+            0% { transform: translateX(-50%) scaleX(-1) translateY(0px); }
+            100% { transform: translateX(-50%) scaleX(-1) translateY(-5px); }
+        }
+
+        .truck-exhaust-smoke {
+            position: absolute;
+            right: -10px;
+            bottom: 6px;
+            width: 8px;
+            height: 8px;
+            background: rgba(16, 185, 129, 0.4);
+            border-radius: 50%;
+            animation: smokePuff 1s infinite linear;
+        }
+
+        @keyframes smokePuff {
+            0% { transform: scale(0.5); opacity: 0.8; }
+            100% { transform: scale(2) translateX(14px); opacity: 0; }
+        }
+
+        /* METRICS INFOGRAPHIC GRID */
+        .metrics-banner {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-top: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 16px;
+            margin-bottom: 36px;
         }
 
         @media (max-width: 768px) {
-            .arch-grid { grid-template-columns: 1fr; }
+            .metrics-banner { grid-template-columns: repeat(2, 1fr); }
         }
 
-        .arch-box {
+        .info-stat-card {
             background: var(--card-dark);
             border: 1px solid var(--glass-border);
-            border-radius: 12px;
+            border-radius: 16px;
             padding: 20px;
-        }
-
-        .arch-box h4 {
-            font-family: 'Outfit', sans-serif;
-            font-size: 1.05rem;
-            font-weight: 700;
-            color: var(--text-main);
-            margin-bottom: 8px;
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 16px;
+            box-shadow: var(--shadow-subtle);
+            transition: all 0.2s ease;
         }
 
-        .arch-box p {
-            font-size: 0.84rem;
-            color: var(--text-muted);
-            line-height: 1.55;
+        .info-stat-card:hover {
+            border-color: var(--primary);
+            transform: translateY(-2px);
         }
 
-        .tech-pill-sm {
-            display: inline-block;
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.3rem;
+            flex-shrink: 0;
+        }
+
+        .stat-val {
+            font-family: 'Outfit', sans-serif;
+            font-size: 1.7rem;
+            font-weight: 800;
+            line-height: 1.1;
+        }
+
+        .stat-lbl {
             font-size: 0.72rem;
             font-weight: 700;
-            color: var(--primary);
-            background: rgba(16, 185, 129, 0.1);
-            border: 1px solid rgba(16, 185, 129, 0.25);
-            padding: 4px 10px;
-            border-radius: 6px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 2px;
+        }
+
+        /* INFOGRAPHIC DETAILED SPEC PANELS */
+        .info-section-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+            margin-bottom: 36px;
+        }
+
+        @media (max-width: 900px) {
+            .info-section-grid { grid-template-columns: 1fr; }
+        }
+
+        .spec-box {
+            background: var(--card-dark);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 28px;
+            box-shadow: var(--shadow-subtle);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .spec-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .spec-title {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: var(--text-main);
+        }
+
+        .spec-body {
+            font-size: 0.88rem;
+            color: var(--text-muted);
+            line-height: 1.6;
+            margin-bottom: 18px;
+        }
+
+        /* Visual Graphic Comparison Displays */
+        .visual-comparison-box {
+            background: var(--card-dark-hover);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 16px;
             margin-top: 12px;
+        }
+
+        .comparison-badge-row {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 10px;
+        }
+
+        .chip-pill {
+            font-size: 0.74rem;
+            font-weight: 800;
+            padding: 4px 10px;
+            border-radius: 8px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        /* Animated Radar Graphic */
+        .radar-graphic-container {
+            width: 100%;
+            height: 140px;
+            background: var(--card-dark-hover);
+            border-radius: 14px;
+            border: 1px solid var(--glass-border);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            margin-top: 12px;
+        }
+
+        .radar-circle {
+            position: absolute;
+            border-radius: 50%;
+            border: 1px dashed rgba(16, 185, 129, 0.3);
+            animation: radarSpin 8s infinite linear;
+        }
+
+        @keyframes radarSpin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* LOGISTICS VEHICLE MATRIX GRID */
+        .vehicle-matrix-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 16px;
+        }
+
+        @media (max-width: 600px) {
+            .vehicle-matrix-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+
+        .vehicle-mini-card {
+            background: var(--card-dark-hover);
+            border: 1px solid var(--glass-border);
+            border-radius: 12px;
+            padding: 12px;
+            text-align: center;
+        }
+
+        .vehicle-emoji {
+            font-size: 1.8rem;
+            margin-bottom: 4px;
+        }
+
+        .vehicle-name {
+            font-family: 'Outfit', sans-serif;
+            font-weight: 800;
+            font-size: 0.82rem;
+            color: var(--text-main);
+        }
+
+        .vehicle-crew {
+            font-size: 0.7rem;
+            color: var(--text-muted);
+            margin-top: 2px;
+        }
+
+        /* INTERACTIVE DEMO INSPECTION TABS */
+        .interactive-demo-panel {
+            background: var(--card-dark);
+            border: 1px solid var(--glass-border);
+            border-radius: 20px;
+            padding: 28px;
+            margin-bottom: 40px;
+            box-shadow: var(--shadow-subtle);
+        }
+
+        .demo-console {
+            background: var(--card-dark-hover);
+            border: 1px solid var(--glass-border);
+            border-radius: 14px;
+            padding: 20px;
+            font-family: monospace;
+            font-size: 0.82rem;
+            color: var(--primary);
+            line-height: 1.6;
+            min-height: 130px;
+            word-break: break-all;
         }
     </style>
     <script>
@@ -141,17 +438,33 @@
     <header class="app-header">
         <div style="display:flex; align-items:center; gap:16px;">
             <a href="index.html" class="nav-back-btn">
-                <i class="fa-solid fa-arrow-left"></i> <span data-i18n="navBack">Back to Home</span>
+                <i class="fa-solid fa-arrow-left"></i> <span data-i18n="navBack">Gateway</span>
             </a>
-            <a href="index.html" class="brand-logo"><i class="fa-solid fa-leaf"></i> SwachhLens</a>
+            <div class="brand-logo">
+                <div class="swachh-logo-mark">
+                    <svg width="28" height="28" viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <defs>
+                            <linearGradient id="logoGradAbout" x1="0%" y1="0%" x2="100%" y2="100%">
+                                <stop offset="0%" stop-color="#10b981" />
+                                <stop offset="100%" stop-color="#06b6d4" />
+                            </linearGradient>
+                        </defs>
+                        <circle cx="16" cy="16" r="14" stroke="url(#logoGradAbout)" stroke-width="2.5" fill="none"/>
+                        <circle cx="16" cy="16" r="9" stroke="url(#logoGradAbout)" stroke-width="1.5" stroke-dasharray="3 3" fill="none" opacity="0.7"/>
+                        <path d="M16 6C10.5 6 7 11 7 16.5C7 22 11.5 25.5 16 26C16 26 21 21 21 16C21 10.5 18 6 16 6Z" fill="url(#logoGradAbout)" />
+                        <path d="M16 11V22" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round"/>
+                    </svg>
+                </div>
+                <span>SwachhLens Architecture</span>
+            </div>
         </div>
         
-        <div style="display:flex; align-items:center; gap:12px;">
+        <div style="display:flex; align-items:center; gap:12px; flex-wrap:wrap;">
             <button onclick="toggleTheme()" class="theme-toggle-btn themeIconBtn" title="Toggle Light/Dark Theme">
                 <i class="fa-solid fa-moon"></i>
             </button>
-            <a href="citizen.html" class="nav-back-btn"><i class="fa-solid fa-camera"></i> <span data-i18n="navCitizen">Report Issue</span></a>
-            <a href="admin.html" class="nav-back-btn"><i class="fa-solid fa-building-shield"></i> <span data-i18n="navCommand">Officer Portal</span></a>
+            <a href="citizen.html" class="nav-back-btn"><i class="fa-solid fa-camera"></i> <span data-i18n="navCitizen">Report Portal</span></a>
+            <a href="admin.html" class="nav-back-btn"><i class="fa-solid fa-building-shield"></i> <span data-i18n="navCommand">Officer OS</span></a>
             
             <!-- Universal Language Selector -->
             <select id="uiLangSelect" onchange="changeUiLanguage(this.value)" style="background:rgba(16, 185, 129, 0.12); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.3); font-weight:700; font-size:0.78rem; padding:6px 12px; border-radius:8px; outline:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;">
@@ -165,106 +478,257 @@
     <div class="about-wrapper">
         
         <!-- Hero Header -->
-        <div style="text-align:center; margin-bottom:36px;">
+        <div style="text-align:center; margin-bottom:32px;">
             <div class="hero-badge">
-                <i class="fa-solid fa-shield-halved"></i> Technical System Documentation
+                <i class="fa-solid fa-microchip"></i> Multimodal Spatial Telemetry Architecture
             </div>
-            <h1 data-i18n="aboutTitle" style="font-family:'Outfit',sans-serif; font-size:2.3rem; font-weight:800; color:var(--text-main); line-height:1.25; margin-bottom:12px;">
-                SwachhLens System Architecture & AI Workflow
+            <h1 data-i18n="aboutTitle" style="font-family:'Outfit',sans-serif; font-size:2.4rem; font-weight:800; color:var(--text-main); line-height:1.2; margin-bottom:12px;">
+                SwachhLens AI System Pipeline & Logistics Engine
             </h1>
-            <p data-i18n="aboutSub" style="color:var(--text-muted); font-size:1rem; line-height:1.6;">
-                An end-to-end multi-agent computer vision & spatial decision support framework designed for municipal sanitation logistics.
+            <p data-i18n="aboutSub" style="color:var(--text-muted); font-size:1rem; line-height:1.6; max-width:820px; margin:0 auto;">
+                An autonomous end-to-end framework integrating edge privacy anonymization, 20m Haversine spatial deduplication, Pixtral-12B visual severity classification, and automated municipal crew dispatching.
             </p>
         </div>
 
-        <!-- 5-Step System Workflow Timeline -->
-        <div class="stepper-grid">
-            
-            <div class="stepper-card">
-                <div class="step-number">Step 01</div>
-                <div class="step-name" data-i18n="step1Title">Telemetry Ingestion</div>
-                <div class="step-desc" data-i18n="step1Desc">Captures geo-tagged photographs, GPS coordinates, and regional voice notes in Odia, Hindi, Bengali, or English.</div>
+        <!-- INFOGRAPHIC KEY PERFORMANCE METRICS BANNER -->
+        <div class="metrics-banner">
+            <div class="info-stat-card">
+                <div class="stat-icon" style="background:rgba(16, 185, 129, 0.15); color:var(--primary);">
+                    <i class="fa-solid fa-bolt"></i>
+                </div>
+                <div>
+                    <div class="stat-val" style="color:var(--primary);">&lt;36ms</div>
+                    <div class="stat-lbl">Response Latency</div>
+                </div>
             </div>
 
-            <div class="stepper-card">
-                <div class="step-number" style="color:var(--accent-cyan);">Step 02</div>
-                <div class="step-name" data-i18n="step2Title">Privacy Anonymization</div>
-                <div class="step-desc" data-i18n="step2Desc">YuNet ONNX neural network and Haar Cascade classifiers detect faces and license plates, pixelating them instantly.</div>
+            <div class="info-stat-card">
+                <div class="stat-icon" style="background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan);">
+                    <i class="fa-solid fa-user-shield"></i>
+                </div>
+                <div>
+                    <div class="stat-val" style="color:var(--accent-cyan);">100%</div>
+                    <div class="stat-lbl">Edge Privacy Anonymization</div>
+                </div>
             </div>
 
-            <div class="stepper-card">
-                <div class="step-number" style="color:var(--accent-amber);">Step 03</div>
-                <div class="step-name" data-i18n="step3Title">Spatial Deduplication</div>
-                <div class="step-desc" data-i18n="step3Desc">Calculates spherical distance between incoming GPS coordinates and active tickets within a 20m radius.</div>
+            <div class="info-stat-card">
+                <div class="stat-icon" style="background:rgba(245, 158, 11, 0.15); color:var(--accent-amber);">
+                    <i class="fa-solid fa-crosshairs"></i>
+                </div>
+                <div>
+                    <div class="stat-val" style="color:var(--accent-amber);">20m</div>
+                    <div class="stat-lbl">Haversine Dedup Radius</div>
+                </div>
             </div>
 
-            <div class="stepper-card">
-                <div class="step-number" style="color:#a855f7;">Step 04</div>
-                <div class="step-name" data-i18n="step4Title">Vision Classification</div>
-                <div class="step-desc" data-i18n="step4Desc">Pixtral-12B evaluates visual waste severity, categorizing material into Plastic, Organic, E-Waste, or Debris.</div>
+            <div class="info-stat-card">
+                <div class="stat-icon" style="background:rgba(168, 85, 247, 0.15); color:#a855f7;">
+                    <i class="fa-solid fa-truck-monster"></i>
+                </div>
+                <div>
+                    <div class="stat-val" style="color:#a855f7;">6 Units</div>
+                    <div class="stat-lbl">Automated Fleet Dispatch</div>
+                </div>
             </div>
-
-            <div class="stepper-card">
-                <div class="step-number">Step 05</div>
-                <div class="step-name" data-i18n="step5Title">Dispatch & Routing</div>
-                <div class="step-desc" data-i18n="step5Desc">Computes urgency score factoring volume, environmental hazards, and location sensitivity for crew dispatch.</div>
-            </div>
-
         </div>
 
-        <!-- Deep Architectural Breakdown Section -->
-        <div class="arch-section">
-            <h2 style="font-family:'Outfit',sans-serif; font-size:1.45rem; font-weight:800; color:var(--text-main); margin-bottom:10px;">
-                <i class="fa-solid fa-microchip text-primary"></i> Multi-Agent Technical Architecture
-            </h2>
-            <p style="color:var(--text-muted); font-size:0.88rem; line-height:1.6;">
-                SwachhLens decouples civic data collection from municipal response, using lightweight edge anonymization on the frontend and deterministic AI algorithms on the backend.
-            </p>
+        <!-- ANIMATED INFOGRAPHIC PIPELINE STEPPER WITH MOVING RECYCLING TRUCK -->
+        <div class="pipeline-card">
+            <div class="pipeline-title">
+                <span><i class="fa-solid fa-diagram-project text-primary"></i> Real-time Telemetry Dataflow Pipeline</span>
+                <span style="font-size:0.75rem; color:var(--text-muted); font-weight:700;"><i class="fa-solid fa-circle-dot text-primary"></i> Watch recycling truck drive or click any step</span>
+            </div>
 
-            <div class="arch-grid">
+            <!-- Animated Recycling Truck Track -->
+            <div class="truck-track-wrapper">
+                <div class="connector-track">
+                    <div class="connector-progress-fill" id="pipelineProgress"></div>
+                    <div class="animated-recycle-truck" id="recycleTruck" title="Autonomous Recycling Truck">
+                        🚛
+                        <div class="truck-exhaust-smoke"></div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flow-grid">
                 
-                <div class="arch-box">
-                    <h4><i class="fa-solid fa-eye text-primary"></i> Pixtral-12B Multimodal Vision AI</h4>
-                    <p>
-                        Analyzes uploaded imagery to detect waste density, overflow risks, and material composition. Output is structured as key-value tags (<em>Plastic Waste, Heavy Compactor Required, Drain Blockage Risk</em>).
-                    </p>
-                    <span class="tech-pill-sm">Mistral API Gateway • Vision Transformer</span>
+                <!-- Node 1 -->
+                <div class="flow-step-box active-step" id="node1" onclick="selectDemoNode(1, true)">
+                    <div class="step-icon-wrapper" style="background:rgba(16, 185, 129, 0.15); color:var(--primary);">
+                        <div class="pulse-ring"></div>
+                        <i class="fa-solid fa-camera"></i>
+                    </div>
+                    <div class="flow-num" style="color:var(--primary);">Step 01</div>
+                    <div class="flow-name">Citizen Capture</div>
+                    <div class="flow-desc">Geo-tagged photo, GPS lat/lng, and Odia/Hindi voice notes.</div>
                 </div>
 
-                <div class="arch-box">
-                    <h4><i class="fa-solid fa-user-shield" style="color:var(--accent-cyan);"></i> YuNet & Haar Edge Anonymizer</h4>
-                    <p>
-                        Ensures privacy compliance before storage. The YuNet ONNX deep model detects human faces while Haar Cascades detect vehicle license plates, blurring sensitive regions in memory.
-                    </p>
-                    <span class="tech-pill-sm" style="color:var(--accent-cyan); border-color:rgba(6,182,212,0.3); background:rgba(6,182,212,0.1);">OpenCV Engine • Edge Anonymization</span>
+                <!-- Node 2 -->
+                <div class="flow-step-box" id="node2" onclick="selectDemoNode(2, true)">
+                    <div class="step-icon-wrapper" style="background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan);">
+                        <i class="fa-solid fa-user-slash"></i>
+                    </div>
+                    <div class="flow-num" style="color:var(--accent-cyan);">Step 02</div>
+                    <div class="flow-name">Edge Privacy</div>
+                    <div class="flow-desc">YuNet ONNX & Haar Cascades pixelate faces & license plates.</div>
                 </div>
 
-                <div class="arch-box">
-                    <h4><i class="fa-solid fa-location-crosshairs" style="color:var(--accent-amber);"></i> 20m Haversine Deduplication</h4>
-                    <p>
-                        Uses the Great-Circle Haversine formula to compare incoming GPS coordinates against existing active complaints. Prevents ticket spam and recalculates cumulative urgency.
-                    </p>
-                    <span class="tech-pill-sm" style="color:var(--accent-amber); border-color:rgba(245,158,11,0.3); background:rgba(245,158,11,0.1);">Python Backend • Spatial Distance</span>
+                <!-- Node 3 -->
+                <div class="flow-step-box" id="node3" onclick="selectDemoNode(3, true)">
+                    <div class="step-icon-wrapper" style="background:rgba(245, 158, 11, 0.15); color:var(--accent-amber);">
+                        <i class="fa-solid fa-location-crosshairs"></i>
+                    </div>
+                    <div class="flow-num" style="color:var(--accent-amber);">Step 03</div>
+                    <div class="flow-name">Spatial Dedup</div>
+                    <div class="flow-desc">Haversine formula checks 20m radius & merges duplicates.</div>
                 </div>
 
-                <div class="arch-box">
-                    <h4><i class="fa-solid fa-route text-primary"></i> Deterministic Dispatch Matrix</h4>
-                    <p>
-                        Assigns tailored crew units based on AI findings: <strong>Manual Sanitation Crew</strong> for light waste, <strong>Mini Truck + Heavy Compactor</strong> for massive piles, and <strong>Hazmat Units</strong> for chemical/medical hazards.
-                    </p>
-                    <span class="tech-pill-sm">Location Sensitivity Boost (+1.5) • Logistics Routing</span>
+                <!-- Node 4 -->
+                <div class="flow-step-box" id="node4" onclick="selectDemoNode(4, true)">
+                    <div class="step-icon-wrapper" style="background:rgba(168, 85, 247, 0.15); color:#a855f7;">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <div class="flow-num" style="color:#a855f7;">Step 04</div>
+                    <div class="flow-name">Vision AI Classify</div>
+                    <div class="flow-desc">Pixtral-12B classifies category, hazard flags & volume score.</div>
+                </div>
+
+                <!-- Node 5 -->
+                <div class="flow-step-box" id="node5" onclick="selectDemoNode(5, true)">
+                    <div class="step-icon-wrapper" style="background:rgba(59, 130, 246, 0.15); color:var(--accent-blue);">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <div class="flow-num" style="color:var(--accent-blue);">Step 05</div>
+                    <div class="flow-name">Logistics Dispatch</div>
+                    <div class="flow-desc">Deterministic vehicle & crew assignment to officer map.</div>
                 </div>
 
             </div>
         </div>
 
-        <!-- Navigation Action Buttons -->
-        <div style="display:flex; justify-content:center; gap:14px; margin-top:24px;">
-            <a href="citizen.html" class="submit-btn" style="width:auto; padding:12px 24px; text-decoration:none;">
+        <!-- LIVE TELEMETRY SIMULATOR PANEL -->
+        <div class="interactive-demo-panel">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <h3 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.15rem; color:var(--text-main); display:flex; align-items:center; gap:10px;">
+                    <i class="fa-solid fa-terminal text-primary"></i> Live Telemetry Node Inspector
+                </h3>
+                <span id="demoNodeBadge" style="font-size:0.75rem; font-weight:800; padding:4px 10px; border-radius:8px; background:rgba(16, 185, 129, 0.15); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.3);">
+                    Selected: Step 01 (Citizen Telemetry)
+                </span>
+            </div>
+            <div class="demo-console" id="demoConsole">
+                [SYSTEM TELEMETRY INITIALIZED]
+                Incoming Payload: { lat: 20.2961, lng: 85.8245, device: "Mobile PWA Client" }
+                Voice Recording: "ଏଠାରେ ଡ୍ରେନ୍ ବ୍ଲକ୍ ହୋଇପଡିଛି" (Odia regional audio captured)
+                Status: Ready for Edge Anonymization & AI Analysis.
+            </div>
+        </div>
+
+        <!-- INFOGRAPHIC SPECIFICATION GRID -->
+        <div class="info-section-grid">
+            
+            <!-- Module 1: Edge Privacy -->
+            <div class="spec-box">
+                <div>
+                    <div class="spec-header">
+                        <span style="font-size:1.5rem; color:var(--accent-cyan);"><i class="fa-solid fa-shield-halved"></i></span>
+                        <h3 class="spec-title">YuNet ONNX & Haar Anonymization</h3>
+                    </div>
+                    <p class="spec-body">
+                        To guarantee DPDP privacy compliance before database storage, SwachhLens runs lightweight computer vision models directly in memory. YuNet deep neural network targets human facial landmarks while Haar Cascade filters isolate vehicle license plates, applying pixelation blur prior to cloud transmission.
+                    </p>
+                </div>
+                <div class="visual-comparison-box">
+                    <div style="font-size:0.72rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px;">Anonymization Target Filters</div>
+                    <div class="comparison-badge-row">
+                        <span class="chip-pill" style="background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan); border:1px solid rgba(6, 182, 212, 0.3);"><i class="fa-solid fa-user-slash"></i> YuNet Face Blur</span>
+                        <span class="chip-pill" style="background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan); border:1px solid rgba(6, 182, 212, 0.3);"><i class="fa-solid fa-car-burst"></i> Haar Plate Anonymizer</span>
+                        <span class="chip-pill" style="background:rgba(16, 185, 129, 0.15); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.3);"><i class="fa-solid fa-memory"></i> Zero Raw File Retention</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 2: Spatial Haversine -->
+            <div class="spec-box">
+                <div>
+                    <div class="spec-header">
+                        <span style="font-size:1.5rem; color:var(--accent-amber);"><i class="fa-solid fa-location-crosshairs"></i></span>
+                        <h3 class="spec-title">20m Haversine Deduplication Engine</h3>
+                    </div>
+                    <p class="spec-body">
+                        Using the Great-Circle Haversine spherical distance algorithm, incoming GPS coordinates are compared against active tickets within a 20m radius. Duplicate reports increment the ticket's confirmation counter (+1) and boost urgency without cluttering the map grid.
+                    </p>
+                </div>
+                <div class="radar-graphic-container">
+                    <div class="radar-circle" style="width:50px; height:50px;"></div>
+                    <div class="radar-circle" style="width:100px; height:100px;"></div>
+                    <div style="position:relative; z-index:2; text-align:center;">
+                        <span style="font-size:0.75rem; font-weight:800; color:var(--accent-amber); background:var(--card-dark); padding:4px 10px; border-radius:8px; border:1px solid var(--glass-border);"><i class="fa-solid fa-bullseye"></i> 20m Haversine Geo-Fence Match</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 3: Multimodal Vision AI -->
+            <div class="spec-box">
+                <div>
+                    <div class="spec-header">
+                        <span style="font-size:1.5rem; color:#a855f7;"><i class="fa-solid fa-eye"></i></span>
+                        <h3 class="spec-title">Pixtral-12B Visual Classification</h3>
+                    </div>
+                    <p class="spec-body">
+                        The Pixtral vision-language transformer inspects visual waste pile composition, categorizing issues into Plastic, Organic, Construction Debris, E-Waste, or Hazardous Waste while detecting drain blockages and fire hazards.
+                    </p>
+                </div>
+                <div class="visual-comparison-box">
+                    <div style="font-size:0.72rem; font-weight:800; color:var(--text-muted); text-transform:uppercase; margin-bottom:6px;">Automated Category Classification</div>
+                    <div class="comparison-badge-row">
+                        <span class="chip-pill" style="background:rgba(168, 85, 247, 0.15); color:#a855f7; border:1px solid rgba(168, 85, 247, 0.3);"><i class="fa-solid fa-water"></i> Drain Blockage Risk</span>
+                        <span class="chip-pill" style="background:rgba(239, 68, 68, 0.15); color:var(--accent-red); border:1px solid rgba(239, 68, 68, 0.3);"><i class="fa-solid fa-fire"></i> Fire Hazard Flag</span>
+                        <span class="chip-pill" style="background:rgba(245, 158, 11, 0.15); color:var(--accent-amber); border:1px solid rgba(245, 158, 11, 0.3);"><i class="fa-solid fa-dumpster"></i> Overflow Score</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Module 4: Logistics Fleet Matrix -->
+            <div class="spec-box">
+                <div>
+                    <div class="spec-header">
+                        <span style="font-size:1.5rem; color:var(--accent-blue);"><i class="fa-solid fa-truck-gear"></i></span>
+                        <h3 class="spec-title">Automated Logistics Dispatch Matrix</h3>
+                    </div>
+                    <p class="spec-body">
+                        Matches severity, waste volume, and category to appropriate municipal sanitation units and worker equipment automatically to minimize vehicle turnaround times.
+                    </p>
+                </div>
+                <div class="vehicle-matrix-grid">
+                    <div class="vehicle-mini-card">
+                        <div class="vehicle-emoji">🛺</div>
+                        <div class="vehicle-name">Electric Cart</div>
+                        <div class="vehicle-crew">1 Worker</div>
+                    </div>
+                    <div class="vehicle-mini-card">
+                        <div class="vehicle-emoji">🚜</div>
+                        <div class="vehicle-name">Debris Tractor</div>
+                        <div class="vehicle-crew">4 Heavy Crew</div>
+                    </div>
+                    <div class="vehicle-mini-card">
+                        <div class="vehicle-emoji">🚛</div>
+                        <div class="vehicle-name">Heavy Compactor</div>
+                        <div class="vehicle-crew">3 Operators</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Action Callout Buttons -->
+        <div style="display:flex; justify-content:center; gap:14px; margin-top:20px; flex-wrap:wrap;">
+            <a href="citizen.html" class="submit-btn" style="width:auto; padding:12px 28px; text-decoration:none;">
                 <i class="fa-solid fa-camera"></i> <span data-i18n="btnLaunchCitizen">Launch Citizen App</span>
             </a>
-            <a href="index.html" class="nav-back-btn" style="padding:12px 24px; font-size:0.88rem;">
-                <i class="fa-solid fa-house"></i> <span data-i18n="navHome">Back to Gateway</span>
+            <a href="admin.html" class="nav-back-btn" style="padding:12px 28px; font-size:0.88rem; background:rgba(6,182,212,0.15); color:var(--accent-cyan); border-color:rgba(6,182,212,0.3);">
+                <i class="fa-solid fa-building-shield"></i> <span data-i18n="navCommand">Open Officer Command OS</span>
             </a>
         </div>
 
@@ -272,5 +736,121 @@
 
     <script src="assets/config.js"></script>
     <script src="js/i18n.js"></script>
+    <script>
+        const demoData = {
+            1: {
+                title: "Step 01 (Citizen Capture & Telemetry Ingestion)",
+                color: "var(--primary)",
+                log: `[TELEMETRY INGESTION ACTIVE]
+Captured Coordinates: Lat 20.2961, Lng 85.8245 (Bhubaneswar Urban Zone)
+Audio Telemetry: Voice memo recorded in Odia ("ଏଠାରେ ଡ୍ରେନ୍ ବ୍ଲକ୍ ହୋଇପଡିଛି")
+Device Client: Unique Client Device ID persistent across submissions.`
+            },
+            2: {
+                title: "Step 02 (Edge Privacy Anonymization)",
+                color: "var(--accent-cyan)",
+                log: `[PRIVACY ANONYMIZATION ENGINE ACTIVE]
+Running OpenCV YuNet ONNX Neural Network...
+Face Targets Found: 0 Detected
+Running Haar Cascade Vehicle Classifier...
+License Plate Targets Found: 0 Detected
+Status: Privacy Compliance Verified. Raw image purged from memory.`
+            },
+            3: {
+                title: "Step 03 (20m Haversine Spatial Deduplication)",
+                color: "var(--accent-amber)",
+                log: `[SPATIAL DEDUPLICATION RUNNING]
+Querying active ticket coordinates in SQLite Spatial Index...
+Distance to nearest ticket SW-24654680: 6.4 meters (< 20.0m threshold)
+Action: Issue category matched -> Incrementing unique confirmation count (+1 confirmation).`
+            },
+            4: {
+                title: "Step 04 (Pixtral-12B Multimodal AI Vision Classifier)",
+                color: "#a855f7",
+                log: `[MULTIMODAL AI VISION TRANSFORMER]
+Pixtral-12B Evaluation: Overflowing Bin & Blocked Drain
+Hazard Classification: Drain Blockage Risk = TRUE | Fire Hazard = FALSE
+Urgency Score Calculated: 6.5 / 10.0 (High Priority)`
+            },
+            5: {
+                title: "Step 05 (Automated Logistics Vehicle Dispatch)",
+                color: "var(--accent-blue)",
+                log: `[LOGISTICS FLEET DISPATCH MATRIX]
+Selected Unit: Heavy Compactor Truck (🚛)
+Assigned Crew: 3 Crew Operators
+Required Equipment: Vacuum Loader & Heavy Winch
+GIS Radar Marker: Telemetry pin rendered on Officer Command Map.`
+            }
+        };
+
+        let currentStep = 1;
+        let autoDriveTimer = null;
+
+        const nodePercentages = {
+            1: "10%",
+            2: "30%",
+            3: "50%",
+            4: "70%",
+            5: "90%"
+        };
+
+        function selectDemoNode(stepNum, isManual = false) {
+            currentStep = stepNum;
+            for (let i = 1; i <= 5; i++) {
+                const node = document.getElementById(`node${i}`);
+                if (node) {
+                    if (i === stepNum) node.classList.add('active-step');
+                    else node.classList.remove('active-step');
+                }
+            }
+
+            const truck = document.getElementById('recycleTruck');
+            const progress = document.getElementById('pipelineProgress');
+            const pct = nodePercentages[stepNum] || "10%";
+
+            if (truck) truck.style.left = pct;
+            if (progress) progress.style.width = pct;
+
+            const data = demoData[stepNum];
+            if (data) {
+                const consoleEl = document.getElementById('demoConsole');
+                const badgeEl = document.getElementById('demoNodeBadge');
+                if (consoleEl) {
+                    consoleEl.innerText = data.log;
+                    consoleEl.style.borderColor = data.color;
+                }
+                if (badgeEl) {
+                    badgeEl.innerText = `Selected: ${data.title}`;
+                    badgeEl.style.color = data.color;
+                }
+            }
+
+            if (isManual) {
+                resetAutoDriveTimer();
+            }
+        }
+
+        function startAutoDrive() {
+            autoDriveTimer = setInterval(() => {
+                let nextStep = currentStep + 1;
+                if (nextStep > 5) nextStep = 1;
+                selectDemoNode(nextStep, false);
+            }, 3200);
+        }
+
+        function resetAutoDriveTimer() {
+            if (autoDriveTimer) clearInterval(autoDriveTimer);
+            autoDriveTimer = setInterval(() => {
+                let nextStep = currentStep + 1;
+                if (nextStep > 5) nextStep = 1;
+                selectDemoNode(nextStep, false);
+            }, 4500);
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            selectDemoNode(1, false);
+            startAutoDrive();
+        });
+    </script>
 </body>
 </html>
