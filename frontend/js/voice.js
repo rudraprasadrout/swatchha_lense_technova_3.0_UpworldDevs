@@ -1,10 +1,11 @@
+// SwachhLens Client-Side Regional Voice Speech-to-Text (STT) Engine
 let recognition = null;
 let isRecording = false;
 
 function toggleSpeech() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        alert("Web Speech API is not supported in this browser. Use Chrome or Edge.");
+        alert("Web Speech API is not supported in this browser. Please use Google Chrome, Microsoft Edge, or Safari.");
         return;
     }
 
@@ -15,56 +16,60 @@ function toggleSpeech() {
 
     if (!isRecording) {
         recognition = new SpeechRecognition();
+        
+        // 1. Language Code Mapping (ISO 639-1 / BCP-47)
         let selectedLang = langSelect ? langSelect.value : 'or-IN';
-
-        // Safety: normalize any legacy 'ori-IN' values
-        if (selectedLang === 'ori-IN') selectedLang = 'or-IN';
-
         recognition.lang = selectedLang;
+        
+        // 2. Continuous & Interim Streaming Setup
         recognition.continuous = true;
         recognition.interimResults = true;
 
-        let finalTranscript = '';
+        let accumulatedFinals = speechText ? speechText.value : '';
 
         recognition.onstart = () => {
             isRecording = true;
-            finalTranscript = '';
             if (micBtn) micBtn.classList.add('recording');
             if (micCaption) micCaption.innerText = "Listening...";
         };
 
+        // 3. Event-Driven Appending (onresult)
         recognition.onresult = (event) => {
             let interimTranscript = '';
+            let newFinals = '';
 
             for (let i = event.resultIndex; i < event.results.length; ++i) {
                 const transcript = event.results[i][0].transcript;
                 if (event.results[i].isFinal) {
-                    finalTranscript += transcript + ' ';
+                    newFinals += transcript + ' ';
                 } else {
                     interimTranscript += transcript;
                 }
             }
 
-            // Show live text in the box (final + interim combined)
-            const displayText = (finalTranscript + interimTranscript).trim();
-            if (speechText && displayText) {
-                speechText.value = displayText;
+            if (newFinals) {
+                accumulatedFinals += newFinals;
+            }
+
+            if (speechText) {
+                speechText.value = (accumulatedFinals + interimTranscript).trim();
             }
         };
 
         recognition.onerror = (event) => {
             console.warn("SpeechRecognition error:", event.error);
+            if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
+                alert("Microphone access was denied. Please allow microphone permissions in browser settings.");
+            }
             if (event.error !== 'no-speech') {
                 stopSpeech();
             }
         };
 
         recognition.onend = () => {
-            // Write the final transcript into the box
-            if (finalTranscript.trim() && speechText) {
-                speechText.value = finalTranscript.trim();
+            if (isRecording) {
+                stopSpeech();
             }
-            stopSpeech();
         };
 
         recognition.start();
@@ -75,7 +80,7 @@ function toggleSpeech() {
     function stopSpeech() {
         isRecording = false;
         if (recognition) {
-            try { recognition.stop(); } catch(e) {}
+            try { recognition.stop(); } catch (e) {}
             recognition = null;
         }
         if (micBtn) micBtn.classList.remove('recording');
