@@ -1,11 +1,10 @@
 let recognition = null;
 let isRecording = false;
-let finalSpeech = '';
 
 function toggleSpeech() {
     const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!SpeechRecognition) {
-        alert("Web Speech API is not supported in this browser. Please use Google Chrome or Microsoft Edge.");
+        alert("Web Speech API is not supported in this browser. Use Chrome or Edge.");
         return;
     }
 
@@ -15,65 +14,38 @@ function toggleSpeech() {
     const langSelect = document.getElementById('langSelect');
 
     if (!isRecording) {
-        try {
-            recognition = new SpeechRecognition();
-            recognition.lang = (langSelect && langSelect.value) ? langSelect.value : 'or-IN';
-            recognition.continuous = true;
-            recognition.interimResults = true;
+        recognition = new SpeechRecognition();
+        recognition.lang = langSelect.value;
+        recognition.continuous = true;
+        recognition.interimResults = true;
 
-            finalSpeech = speechText ? speechText.value : '';
+        recognition.onstart = () => {
+            isRecording = true;
+            micBtn.classList.add('recording');
+            micCaption.innerText = "Listening...";
+        };
 
-            recognition.onstart = () => {
-                isRecording = true;
-                if (micBtn) micBtn.classList.add('recording');
-                if (micCaption) micCaption.innerText = "Listening...";
-            };
-
-            recognition.onresult = (event) => {
-                let interim = '';
-                for (let i = event.resultIndex; i < event.results.length; ++i) {
-                    const trans = event.results[i][0].transcript;
-                    if (event.results[i].isFinal) {
-                        finalSpeech += trans + ' ';
-                    } else {
-                        interim += trans;
-                    }
+        recognition.onresult = (event) => {
+            let finalTranscript = '';
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript + ' ';
                 }
-                if (speechText) {
-                    speechText.value = finalSpeech + interim;
-                }
-            };
+            }
+            if (finalTranscript) speechText.value += finalTranscript;
+        };
 
-            recognition.onerror = (e) => {
-                console.warn("Speech error:", e.error);
-                if (e.error === 'not-allowed') {
-                    alert("Microphone access blocked. Please allow microphone access in your browser site settings.");
-                }
-                stopSpeech();
-            };
-
-            recognition.onend = () => {
-                if (isRecording) {
-                    stopSpeech();
-                }
-            };
-
-            recognition.start();
-        } catch (e) {
-            console.error("Speech start error:", e);
-            stopSpeech();
-        }
+        recognition.onerror = () => stopSpeech();
+        recognition.onend = () => { if (isRecording) stopSpeech(); };
+        recognition.start();
     } else {
         stopSpeech();
     }
 
     function stopSpeech() {
         isRecording = false;
-        if (recognition) {
-            try { recognition.stop(); } catch(e) {}
-            recognition = null;
-        }
-        if (micBtn) micBtn.classList.remove('recording');
-        if (micCaption) micCaption.innerText = "Tap Voice";
+        if (recognition) recognition.stop();
+        micBtn.classList.remove('recording');
+        micCaption.innerText = "Tap Voice";
     }
 }
