@@ -87,6 +87,19 @@ def health():
     return jsonify({"status": "healthy", "service": "SwachhLens Core Service"})
 
 
+ODIA_FAST_MAP = {
+    "aborjana": "ଅବର୍ଜନା",
+    "kuda": "କୁଡ଼ା",
+    "nalla": "ନାଳ",
+    "dustbin": "ଡଷ୍ଟବିନ୍",
+    "safai": "ସଫା",
+    "drain": "ନାଳି",
+    "block": "ବ୍ଲକ",
+    "water": "ପାଣି",
+    "overflow": "ଓଭରଫ୍ଲୋ",
+    "garbage": "ଅବର୍ଜନା"
+}
+
 @app.route("/api/v1/transcribe-voice", methods=["POST"])
 def transcribe_voice():
     data = request.get_json() or {}
@@ -107,9 +120,9 @@ def transcribe_voice():
 
             CRITICAL DIRECTIVE:
             1. If target language is Odia ('or-in', 'ori-in', 'or'), YOU MUST ALWAYS CONVERT AND WRITE THE FINAL TRANSCRIPT STRICTLY IN AUTHENTIC ODIA SCRIPT (ଓଡ଼ିଆ).
-            2. Even if raw_text contains English words or English phonetic transliterations (e.g. "kuda pakha", "victoria hotel", "aborjana", "nalla"), translate/transliterate them into authentic Odia Script (ଓଡ଼ିଆ). DO NOT RETURN ENGLISH TEXT WHEN ODIA IS SELECTED.
-            3. If target language is Hindi ('hi-in', 'hi'), write in Devanagari script (हिन्दी).
-            4. If target language is Bengali ('bn-in', 'bn'), write in Bengali script (বাংলা).
+            2. Convert any English words or phonetic Odia transliterations (e.g. "kuda pakha", "victoria hotel", "aborjana", "nalla", "eithi", "bohut") into authentic Odia Script (ଓଡ଼ିଆ).
+            3. If target language is Hindi, write in Devanagari script (हिन्दी).
+            4. If target language is Bengali, write in Bengali script (বাংলা).
 
             You MUST return ONLY a valid JSON object:
             {{"native_text": "Clean transcript strictly in native script (e.g. ଓଡ଼ିଆ)..."}}
@@ -117,6 +130,7 @@ def transcribe_voice():
             resp = client.chat.complete(
                 model="mistral-small-latest",
                 response_format={"type": "json_object"},
+                max_tokens=250,
                 messages=[{"role": "user", "content": prompt}]
             )
             content = resp.choices[0].message.content.strip()
@@ -145,16 +159,14 @@ def transcribe_voice_audio():
     if api_key:
         try:
             client = Mistral(api_key=api_key)
-            b64_audio = base64.b64encode(audio_bytes).decode("utf-8")
-            
             prompt = f"""
             Act as an expert Odia & Regional Language Audio Speech Transcriber for Municipal Civic Reports.
             Target Language: {target_lang} (Odia / Hindi / Bengali / English).
             
             CRITICAL DIRECTIVE:
             1. Transcribe the spoken audio. If target language is Odia ('or-in', 'ori-in', 'or'), YOU MUST ALWAYS WRITE THE FINAL TRANSCRIPT STRICTLY IN AUTHENTIC ODIA SCRIPT (ଓଡ଼ିଆ).
-            2. If target language is Hindi ('hi-in', 'hi'), write in Devanagari script (हिन्दी).
-            3. If target language is Bengali ('bn-in', 'bn'), write in Bengali script (বাংলা).
+            2. If target language is Hindi, write in Devanagari script (हिन्दी).
+            3. If target language is Bengali, write in Bengali script (বাংলা).
 
             You MUST return ONLY a valid JSON object:
             {{"native_text": "Clean native script transcript..."}}
@@ -163,18 +175,17 @@ def transcribe_voice_audio():
             resp = client.chat.complete(
                 model="mistral-small-latest",
                 response_format={"type": "json_object"},
+                max_tokens=250,
                 messages=[{"role": "user", "content": prompt}]
             )
             content = resp.choices[0].message.content.strip()
             res_data = json.loads(content)
-            native_text = res_data.get("native_text", "ଏଠାରେ ଆବର୍ଜନା କୁଡ଼ା ପଡିଛି ସଫା କରନ୍ତୁ")
+            native_text = res_data.get("native_text", raw_text if 'raw_text' in locals() else "")
             return jsonify({"status": "success", "native_text": native_text})
         except Exception as e:
             print("Audio transcribe error:", e)
             
-    # Default fallback for Odia civic voice reports
-    fallback_text = "ଏଠାରେ ଆବର୍ଜନା କୁଡ଼ା ପଡିଛି ସଫା କରନ୍ତୁ" if 'or' in target_lang else "कूड़ा जमा है सफाई करें"
-    return jsonify({"status": "success", "native_text": fallback_text})
+    return jsonify({"status": "success", "native_text": ""})
 
 
 @app.route("/api/v1/auth", methods=["POST"])
@@ -582,9 +593,11 @@ def get_ticket_verification_image(ticket_id):
     })
 
 
-@app.errorhandler(404)
-def not_found_api(e):
-    return jsonify({"status": "error", "message": "API endpoint not found. Refer to GET / for API documentation."}), 404
+@app.route("/<path:path>", methods=["GET"])
+def static_proxy(path):
+    if os.path.exists(os.path.join(FRONTEND_DIR, path)):
+        return send_from_directory(FRONTEND_DIR, path)
+    return jsonify({"status": "error", "message": "API endpoint or static file not found"}), 404
 
 
 if __name__ == "__main__":
