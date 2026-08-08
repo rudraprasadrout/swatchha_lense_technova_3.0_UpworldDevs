@@ -72,6 +72,7 @@ def analyze_image_with_mistral(
         Act as a Municipal Waste Logistics Decision Support AI. Analyze this civic report photo and regional voice transcript.
         
         Citizen Voice Transcript ({lang}): "{citizen_note if citizen_note else 'No voice note provided'}"
+        Note: The citizen voice transcript may be in Odia script (ଓଡ଼ିଆ), Hindi, Bengali, or phonetically transcribed Odia/Hindi Latin text (e.g., 'aborjana', 'kuda', 'nalla block'). You MUST accurately translate and summarize any Odia or regional dialect transcript into English in "note_summary_en".
 
         You MUST return ONLY a valid JSON object matching this exact schema:
         {{
@@ -79,7 +80,7 @@ def analyze_image_with_mistral(
           "volume_band": "Small (<0.2m³)" | "Medium (0.2-1.0m³)" | "Large (1.0-3.0m³)" | "Very Large (>3.0m³)",
           "is_drain_blocked": true | false,
           "is_fire_hazard": true | false,
-          "note_summary_en": "English translation and 1-sentence summary of the citizen voice note",
+          "note_summary_en": "Accurate English translation and 1-sentence summary of the citizen Odia voice note",
           "description": "Actionable 1-2 sentence vehicle dispatch recommendation incorporating visual and citizen context.",
           "confidence": 0.95
         }}
