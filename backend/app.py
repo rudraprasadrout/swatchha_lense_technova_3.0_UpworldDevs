@@ -79,6 +79,46 @@ def health():
     return jsonify({"status": "healthy", "service": "SwachhLens Core Service"})
 
 
+@app.route("/api/v1/transcribe-voice", methods=["POST"])
+def transcribe_voice():
+    data = request.get_json() or {}
+    raw_text = data.get("text", "").strip()
+    target_lang = data.get("lang", "or-IN")
+    
+    if not raw_text:
+        return jsonify({"status": "success", "native_text": ""})
+        
+    api_key = os.environ.get("MISTRAL_API_KEY")
+    if api_key:
+        try:
+            client = Mistral(api_key=api_key)
+            prompt = f"""
+            Act as a Regional Language Speech Transcriber & Script Normalizer for Civic Reports.
+            The user spoke a civic complaint in a regional language: "{raw_text}".
+            
+            Target Language: {target_lang} (Odia / Hindi / Bengali / English).
+            If target language is Odia (or-IN/ori-IN/or), convert and write the transcript strictly in authentic Odia Script (ଓଡ଼ିଆ).
+            If target language is Hindi, write in Devanagari script (हिन्दी).
+            If target language is Bengali, write in Bengali script (বাংলা).
+            
+            You MUST return ONLY a valid JSON object:
+            {{"native_text": "Clean native script transcript..."}}
+            """
+            resp = client.chat.complete(
+                model="mistral-small-latest",
+                response_format={"type": "json_object"},
+                messages=[{"role": "user", "content": prompt}]
+            )
+            content = resp.choices[0].message.content.strip()
+            res_data = json.loads(content)
+            native_text = res_data.get("native_text", raw_text)
+            return jsonify({"status": "success", "native_text": native_text})
+        except Exception as e:
+            print("Voice transcription Error:", e)
+            
+    return jsonify({"status": "success", "native_text": raw_text})
+
+
 @app.route("/api/v1/auth", methods=["POST"])
 def officer_login():
     data = request.get_json() or {}
