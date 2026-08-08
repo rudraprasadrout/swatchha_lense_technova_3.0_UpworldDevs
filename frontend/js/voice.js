@@ -1,4 +1,4 @@
-// SwachhLens Client-Side Regional Voice Speech-to-Text (STT) Engine
+// SwachhLens Regional Voice Engine - Native Script Speech Recognition
 let recognition = null;
 let isRecording = false;
 
@@ -17,15 +17,13 @@ function toggleSpeech() {
     if (!isRecording) {
         recognition = new SpeechRecognition();
         
-        // 1. Language Code Mapping (ISO 639-1 / BCP-47)
-        let selectedLang = langSelect ? langSelect.value : 'or-IN';
+        // 1. Set Regional ISO Code (or-IN for Odia, hi-IN for Hindi, bn-IN for Bengali, en-IN for English)
+        let selectedLang = (langSelect && langSelect.value) ? langSelect.value : 'or-IN';
         recognition.lang = selectedLang;
         
-        // 2. Continuous & Interim Streaming Setup
+        // 2. Set continuous listening without interim phonetic noise
         recognition.continuous = true;
-        recognition.interimResults = true;
-
-        let accumulatedFinals = speechText ? speechText.value : '';
+        recognition.interimResults = false;
 
         recognition.onstart = () => {
             isRecording = true;
@@ -33,26 +31,16 @@ function toggleSpeech() {
             if (micCaption) micCaption.innerText = "Listening...";
         };
 
-        // 3. Event-Driven Appending (onresult)
+        // 3. Append only finalized native regional script segments into speechText
         recognition.onresult = (event) => {
-            let interimTranscript = '';
-            let newFinals = '';
-
+            let finalTranscript = '';
             for (let i = event.resultIndex; i < event.results.length; ++i) {
-                const transcript = event.results[i][0].transcript;
                 if (event.results[i].isFinal) {
-                    newFinals += transcript + ' ';
-                } else {
-                    interimTranscript += transcript;
+                    finalTranscript += event.results[i][0].transcript + ' ';
                 }
             }
-
-            if (newFinals) {
-                accumulatedFinals += newFinals;
-            }
-
-            if (speechText) {
-                speechText.value = (accumulatedFinals + interimTranscript).trim();
+            if (finalTranscript && speechText) {
+                speechText.value += finalTranscript;
             }
         };
 
@@ -61,9 +49,7 @@ function toggleSpeech() {
             if (event.error === 'not-allowed' || event.error === 'service-not-allowed') {
                 alert("Microphone access was denied. Please allow microphone permissions in browser settings.");
             }
-            if (event.error !== 'no-speech') {
-                stopSpeech();
-            }
+            stopSpeech();
         };
 
         recognition.onend = () => {
