@@ -4,7 +4,7 @@
     --bg-dark: #080c0a;
     --card-dark: #101614;
     --card-dark-hover: #141c19;
-    --glass-bg: rgba(16, 22, 20, 0.85);
+    --glass-bg: rgba(12, 17, 15, 0.92);
     --glass-border: rgba(255, 255, 255, 0.08);
     --glass-border-hover: rgba(16, 185, 129, 0.35);
 
@@ -29,12 +29,12 @@
     --card-dark: #ffffff;
     --card-dark-hover: #f1f5f9;
     --glass-bg: rgba(255, 255, 255, 0.95);
-    --glass-border: rgba(0, 0, 0, 0.08);
-    --glass-border-hover: rgba(16, 185, 129, 0.4);
+    --glass-border: #cbd5e1;
+    --glass-border-hover: rgba(16, 185, 129, 0.5);
 
-    --primary: #10b981;
-    --primary-dark: #059669;
-    --primary-glow: rgba(16, 185, 129, 0.2);
+    --primary: #059669;
+    --primary-dark: #047857;
+    --primary-glow: rgba(5, 150, 105, 0.2);
     --accent-cyan: #0284c7;
     --accent-blue: #2563eb;
     --accent-amber: #d97706;
@@ -44,8 +44,8 @@
     --text-muted: #475569;
     --text-dim: #64748b;
 
-    --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.06);
-    --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.12);
+    --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.08);
+    --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.14);
 }
 
 .theme-toggle-btn {
@@ -85,7 +85,7 @@ body {
 
 /* --- HEADER & NAVIGATION --- */
 .app-header {
-    background: rgba(12, 17, 15, 0.92);
+    background: var(--glass-bg);
     backdrop-filter: blur(12px);
     -webkit-backdrop-filter: blur(12px);
     border-bottom: 1px solid var(--glass-border);
@@ -107,7 +107,7 @@ body {
     display: flex;
     align-items: center;
     gap: 9px;
-    color: white;
+    color: var(--text-main);
     text-decoration: none;
     letter-spacing: -0.3px;
 }
@@ -120,7 +120,7 @@ body {
     display: inline-flex;
     align-items: center;
     gap: 7px;
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--card-dark-hover);
     border: 1px solid var(--glass-border);
     color: var(--text-main);
     padding: 7px 14px;
@@ -201,8 +201,8 @@ body {
     width: 100%;
     height: 200px;
     border-radius: 12px;
-    background: rgba(8, 12, 10, 0.6);
-    border: 2px dashed rgba(16, 185, 129, 0.3);
+    background: var(--card-dark-hover);
+    border: 2px dashed rgba(16, 185, 129, 0.35);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -215,7 +215,7 @@ body {
 
 .capture-box:hover {
     border-color: var(--primary);
-    background: rgba(16, 185, 129, 0.05);
+    background: rgba(16, 185, 129, 0.08);
 }
 
 .camera-pulse-ring {
@@ -291,9 +291,9 @@ body {
     width: 100%;
     padding: 12px 14px;
     border-radius: 10px;
-    background: rgba(8, 12, 10, 0.7);
+    background: var(--card-dark-hover);
     border: 1px solid var(--glass-border);
-    color: #ffffff;
+    color: var(--text-main);
     font-size: 0.88rem;
     font-weight: 500;
     outline: none;
@@ -303,11 +303,11 @@ body {
 .input-field:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-    background: rgba(8, 12, 10, 0.95);
+    background: var(--card-dark);
 }
 
 .input-field option {
-    background: #101614;
+    background: var(--card-dark);
     color: var(--text-main);
 }
 
@@ -347,12 +347,12 @@ body {
     width: 100%;
     min-height: 90px;
     border-radius: 10px;
-    background: rgba(8, 12, 10, 0.7);
+    background: var(--card-dark-hover);
     border: 1px solid var(--glass-border);
     padding: 12px 14px;
     font-size: 0.88rem;
     resize: none;
-    color: #ffffff;
+    color: var(--text-main);
     outline: none;
     transition: all 0.2s ease;
 }
@@ -360,7 +360,7 @@ body {
 .speech-box:focus {
     border-color: var(--primary);
     box-shadow: 0 0 0 2px rgba(16, 185, 129, 0.2);
-    background: rgba(8, 12, 10, 0.95);
+    background: var(--card-dark);
 }
 
 /* --- BUTTONS --- */
@@ -592,7 +592,7 @@ table {
 }
 
 th {
-    background: rgba(8, 12, 10, 0.8);
+    background: var(--card-dark-hover);
     padding: 12px 14px;
     font-weight: 700;
     color: var(--text-muted);
@@ -604,7 +604,7 @@ th {
 
 td {
     padding: 12px 14px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    border-bottom: 1px solid var(--glass-border);
     color: var(--text-main);
 }
 
@@ -638,7 +638,7 @@ tr.selected-row {
 }
 
 .dispatch-badge {
-    background: rgba(8, 12, 10, 0.7);
+    background: var(--card-dark-hover);
     border: 1px solid var(--glass-border);
     border-radius: 10px;
     padding: 10px 12px;
@@ -673,14 +673,14 @@ tr.selected-row {
     width: 100%;
     height: 200px;
     object-fit: cover;
-    background: #080d0b;
+    background: var(--card-dark-hover);
     border-radius: 12px;
     margin-top: 8px;
     border: 1px solid var(--glass-border);
 }
 
 .action-btn-pill {
-    background: rgba(255, 255, 255, 0.05);
+    background: var(--card-dark-hover);
     border: 1px solid var(--glass-border);
     color: var(--text-main);
     padding: 6px 14px;
@@ -737,14 +737,14 @@ tr.selected-row {
     background: var(--card-dark);
     border: 1px solid var(--glass-border);
     border-radius: 16px;
-    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.6);
+    box-shadow: 0 16px 40px rgba(0, 0, 0, 0.25);
     z-index: 9999;
     flex-direction: column;
     overflow: hidden;
 }
 
 .chat-header {
-    background: rgba(8, 12, 10, 0.9);
+    background: var(--card-dark-hover);
     padding: 14px 18px;
     border-bottom: 1px solid var(--glass-border);
     display: flex;
@@ -763,8 +763,8 @@ tr.selected-row {
 }
 
 .chat-bubble-bot {
-    background: rgba(16, 185, 129, 0.1);
-    border: 1px solid rgba(16, 185, 129, 0.2);
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.25);
     color: var(--text-main);
     padding: 12px 14px;
     border-radius: 12px;
@@ -776,14 +776,14 @@ tr.selected-row {
     display: flex;
     gap: 8px;
     overflow-x: auto;
-    background: rgba(8, 12, 10, 0.4);
+    background: var(--card-dark-hover);
     border-top: 1px solid var(--glass-border);
 }
 
 .chat-chip {
     font-size: 0.72rem;
     font-weight: 600;
-    background: rgba(255, 255, 255, 0.06);
+    background: var(--card-dark);
     border: 1px solid var(--glass-border);
     color: var(--text-muted);
     padding: 4px 10px;
@@ -801,7 +801,7 @@ tr.selected-row {
 
 .chat-input-bar {
     padding: 12px 14px;
-    background: rgba(8, 12, 10, 0.8);
+    background: var(--card-dark-hover);
     border-top: 1px solid var(--glass-border);
     display: flex;
     gap: 8px;
@@ -815,7 +815,7 @@ tr.selected-row {
     left: 0;
     width: 100%;
     height: 60px;
-    background: rgba(12, 17, 15, 0.95);
+    background: var(--glass-bg);
     backdrop-filter: blur(12px);
     border-top: 1px solid var(--glass-border);
     z-index: 999;

@@ -249,21 +249,8 @@
             id="speechText"
             class="speech-box"
             data-i18n-ph="phVoiceNote"
-            placeholder="Speak in your regional language or tap quick tags below..."
+            placeholder="Speak in your regional language or type notes here..."
           ></textarea>
-          
-          <!-- Quick Hazard Chips for Mobile Users -->
-          <div style="display:flex; gap:8px; flex-wrap:wrap; margin-top:6px;">
-            <button type="button" onclick="selectQuickTag('Overflowing Garbage')" style="background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:var(--text-main); font-size:0.75rem; font-weight:600; padding:6px 12px; border-radius:16px; cursor:pointer; transition:all 0.2s ease;">
-              🗑️ Garbage Pile
-            </button>
-            <button type="button" onclick="selectQuickTag('Blocked Drain / Waterlogging')" style="background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:var(--text-main); font-size:0.75rem; font-weight:600; padding:6px 12px; border-radius:16px; cursor:pointer; transition:all 0.2s ease;">
-              🌊 Blocked Drain
-            </button>
-            <button type="button" onclick="selectQuickTag('Open Waste Burning')" style="background:rgba(255,255,255,0.05); border:1px solid var(--glass-border); color:var(--text-main); font-size:0.75rem; font-weight:600; padding:6px 12px; border-radius:16px; cursor:pointer; transition:all 0.2s ease;">
-              🔥 Open Burning
-            </button>
-          </div>
         </div>
 
         <!-- Location Sensitivity Selector -->
@@ -340,13 +327,13 @@
           </div>
           <div class="detail-row">
             <span style="color: var(--text-muted)">Report Status:</span
-            ><span id="resCategory" style="font-weight: 700; color: white"
+            ><span id="resCategory" style="font-weight: 700; color: var(--text-main)"
               >-</span
             >
           </div>
           <div class="detail-row">
             <span style="color: var(--text-muted)">Coordinates:</span
-            ><span id="resVolume" style="font-weight: 700; color: white"
+            ><span id="resVolume" style="font-weight: 700; color: var(--text-main)"
               >-</span
             >
           </div>
@@ -374,7 +361,7 @@
                 font-weight: 600;
                 text-align: right;
                 max-width: 62%;
-                color: white;
+                color: var(--text-main);
               "
               >-</span
             >
