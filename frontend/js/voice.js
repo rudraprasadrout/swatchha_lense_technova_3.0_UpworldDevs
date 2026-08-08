@@ -34,10 +34,10 @@ function toggleSpeech() {
             }
 
             if (capturedText.trim() && speechText) {
-                speechText.value = capturedText;
-                if (micCaption) micCaption.innerText = "Normalizing Script...";
+                speechText.value = capturedText.trim();
+                if (micCaption) micCaption.innerText = "Writing Odia Script...";
 
-                // Auto-normalize to authentic native Odia script (ଓଡ଼ିଆ) via AI API
+                // Instant AI Normalization into authentic Odia Script (ଓଡ଼ିଆ)
                 try {
                     const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : "https://swachhlens-backend-upworlddev.onrender.com";
                     const res = await fetch(`${baseUrl}/api/v1/transcribe-voice`, {
@@ -51,6 +51,8 @@ function toggleSpeech() {
                     }
                 } catch(e) {
                     console.warn("Backend native script conversion error:", e);
+                } finally {
+                    if (micCaption) micCaption.innerText = "Tap Voice";
                 }
             }
         };

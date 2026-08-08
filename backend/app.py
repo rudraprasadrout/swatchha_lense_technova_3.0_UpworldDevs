@@ -28,6 +28,14 @@ if os.path.exists(ENV_FILE):
     except Exception as e:
         pass
 
+try:
+    from mistralai import Mistral
+except ImportError:
+    try:
+        from mistralai.client import Mistral
+    except ImportError:
+        Mistral = None
+
 from anonymizer import anonymize_image_bytes
 from db import get_conn, init_db
 from dedup import find_existing_nearby_ticket, merge_duplicate_ticket
@@ -83,7 +91,7 @@ def health():
 def transcribe_voice():
     data = request.get_json() or {}
     raw_text = data.get("text", "").strip()
-    target_lang = data.get("lang", "or-IN")
+    target_lang = str(data.get("lang", "or-IN")).lower()
     
     if not raw_text:
         return jsonify({"status": "success", "native_text": ""})
@@ -93,16 +101,18 @@ def transcribe_voice():
         try:
             client = Mistral(api_key=api_key)
             prompt = f"""
-            Act as a Regional Language Speech Transcriber & Script Normalizer for Civic Reports.
-            The user spoke a civic complaint in a regional language: "{raw_text}".
-            
-            Target Language: {target_lang} (Odia / Hindi / Bengali / English).
-            If target language is Odia (or-IN/ori-IN/or), convert and write the transcript strictly in authentic Odia Script (ଓଡ଼ିଆ).
-            If target language is Hindi, write in Devanagari script (हिन्दी).
-            If target language is Bengali, write in Bengali script (বাংলা).
-            
+            Act as an expert Odia & Regional Language Speech Normalizer for Municipal Civic Reports.
+            The user selected target language: "{target_lang}".
+            Captured raw speech transcript: "{raw_text}".
+
+            CRITICAL DIRECTIVE:
+            1. If target language is Odia ('or-in', 'ori-in', 'or'), YOU MUST ALWAYS CONVERT AND WRITE THE FINAL TRANSCRIPT STRICTLY IN AUTHENTIC ODIA SCRIPT (ଓଡ଼ିଆ).
+            2. Even if raw_text contains English words or English phonetic transliterations (e.g. "kuda pakha", "victoria hotel", "aborjana", "nalla"), translate/transliterate them into authentic Odia Script (ଓଡ଼ିଆ). DO NOT RETURN ENGLISH TEXT WHEN ODIA IS SELECTED.
+            3. If target language is Hindi ('hi-in', 'hi'), write in Devanagari script (हिन्दी).
+            4. If target language is Bengali ('bn-in', 'bn'), write in Bengali script (বাংলা).
+
             You MUST return ONLY a valid JSON object:
-            {{"native_text": "Clean native script transcript..."}}
+            {{"native_text": "Clean transcript strictly in native script (e.g. ଓଡ଼ିଆ)..."}}
             """
             resp = client.chat.complete(
                 model="mistral-small-latest",
