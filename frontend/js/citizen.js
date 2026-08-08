@@ -223,7 +223,8 @@ async function submitReport(e) {
         }
     } catch (err) {
         console.error("Submission failed:", err);
-        alert("Failed to reach server. Ensure python -m backend.utils.app is running at " + CONFIG.API_BASE_URL);
+        const targetUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : "http://127.0.0.1:5000";
+        alert(`Failed to reach backend server. Please make sure the Python server (python backend/app.py) is running at ${targetUrl}`);
     } finally {
         if (submitBtn) {
             submitBtn.disabled = false;

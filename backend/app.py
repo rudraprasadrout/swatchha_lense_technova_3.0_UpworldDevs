@@ -54,6 +54,8 @@ init_db(DB_PATH)
 
 @app.route("/", methods=["GET"])
 def index():
+    if os.path.exists(os.path.join(FRONTEND_DIR, "index.html")) and "text/html" in request.headers.get("Accept", ""):
+        return send_from_directory(FRONTEND_DIR, "index.html")
     return jsonify(
         {
             "system": "SwachhLens Engine",
