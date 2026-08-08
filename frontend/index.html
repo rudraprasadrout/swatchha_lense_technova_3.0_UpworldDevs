@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SwachhLens | BMC Bhubaneswar AI Waste Decision Engine</title>
+    <title>SwachhLens | BMC Bhubaneswar Civic Portal</title>
     <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
@@ -12,8 +12,8 @@
         .portal-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            max-width: 900px;
+            gap: 24px;
+            max-width: 920px;
             width: 100%;
         }
         @media (max-width: 768px) {
@@ -21,8 +21,8 @@
         }
         .portal-card {
             background: var(--card-dark);
-            border-radius: 14px;
-            padding: 30px;
+            border-radius: 16px;
+            padding: 32px;
             border: 1px solid var(--glass-border);
             box-shadow: var(--shadow-subtle);
             display: flex;
@@ -31,25 +31,26 @@
             transition: all 0.25s ease;
         }
         .portal-card:hover {
-            transform: translateY(-3px);
+            transform: translateY(-4px);
             border-color: var(--primary);
+            box-shadow: 0 12px 30px rgba(16, 185, 129, 0.15);
         }
         .card-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
+            width: 52px;
+            height: 52px;
+            border-radius: 14px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.35rem;
+            font-size: 1.5rem;
             margin-bottom: 20px;
         }
         .btn-portal {
-            padding: 13px;
-            border-radius: 10px;
+            padding: 14px 20px;
+            border-radius: 12px;
             border: none;
             font-family: 'Outfit', sans-serif;
-            font-size: 0.92rem;
+            font-size: 0.98rem;
             font-weight: 700;
             text-decoration: none;
             text-align: center;
@@ -58,16 +59,17 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 10px;
             transition: all 0.2s ease;
         }
         .hero-title {
             font-family: 'Outfit', sans-serif;
-            font-size: 3.1rem;
+            font-size: 3.2rem;
             font-weight: 800;
             letter-spacing: -0.5px;
             color: white;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            line-height: 1.15;
         }
         .tech-pill {
             display: inline-flex;
@@ -76,24 +78,53 @@
             background: rgba(16, 185, 129, 0.1);
             border: 1px solid rgba(16, 185, 129, 0.25);
             color: var(--primary);
-            font-size: 0.78rem;
+            font-size: 0.82rem;
             font-weight: 700;
-            padding: 5px 14px;
-            border-radius: 8px;
-            margin-bottom: 18px;
+            padding: 6px 16px;
+            border-radius: 20px;
+            margin-bottom: 20px;
         }
-        .home-features-section {
-            max-width: 900px;
+        .how-it-works-section {
+            max-width: 920px;
             width: 100%;
             margin-top: 48px;
             padding-top: 36px;
             border-top: 1px solid rgba(255, 255, 255, 0.08);
         }
+        .step-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 18px;
+            margin-top: 24px;
+        }
+        @media (max-width: 768px) {
+            .step-grid { grid-template-columns: 1fr; }
+        }
+        .step-card {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+            border-radius: 14px;
+            padding: 24px 20px;
+            text-align: center;
+        }
+        .step-number {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.15);
+            color: var(--primary);
+            font-weight: 800;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 14px auto;
+            font-size: 0.95rem;
+        }
     </style>
     <script>
         (function() {
-            document.documentElement.setAttribute("data-theme", "dark");
-            localStorage.setItem("swachh_theme", "dark");
+            const savedTheme = localStorage.getItem("swachh_theme") || "dark";
+            document.documentElement.setAttribute("data-theme", savedTheme);
         })();
     </script>
 </head>
@@ -106,7 +137,10 @@
         </div>
         
         <div style="display:flex; align-items:center; gap:12px;">
-            <a href="citizen.html" class="nav-back-btn"><i class="fa-solid fa-camera"></i> <span data-i18n="navCitizen">Citizen Portal</span></a>
+            <button onclick="toggleTheme()" class="theme-toggle-btn themeIconBtn" title="Toggle Light/Dark Theme">
+                <i class="fa-solid fa-moon"></i>
+            </button>
+            <a href="citizen.html" class="nav-back-btn"><i class="fa-solid fa-camera"></i> <span data-i18n="navCitizen">Report Issue</span></a>
             <a href="about.html" class="nav-back-btn"><i class="fa-solid fa-circle-info"></i> <span data-i18n="navAbout">About System</span></a>
             
             <!-- Universal Language Selector -->
@@ -118,90 +152,86 @@
         </div>
     </header>
 
-    <div class="container-center" style="padding-top:30px; padding-bottom:60px;">
+    <div class="container-center" style="padding-top:36px; padding-bottom:60px;">
         
-        <div style="text-align:center; margin-bottom:40px; max-width:740px;">
+        <div style="text-align:center; margin-bottom:44px; max-width:760px;">
             <div class="tech-pill">
-                <i class="fa-solid fa-building-shield text-primary"></i> <span data-i18n="homePill">Bhubaneswar Municipal Corporation (BMC) • AI Civic Engine</span>
+                <i class="fa-solid fa-building-shield"></i> <span data-i18n="homePill">Bhubaneswar Municipal Corporation (BMC) Portal</span>
             </div>
-            <h1 class="hero-title"><span data-i18n="homeTitle">SwachhLens BMC Gateway</span></h1>
-            <p data-i18n="homeSubtitle" style="color:var(--text-muted); font-size:1.05rem; line-height:1.6; font-weight:500;">
-                Official AI-Powered Waste Response Decision Support System for Bhubaneswar Municipal Wards, Smart City Spatial Deduplication & Vision Logistics.
+            <h1 class="hero-title"><span data-i18n="homeTitle">Cleaner City, Faster Response</span></h1>
+            <p data-i18n="homeSubtitle" style="color:var(--text-muted); font-size:1.1rem; line-height:1.6; font-weight:500;">
+                Report garbage, blocked drains, or sanitation issues in seconds. Captured photos are instantly routed to municipal cleanup teams.
             </p>
         </div>
 
         <div class="portal-grid">
             
             <!-- 1. Citizen Portal Card -->
-            <div class="portal-card">
+            <div class="portal-card" style="border-top: 3px solid var(--primary);">
                 <div>
-                    <div class="card-icon" style="background:rgba(16, 185, 129, 0.12); color:var(--primary);">
+                    <div class="card-icon" style="background:rgba(16, 185, 129, 0.15); color:var(--primary);">
                         <i class="fa-solid fa-camera"></i>
                     </div>
-                    <h3 data-i18n="cardCitizenTitle" style="font-family:'Outfit',sans-serif; font-size:1.45rem; font-weight:800; color:white; margin-bottom:8px;">BMC Citizen App</h3>
-                    <p data-i18n="cardCitizenDesc" style="color:var(--text-muted); font-size:0.9rem; line-height:1.6; margin-bottom:24px;">
-                        Report civic waste issues across Bhubaneswar with instant photo capture, Odia voice transcriptions, and automated face/license plate privacy receipts.
+                    <h3 data-i18n="cardCitizenTitle" style="font-family:'Outfit',sans-serif; font-size:1.55rem; font-weight:800; color:white; margin-bottom:10px;">Report a Sanitation Issue</h3>
+                    <p data-i18n="cardCitizenDesc" style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:28px;">
+                        Snap a photo of waste or blocked drains, add a voice note in Odia or Hindi, and submit immediately. No login required.
                     </p>
                 </div>
                 <a href="citizen.html" class="btn-portal" style="background:var(--primary);">
-                    <span data-i18n="btnLaunchCitizen">Launch Citizen App</span> <i class="fa-solid fa-arrow-right"></i>
+                    <span data-i18n="btnLaunchCitizen">Report Issue Now</span> <i class="fa-solid fa-arrow-right"></i>
                 </a>
             </div>
 
             <!-- 2. Officer Command Card -->
-            <div class="portal-card">
+            <div class="portal-card" style="border-top: 3px solid var(--accent-cyan);">
                 <div>
-                    <div class="card-icon" style="background:rgba(6, 182, 212, 0.12); color:var(--accent-cyan);">
-                        <i class="fa-solid fa-building-shield"></i>
+                    <div class="card-icon" style="background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan);">
+                        <i class="fa-solid fa-shield-halved"></i>
                     </div>
-                    <h3 data-i18n="cardCommandTitle" style="font-family:'Outfit',sans-serif; font-size:1.45rem; font-weight:800; color:white; margin-bottom:8px;">BMC Municipal Command</h3>
-                    <p data-i18n="cardCommandDesc" style="color:var(--text-muted); font-size:0.9rem; line-height:1.6; margin-bottom:24px;">
-                        Bhubaneswar Ward Leaflet logistics map, real-time algorithmic urgency dispatch queue, and inter-departmental forwarding.
+                    <h3 data-i18n="cardCommandTitle" style="font-family:'Outfit',sans-serif; font-size:1.55rem; font-weight:800; color:white; margin-bottom:10px;">Municipal Staff Portal</h3>
+                    <p data-i18n="cardCommandDesc" style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:28px;">
+                        Access live ward map, view incoming citizen reports, manage priority queues, and dispatch cleanup crews.
                     </p>
                 </div>
                 <button type="button" onclick="openModal()" class="btn-portal" style="background:var(--accent-cyan);">
-                    <i class="fa-solid fa-lock"></i> <span data-i18n="btnOfficerLogin">BMC Officer Login</span>
+                    <i class="fa-solid fa-lock"></i> <span data-i18n="btnOfficerLogin">Officer Login</span>
                 </button>
             </div>
 
         </div>
 
-        <!-- Features Highlights Grid at Bottom of Homepage -->
-        <div class="home-features-section">
-            <h2 data-i18n="featHeading" style="font-family:'Outfit',sans-serif; font-size:1.45rem; font-weight:800; color:white; text-align:center; margin-bottom:20px;">
-                Core AI & Telemetry Innovations
+        <!-- Simple 3-Step How It Works Section -->
+        <div class="how-it-works-section">
+            <h2 data-i18n="featHeading" style="font-family:'Outfit',sans-serif; font-size:1.5rem; font-weight:800; color:white; text-align:center; margin-bottom:8px;">
+                How It Works
             </h2>
-            <div class="feature-card-grid">
-                <div class="feature-item-card">
-                    <div class="feature-item-icon"><i class="fa-solid fa-eye"></i></div>
-                    <div>
-                        <div class="feature-item-title" data-i18n="featVisionTitle">Pixtral Multimodal Vision</div>
-                        <div class="feature-item-desc" data-i18n="featVisionDesc">Auto-classifies waste category (Plastic, Organic, E-Waste, Debris) and estimates volume band.</div>
-                    </div>
+            <p style="color:var(--text-muted); text-align:center; font-size:0.92rem; font-weight:500; margin-bottom:24px;" data-i18n="howItWorksSub">
+                Three quick steps to report and clear civic issues
+            </p>
+
+            <div class="step-grid">
+                <div class="step-card">
+                    <div class="step-number">1</div>
+                    <h4 data-i18n="step1Header" style="color:white; font-weight:700; margin-bottom:8px; font-size:1.05rem;">Snap & Capture</h4>
+                    <p data-i18n="step1Detail" style="color:var(--text-muted); font-size:0.88rem; line-height:1.5;">
+                        Take a quick photo of the issue. Location and timestamp are detected automatically.
+                    </p>
                 </div>
 
-                <div class="feature-item-card">
-                    <div class="feature-item-icon"><i class="fa-solid fa-user-shield"></i></div>
-                    <div>
-                        <div class="feature-item-title" data-i18n="featPrivacyTitle">YuNet Privacy Blur</div>
-                        <div class="feature-item-desc" data-i18n="featPrivacyDesc">Automatically detects and pixelates faces and vehicle license plates before storing reports.</div>
-                    </div>
+                <div class="step-card">
+                    <div class="step-number">2</div>
+                    <h4 data-i18n="step2Header" style="color:white; font-weight:700; margin-bottom:8px; font-size:1.05rem;">Privacy Safeguard</h4>
+                    <p data-i18n="step2Detail" style="color:var(--text-muted); font-size:0.88rem; line-height:1.5;">
+                        Faces and license plates are automatically blurred before storing to ensure citizen privacy.
+                    </p>
                 </div>
 
-                <div class="feature-item-card">
-                    <div class="feature-item-icon"><i class="fa-solid fa-microphone"></i></div>
-                    <div>
-                        <div class="feature-item-title" data-i18n="featVoiceTitle">Multilingual Voice Notes</div>
-                        <div class="feature-item-desc" data-i18n="featVoiceDesc">Speak in Odia, Hindi, Bengali, or English. Transcribed and translated to English for sanitation crews.</div>
-                    </div>
-                </div>
-
-                <div class="feature-item-card">
-                    <div class="feature-item-icon"><i class="fa-solid fa-map-pin"></i></div>
-                    <div>
-                        <div class="feature-item-title" data-i18n="featDedupTitle">20m Haversine Deduplication</div>
-                        <div class="feature-item-desc" data-i18n="featDedupDesc">Detects nearby active reports within 20m, merging duplicate complaints and boosting urgency scores.</div>
-                    </div>
+                <div class="step-card">
+                    <div class="step-number">3</div>
+                    <h4 data-i18n="step3Header" style="color:white; font-weight:700; margin-bottom:8px; font-size:1.05rem;">Rapid Cleanup</h4>
+                    <p data-i18n="step3Detail" style="color:var(--text-muted); font-size:0.88rem; line-height:1.5;">
+                        Municipal teams get instant location alerts and dispatch sanitation trucks immediately.
+                    </p>
                 </div>
             </div>
         </div>
@@ -218,14 +248,14 @@
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
                 <div>
-                    <h3 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.2rem; color:white;">BMC Officer Auth</h3>
-                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Bhubaneswar Command Center Verification</span>
+                    <h3 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.2rem; color:white;">BMC Officer Login</h3>
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Bhubaneswar Command Center Authentication</span>
                 </div>
             </div>
 
             <form onsubmit="return handleLogin(event);">
                 <div class="input-group-custom" style="margin-bottom:14px;">
-                    <label class="input-label"><i class="fa-solid fa-id-badge"></i> BMC Officer ID / Email</label>
+                    <label class="input-label"><i class="fa-solid fa-id-badge"></i> Officer ID / Email</label>
                     <input type="text" id="loginId" class="input-field" placeholder="admin@swachhlens.gov.in" required>
                 </div>
                 <div class="input-group-custom" style="margin-bottom:20px;">
@@ -238,7 +268,7 @@
                 </div>
 
                 <button type="submit" class="btn-portal" style="background:var(--accent-cyan); width:100%;">
-                    <span>Authenticate & Access BMC Command</span> <i class="fa-solid fa-right-to-bracket"></i>
+                    <span>Access Officer Dashboard</span> <i class="fa-solid fa-right-to-bracket"></i>
                 </button>
             </form>
         </div>

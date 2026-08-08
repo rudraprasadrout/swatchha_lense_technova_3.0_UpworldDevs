@@ -29,6 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
                     }
                     const placeholder = document.getElementById('capturePlaceholder');
                     if (placeholder) placeholder.style.display = 'none';
+                    
+                    const badge = document.getElementById('photoBadge');
+                    if (badge) badge.style.display = 'flex';
                 };
                 reader.readAsDataURL(file);
                 updateTime();
@@ -46,6 +49,53 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 });
+
+function detectMobileGPS() {
+    const locInput = document.getElementById('locationInput');
+    const gpsBtn = document.getElementById('gpsDetectBtn');
+    if (!navigator.geolocation) {
+        alert("GPS geolocation is not supported on this browser.");
+        return;
+    }
+    if (gpsBtn) {
+        gpsBtn.disabled = true;
+        gpsBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Locating...`;
+    }
+    navigator.geolocation.getCurrentPosition(
+        position => {
+            currentLat = position.coords.latitude;
+            currentLng = position.coords.longitude;
+            if (locInput) locInput.value = `${currentLat.toFixed(4)}, ${currentLng.toFixed(4)}`;
+            if (gpsBtn) {
+                gpsBtn.disabled = false;
+                gpsBtn.innerHTML = `<i class="fa-solid fa-check"></i> Located!`;
+                setTimeout(() => {
+                    gpsBtn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Auto-Detect GPS`;
+                }, 3000);
+            }
+        },
+        error => {
+            console.warn("Mobile GPS error:", error);
+            if (gpsBtn) {
+                gpsBtn.disabled = false;
+                gpsBtn.innerHTML = `<i class="fa-solid fa-location-crosshairs"></i> Auto-Detect GPS`;
+            }
+            alert("Could not retrieve location. Using current location coordinates.");
+        },
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
+}
+
+function selectQuickTag(tagText) {
+    const textEl = document.getElementById('speechText');
+    if (textEl) {
+        if (textEl.value.trim()) {
+            textEl.value = textEl.value.trim() + ". " + tagText;
+        } else {
+            textEl.value = tagText;
+        }
+    }
+}
 
 function updateTime() {
     const now = new Date();

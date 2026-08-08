@@ -1,6 +1,6 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
 
-:root {
+:root, [data-theme="dark"] {
     --bg-dark: #080c0a;
     --card-dark: #101614;
     --card-dark-hover: #141c19;
@@ -22,6 +22,50 @@
 
     --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.4);
     --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.55);
+}
+
+[data-theme="light"] {
+    --bg-dark: #f8fafc;
+    --card-dark: #ffffff;
+    --card-dark-hover: #f1f5f9;
+    --glass-bg: rgba(255, 255, 255, 0.95);
+    --glass-border: rgba(0, 0, 0, 0.08);
+    --glass-border-hover: rgba(16, 185, 129, 0.4);
+
+    --primary: #10b981;
+    --primary-dark: #059669;
+    --primary-glow: rgba(16, 185, 129, 0.2);
+    --accent-cyan: #0284c7;
+    --accent-blue: #2563eb;
+    --accent-amber: #d97706;
+    --accent-red: #dc2626;
+
+    --text-main: #0f172a;
+    --text-muted: #475569;
+    --text-dim: #64748b;
+
+    --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.06);
+    --shadow-hover: 0 10px 30px rgba(0, 0, 0, 0.12);
+}
+
+.theme-toggle-btn {
+    background: rgba(16, 185, 129, 0.12);
+    border: 1px solid rgba(16, 185, 129, 0.3);
+    color: var(--primary);
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    font-size: 0.95rem;
+    transition: all 0.2s ease;
+}
+
+.theme-toggle-btn:hover {
+    background: rgba(16, 185, 129, 0.25);
+    transform: scale(1.05);
 }
 
 * {
@@ -865,6 +909,16 @@ tr.selected-row {
     .detail-row span:last-child {
         text-align: left !important;
         max-width: 100% !important;
+    }
+
+    .input-field, select, textarea {
+        font-size: 16px !important; /* Prevents auto-zoom on mobile safari */
+        min-height: 46px;
+    }
+
+    .submit-btn {
+        min-height: 52px;
+        font-size: 1.05rem;
     }
 }
 
