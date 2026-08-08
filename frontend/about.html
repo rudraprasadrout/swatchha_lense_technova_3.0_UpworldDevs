@@ -93,7 +93,7 @@
         }
 
         .arch-box {
-            background: rgba(8, 12, 10, 0.6);
+            background: var(--card-dark);
             border: 1px solid var(--glass-border);
             border-radius: 12px;
             padding: 20px;
@@ -103,7 +103,7 @@
             font-family: 'Outfit', sans-serif;
             font-size: 1.05rem;
             font-weight: 700;
-            color: white;
+            color: var(--text-main);
             margin-bottom: 8px;
             display: flex;
             align-items: center;
@@ -118,14 +118,14 @@
 
         .tech-pill-sm {
             display: inline-block;
-            background: rgba(16, 185, 129, 0.12);
-            color: var(--primary);
-            border: 1px solid rgba(16, 185, 129, 0.25);
             font-size: 0.72rem;
             font-weight: 700;
-            padding: 3px 8px;
+            color: var(--primary);
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            padding: 4px 10px;
             border-radius: 6px;
-            margin-top: 10px;
+            margin-top: 12px;
         }
     </style>
     <script>
@@ -165,11 +165,11 @@
     <div class="about-wrapper">
         
         <!-- Hero Header -->
-        <div style="text-align:center; max-width:800px; margin:0 auto;">
+        <div style="text-align:center; margin-bottom:36px;">
             <div class="hero-badge">
                 <i class="fa-solid fa-shield-halved"></i> Technical System Documentation
             </div>
-            <h1 data-i18n="aboutTitle" style="font-family:'Outfit',sans-serif; font-size:2.3rem; font-weight:800; color:white; line-height:1.25; margin-bottom:12px;">
+            <h1 data-i18n="aboutTitle" style="font-family:'Outfit',sans-serif; font-size:2.3rem; font-weight:800; color:var(--text-main); line-height:1.25; margin-bottom:12px;">
                 SwachhLens System Architecture & AI Workflow
             </h1>
             <p data-i18n="aboutSub" style="color:var(--text-muted); font-size:1rem; line-height:1.6;">
@@ -214,7 +214,7 @@
 
         <!-- Deep Architectural Breakdown Section -->
         <div class="arch-section">
-            <h2 style="font-family:'Outfit',sans-serif; font-size:1.45rem; font-weight:800; color:white; margin-bottom:10px;">
+            <h2 style="font-family:'Outfit',sans-serif; font-size:1.45rem; font-weight:800; color:var(--text-main); margin-bottom:10px;">
                 <i class="fa-solid fa-microchip text-primary"></i> Multi-Agent Technical Architecture
             </h2>
             <p style="color:var(--text-muted); font-size:0.88rem; line-height:1.6;">

@@ -1,10 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SwachhLens | BMC Bhubaneswar Civic Portal</title>
-    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Outfit:wght@500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap"
+        rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="css/style.css">
     <script src="assets/config.js"></script>
@@ -16,9 +19,13 @@
             max-width: 920px;
             width: 100%;
         }
+
         @media (max-width: 768px) {
-            .portal-grid { grid-template-columns: 1fr; }
+            .portal-grid {
+                grid-template-columns: 1fr;
+            }
         }
+
         .portal-card {
             background: var(--card-dark);
             border-radius: 16px;
@@ -30,11 +37,13 @@
             justify-content: space-between;
             transition: all 0.25s ease;
         }
+
         .portal-card:hover {
             transform: translateY(-4px);
             border-color: var(--primary);
             box-shadow: 0 12px 30px rgba(16, 185, 129, 0.15);
         }
+
         .card-icon {
             width: 52px;
             height: 52px;
@@ -45,6 +54,7 @@
             font-size: 1.5rem;
             margin-bottom: 20px;
         }
+
         .btn-portal {
             padding: 14px 20px;
             border-radius: 12px;
@@ -62,15 +72,17 @@
             gap: 10px;
             transition: all 0.2s ease;
         }
+
         .hero-title {
             font-family: 'Outfit', sans-serif;
             font-size: 3.2rem;
             font-weight: 800;
             letter-spacing: -0.5px;
-            color: white;
+            color: var(--text-main);
             margin-bottom: 12px;
             line-height: 1.15;
         }
+
         .tech-pill {
             display: inline-flex;
             align-items: center;
@@ -84,29 +96,36 @@
             border-radius: 20px;
             margin-bottom: 20px;
         }
+
         .how-it-works-section {
             max-width: 920px;
             width: 100%;
             margin-top: 48px;
             padding-top: 36px;
-            border-top: 1px solid rgba(255, 255, 255, 0.08);
+            border-top: 1px solid var(--glass-border);
         }
+
         .step-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
             gap: 18px;
             margin-top: 24px;
         }
+
         @media (max-width: 768px) {
-            .step-grid { grid-template-columns: 1fr; }
+            .step-grid {
+                grid-template-columns: 1fr;
+            }
         }
+
         .step-card {
-            background: rgba(255, 255, 255, 0.03);
-            border: 1px solid rgba(255, 255, 255, 0.07);
+            background: var(--card-dark);
+            border: 1px solid var(--glass-border);
             border-radius: 14px;
             padding: 24px 20px;
             text-align: center;
         }
+
         .step-number {
             width: 36px;
             height: 36px;
@@ -122,29 +141,35 @@
         }
     </style>
     <script>
-        (function() {
+        (function () {
             const savedTheme = localStorage.getItem("swachh_theme") || "dark";
             document.documentElement.setAttribute("data-theme", savedTheme);
         })();
     </script>
 </head>
+
 <body>
 
     <!-- Header Navigation -->
     <header class="app-header">
         <div style="display:flex; align-items:center; gap:16px;">
-            <a href="index.html" class="brand-logo"><i class="fa-solid fa-leaf"></i> SwachhLens <span style="font-size:0.75rem; background:rgba(16,185,129,0.15); color:var(--primary); padding:3px 8px; border-radius:6px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;">BMC Bhubaneswar</span></a>
+            <a href="index.html" class="brand-logo"><i class="fa-solid fa-leaf"></i> SwachhLens <span
+                    style="font-size:0.75rem; background:rgba(16,185,129,0.15); color:var(--primary); padding:3px 8px; border-radius:6px; font-weight:700; font-family:'Plus Jakarta Sans',sans-serif;">BMC
+                    Bhubaneswar</span></a>
         </div>
-        
+
         <div style="display:flex; align-items:center; gap:12px;">
             <button onclick="toggleTheme()" class="theme-toggle-btn themeIconBtn" title="Toggle Light/Dark Theme">
                 <i class="fa-solid fa-moon"></i>
             </button>
-            <a href="citizen.html" class="nav-back-btn"><i class="fa-solid fa-camera"></i> <span data-i18n="navCitizen">Report Issue</span></a>
-            <a href="about.html" class="nav-back-btn"><i class="fa-solid fa-circle-info"></i> <span data-i18n="navAbout">About System</span></a>
-            
+            <a href="citizen.html" class="nav-back-btn"><i class="fa-solid fa-camera"></i> <span
+                    data-i18n="navCitizen">Report Issue</span></a>
+            <a href="about.html" class="nav-back-btn"><i class="fa-solid fa-circle-info"></i> <span
+                    data-i18n="navAbout">About System</span></a>
+
             <!-- Universal Language Selector -->
-            <select id="uiLangSelect" onchange="changeUiLanguage(this.value)" style="background:rgba(16, 185, 129, 0.12); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.3); font-weight:700; font-size:0.78rem; padding:6px 12px; border-radius:8px; outline:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;">
+            <select id="uiLangSelect" onchange="changeUiLanguage(this.value)"
+                style="background:rgba(16, 185, 129, 0.12); color:var(--primary); border:1px solid rgba(16, 185, 129, 0.3); font-weight:700; font-size:0.78rem; padding:6px 12px; border-radius:8px; outline:none; cursor:pointer; font-family:'Plus Jakarta Sans',sans-serif;">
                 <option value="en" selected>🌐 English</option>
                 <option value="or">🇮🇳 ଓଡ଼ିଆ (Odia)</option>
                 <option value="hi">🇮🇳 हिन्दी (Hindi)</option>
@@ -153,28 +178,35 @@
     </header>
 
     <div class="container-center" style="padding-top:36px; padding-bottom:60px;">
-        
+
         <div style="text-align:center; margin-bottom:44px; max-width:760px;">
             <div class="tech-pill">
-                <i class="fa-solid fa-building-shield"></i> <span data-i18n="homePill">Bhubaneswar Municipal Corporation (BMC) Portal</span>
+                <i class="fa-solid fa-building-shield"></i> <span data-i18n="homePill">Bhubaneswar Municipal Corporation
+                    (BMC) Portal</span>
             </div>
             <h1 class="hero-title"><span data-i18n="homeTitle">Cleaner City, Faster Response</span></h1>
-            <p data-i18n="homeSubtitle" style="color:var(--text-muted); font-size:1.1rem; line-height:1.6; font-weight:500;">
-                Report garbage, blocked drains, or sanitation issues in seconds. Captured photos are instantly routed to municipal cleanup teams.
+            <p data-i18n="homeSubtitle"
+                style="color:var(--text-muted); font-size:1.1rem; line-height:1.6; font-weight:500;">
+                Report garbage, blocked drains, or sanitation issues in seconds. Captured photos are instantly routed to
+                municipal cleanup teams.
             </p>
         </div>
 
         <div class="portal-grid">
-            
+
             <!-- 1. Citizen Portal Card -->
             <div class="portal-card" style="border-top: 3px solid var(--primary);">
                 <div>
                     <div class="card-icon" style="background:rgba(16, 185, 129, 0.15); color:var(--primary);">
                         <i class="fa-solid fa-camera"></i>
                     </div>
-                    <h3 data-i18n="cardCitizenTitle" style="font-family:'Outfit',sans-serif; font-size:1.55rem; font-weight:800; color:var(--text-main); margin-bottom:10px;">Report a Sanitation Issue</h3>
-                    <p data-i18n="cardCitizenDesc" style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:28px;">
-                        Snap a photo of waste or blocked drains, add a voice note in Odia or Hindi, and submit immediately. No login required.
+                    <h3 data-i18n="cardCitizenTitle"
+                        style="font-family:'Outfit',sans-serif; font-size:1.55rem; font-weight:800; color:var(--text-main); margin-bottom:10px;">
+                        Report a Sanitation Issue</h3>
+                    <p data-i18n="cardCitizenDesc"
+                        style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:28px;">
+                        Snap a photo of waste or blocked drains, add a voice note in Odia or Hindi, and submit
+                        immediately. No login required.
                     </p>
                 </div>
                 <a href="citizen.html" class="btn-portal" style="background:var(--primary);">
@@ -188,9 +220,13 @@
                     <div class="card-icon" style="background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan);">
                         <i class="fa-solid fa-shield-halved"></i>
                     </div>
-                    <h3 data-i18n="cardCommandTitle" style="font-family:'Outfit',sans-serif; font-size:1.55rem; font-weight:800; color:var(--text-main); margin-bottom:10px;">Municipal Staff Portal</h3>
-                    <p data-i18n="cardCommandDesc" style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:28px;">
-                        Access live ward map, view incoming citizen reports, manage priority queues, and dispatch cleanup crews.
+                    <h3 data-i18n="cardCommandTitle"
+                        style="font-family:'Outfit',sans-serif; font-size:1.55rem; font-weight:800; color:var(--text-main); margin-bottom:10px;">
+                        Municipal Staff Portal</h3>
+                    <p data-i18n="cardCommandDesc"
+                        style="color:var(--text-muted); font-size:0.95rem; line-height:1.6; margin-bottom:28px;">
+                        Access live ward map, view incoming citizen reports, manage priority queues, and dispatch
+                        cleanup crews.
                     </p>
                 </div>
                 <button type="button" onclick="openModal()" class="btn-portal" style="background:var(--accent-cyan);">
@@ -202,17 +238,21 @@
 
         <!-- Simple 3-Step How It Works Section -->
         <div class="how-it-works-section">
-            <h2 data-i18n="featHeading" style="font-family:'Outfit',sans-serif; font-size:1.5rem; font-weight:800; color:var(--text-main); text-align:center; margin-bottom:8px;">
+            <h2 data-i18n="featHeading"
+                style="font-family:'Outfit',sans-serif; font-size:1.5rem; font-weight:800; color:var(--text-main); text-align:center; margin-bottom:8px;">
                 How It Works
             </h2>
-            <p style="color:var(--text-muted); text-align:center; font-size:0.92rem; font-weight:500; margin-bottom:24px;" data-i18n="howItWorksSub">
+            <p style="color:var(--text-muted); text-align:center; font-size:0.92rem; font-weight:500; margin-bottom:24px;"
+                data-i18n="howItWorksSub">
                 Three quick steps to report and clear civic issues
             </p>
 
             <div class="step-grid">
                 <div class="step-card">
                     <div class="step-number">1</div>
-                    <h4 data-i18n="step1Header" style="color:var(--text-main); font-weight:700; margin-bottom:8px; font-size:1.05rem;">Snap & Capture</h4>
+                    <h4 data-i18n="step1Header"
+                        style="color:var(--text-main); font-weight:700; margin-bottom:8px; font-size:1.05rem;">Snap &
+                        Capture</h4>
                     <p data-i18n="step1Detail" style="color:var(--text-muted); font-size:0.88rem; line-height:1.5;">
                         Take a quick photo of the issue. Location and timestamp are detected automatically.
                     </p>
@@ -220,7 +260,9 @@
 
                 <div class="step-card">
                     <div class="step-number">2</div>
-                    <h4 data-i18n="step2Header" style="color:var(--text-main); font-weight:700; margin-bottom:8px; font-size:1.05rem;">Privacy Safeguard</h4>
+                    <h4 data-i18n="step2Header"
+                        style="color:var(--text-main); font-weight:700; margin-bottom:8px; font-size:1.05rem;">Privacy
+                        Safeguard</h4>
                     <p data-i18n="step2Detail" style="color:var(--text-muted); font-size:0.88rem; line-height:1.5;">
                         Faces and license plates are automatically blurred before storing to ensure citizen privacy.
                     </p>
@@ -228,7 +270,9 @@
 
                 <div class="step-card">
                     <div class="step-number">3</div>
-                    <h4 data-i18n="step3Header" style="color:var(--text-main); font-weight:700; margin-bottom:8px; font-size:1.05rem;">Rapid Cleanup</h4>
+                    <h4 data-i18n="step3Header"
+                        style="color:var(--text-main); font-weight:700; margin-bottom:8px; font-size:1.05rem;">Rapid
+                        Cleanup</h4>
                     <p data-i18n="step3Detail" style="color:var(--text-muted); font-size:0.88rem; line-height:1.5;">
                         Municipal teams get instant location alerts and dispatch sanitation trucks immediately.
                     </p>
@@ -241,15 +285,21 @@
     <!-- Auth Modal -->
     <div id="loginModal" class="modal-backdrop">
         <div class="modal-content">
-            <button onclick="closeModal()" style="position:absolute; top:20px; right:20px; border:none; background:rgba(0,0,0,0.06); color:var(--text-muted); width:32px; height:32px; border-radius:8px; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i class="fa-solid fa-xmark"></i></button>
-            
+            <button onclick="closeModal()"
+                style="position:absolute; top:20px; right:20px; border:none; background:rgba(0,0,0,0.06); color:var(--text-muted); width:32px; height:32px; border-radius:8px; font-size:1rem; cursor:pointer; display:flex; align-items:center; justify-content:center;"><i
+                    class="fa-solid fa-xmark"></i></button>
+
             <div style="display:flex; align-items:center; gap:12px; margin-bottom:20px;">
-                <div style="width:40px; height:40px; border-radius:10px; background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
+                <div
+                    style="width:40px; height:40px; border-radius:10px; background:rgba(6, 182, 212, 0.15); color:var(--accent-cyan); display:flex; align-items:center; justify-content:center; font-size:1.1rem;">
                     <i class="fa-solid fa-shield-halved"></i>
                 </div>
                 <div>
-                    <h3 style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.2rem; color:var(--text-main);">BMC Officer Login</h3>
-                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Bhubaneswar Command Center Authentication</span>
+                    <h3
+                        style="font-family:'Outfit',sans-serif; font-weight:800; font-size:1.2rem; color:var(--text-main);">
+                        BMC Officer Login</h3>
+                    <span style="font-size:0.75rem; color:var(--text-muted); font-weight:600;">Bhubaneswar Command
+                        Center Authentication</span>
                 </div>
             </div>
 
@@ -262,8 +312,9 @@
                     <label class="input-label"><i class="fa-solid fa-key"></i> Security Password</label>
                     <input type="password" id="loginPass" class="input-field" placeholder="••••••••" required>
                 </div>
-                
-                <div id="loginError" style="color:var(--accent-red); background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.2); padding:10px 14px; border-radius:8px; font-size:0.82rem; font-weight:700; margin-bottom:14px; display:none; text-align:center;">
+
+                <div id="loginError"
+                    style="color:var(--accent-red); background:rgba(239, 68, 68, 0.1); border:1px solid rgba(239, 68, 68, 0.2); padding:10px 14px; border-radius:8px; font-size:0.82rem; font-weight:700; margin-bottom:14px; display:none; text-align:center;">
                     Invalid Credentials
                 </div>
 
@@ -278,19 +329,19 @@
     <script>
         function openModal() { document.getElementById('loginModal').style.display = 'flex'; }
         function closeModal() { document.getElementById('loginModal').style.display = 'none'; }
-        
+
         async function handleLogin(e) {
             e.preventDefault();
             const id = document.getElementById('loginId').value.trim();
             const pass = document.getElementById('loginPass').value.trim();
             const errDiv = document.getElementById('loginError');
             errDiv.style.display = 'none';
-            
+
             try {
                 const res = await fetch(`${CONFIG.API_BASE_URL}/api/v1/auth`, {
                     method: 'POST',
-                    headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({id, password: pass})
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ id, password: pass })
                 });
                 const data = await res.json();
                 if (res.ok && data.status === 'success') {
@@ -301,7 +352,7 @@
                     errDiv.innerText = data.message || "Invalid credentials";
                     errDiv.style.display = 'block';
                 }
-            } catch(err) {
+            } catch (err) {
                 errDiv.innerText = "Cannot connect to backend server on " + CONFIG.API_BASE_URL;
                 errDiv.style.display = 'block';
             }
@@ -309,4 +360,5 @@
         }
     </script>
 </body>
+
 </html>

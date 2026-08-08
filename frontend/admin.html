@@ -360,10 +360,31 @@
                             </tr>
                         </thead>
                         <tbody id="adminTableBody">
-
                             <tr><td colspan="7" style="text-align:center; color:var(--text-muted);">Loading active tickets from backend...</td></tr>
                         </tbody>
                     </table>
+                </div>
+
+                <!-- Admin Dashboard Table Pagination Controls -->
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-top:14px; flex-wrap:wrap; gap:10px; padding-top:12px; border-top:1px solid var(--glass-border);">
+                    <div style="font-size:0.8rem; color:var(--text-muted); font-weight:600;" id="paginationInfo">
+                        Showing 0 to 0 of 0 tickets
+                    </div>
+                    <div style="display:flex; align-items:center; gap:8px;">
+                        <button id="prevPageBtn" onclick="changePage(-1)" class="nav-back-btn" style="padding:6px 12px; font-size:0.78rem;" disabled>
+                            <i class="fa-solid fa-chevron-left"></i> Prev
+                        </button>
+                        <span id="pageIndicator" style="font-size:0.8rem; font-weight:800; color:var(--text-main); min-width:90px; text-align:center;">Page 1 of 1</span>
+                        <button id="nextPageBtn" onclick="changePage(1)" class="nav-back-btn" style="padding:6px 12px; font-size:0.78rem;" disabled>
+                            Next <i class="fa-solid fa-chevron-right"></i>
+                        </button>
+                        <select id="itemsPerPageSelect" onchange="changeItemsPerPage(this.value)" style="background:var(--card-dark-hover); color:var(--text-main); border:1px solid var(--glass-border); font-size:0.78rem; font-weight:700; padding:5px 8px; border-radius:8px; outline:none; margin-left:6px; font-family:'Plus Jakarta Sans',sans-serif;">
+                            <option value="5" selected>5 per page</option>
+                            <option value="10">10 per page</option>
+                            <option value="25">25 per page</option>
+                            <option value="ALL">Show All</option>
+                        </select>
+                    </div>
                 </div>
             </div>
         </div>
@@ -529,10 +550,9 @@
     <script src="https://unpkg.com/leaflet.heat@0.2.0/dist/leaflet-heat.js"></script>
 
     <script>
-        // Theme Manager Script - Permanent Cyber Dark Mode
         (function() {
-            document.documentElement.setAttribute("data-theme", "dark");
-            localStorage.setItem("swachh_theme", "dark");
+            const savedTheme = localStorage.getItem("swachh_theme") || "dark";
+            document.documentElement.setAttribute("data-theme", savedTheme);
         })();
 
         if (!sessionStorage.getItem("swachh_auth")) window.location.replace("index.html");
@@ -540,6 +560,8 @@
 
         let map, markersGroup, routePolyline = null, heatmapLayer = null, isHeatmapActive = false, ticketsData = [], filteredTickets = [], currentInspectId = null;
         let currentTileLayer = null;
+        let currentPage = 1;
+        let itemsPerPage = 5;
 
         const tileProviders = {
             dark: 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
@@ -683,14 +705,44 @@
         function scrollToSection(id) {
             const el = document.getElementById(id);
             if (el) el.scrollIntoView({ behavior: 'smooth' });
-        }
-
-        const cityCenterCoords = {
+const cityCenterCoords = {
             "BMC": [20.2961, 85.8245],
             "CMC": [20.4625, 85.8828],
             "PURI": [19.8135, 85.8312],
             "RMC": [22.2604, 84.8536]
         };
+
+        function changePage(delta) {
+            const totalItems = filteredTickets.length;
+            const perPage = itemsPerPage === 'ALL' ? totalItems : itemsPerPage;
+            const totalPages = Math.ceil(totalItems / perPage) || 1;
+            currentPage += delta;
+            if (currentPage < 1) currentPage = 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            renderTableAndMap();
+        }
+
+        function changeItemsPerPage(val) {
+            itemsPerPage = val === 'ALL' ? 'ALL' : parseInt(val, 10);
+            currentPage = 1;
+            renderTableAndMap();
+        }
+
+        function updatePaginationControls(start, end, total) {
+            const info = document.getElementById('paginationInfo');
+            const indicator = document.getElementById('pageIndicator');
+            const prevBtn = document.getElementById('prevPageBtn');
+            const nextBtn = document.getElementById('nextPageBtn');
+
+            if (info) info.innerText = total > 0 ? `Showing ${start}-${end} of ${total} tickets` : 'Showing 0 tickets';
+            
+            const perPage = itemsPerPage === 'ALL' ? total : itemsPerPage;
+            const totalPages = Math.ceil(total / perPage) || 1;
+            
+            if (indicator) indicator.innerText = `Page ${currentPage} of ${totalPages}`;
+            if (prevBtn) prevBtn.disabled = currentPage <= 1;
+            if (nextBtn) nextBtn.disabled = currentPage >= totalPages;
+        }
 
         function filterTickets() {
             const q = document.getElementById('searchInput') ? document.getElementById('searchInput').value.toLowerCase().trim() : '';
@@ -717,146 +769,10 @@
                 map.flyTo(cityCenterCoords[jF], 13, { animate: true });
             }
 
+            currentPage = 1;
             renderMetrics();
             renderTableAndMap();
         }
-
-
-
-        // --- Haversine Distance Calculation (in km) ---
-        function getHaversineDist(lat1, lon1, lat2, lon2) {
-            const R = 6371;
-            const dLat = (lat2 - lat1) * Math.PI / 180;
-            const dLon = (lon2 - lon1) * Math.PI / 180;
-            const a = Math.sin(dLat / 2) * Math.sin(dLat / 2) +
-                      Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
-                      Math.sin(dLon / 2) * Math.sin(dLon / 2);
-            const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
-            return R * c;
-        }
-
-        // --- TSP Nearest-Neighbor Hybrid Route Optimizer ---
-        function solveOptimizedTruckRoute(tickets) {
-            const BMC_DEPOT = { id: "BMC-DEPOT", category: "Central Waste Depot", lat: 20.2961, lng: 85.8245, urgency_score: 0 };
-            
-            if (!tickets || tickets.length === 0) {
-                return {
-                    pathPoints: [
-                        [20.2961, 85.8245],
-                        [20.3200, 85.8400],
-                        [20.3500, 85.8200],
-                        [20.3100, 85.7900],
-                        [20.2800, 85.8150],
-                        [20.2961, 85.8245]
-                    ],
-                    totalDistKm: 14.2,
-                    estTimeMins: 32,
-                    fuelSavedLiters: 3.5,
-                    stopCount: 5
-                };
-            }
-
-            const unvisited = [...tickets];
-            let currentPos = { lat: BMC_DEPOT.lat, lng: BMC_DEPOT.lng };
-            const orderedStops = [];
-            const pathPoints = [[BMC_DEPOT.lat, BMC_DEPOT.lng]];
-            let totalDist = 0;
-
-            while (unvisited.length > 0) {
-                let bestIdx = 0;
-                let bestScore = Infinity;
-                let bestDist = 0;
-
-                for (let i = 0; i < unvisited.length; i++) {
-                    const t = unvisited[i];
-                    const dist = getHaversineDist(currentPos.lat, currentPos.lng, t.lat, t.lng);
-                    const urgencyFactor = 1.0 - (Math.min(10, t.urgency_score || 5) / 25.0);
-                    const score = dist * urgencyFactor;
-
-                    if (score < bestScore) {
-                        bestScore = score;
-                        bestIdx = i;
-                        bestDist = dist;
-                    }
-                }
-
-                const nextStop = unvisited.splice(bestIdx, 1)[0];
-                totalDist += bestDist;
-                orderedStops.push(nextStop);
-                pathPoints.push([nextStop.lat, nextStop.lng]);
-                currentPos = { lat: nextStop.lat, lng: nextStop.lng };
-            }
-
-            // Return to Central Depot
-            const returnDist = getHaversineDist(currentPos.lat, currentPos.lng, BMC_DEPOT.lat, BMC_DEPOT.lng);
-            totalDist += returnDist;
-            pathPoints.push([BMC_DEPOT.lat, BMC_DEPOT.lng]);
-
-            const totalDistKm = parseFloat(totalDist.toFixed(1));
-            const estTimeMins = Math.round(totalDistKm * 2.2 + orderedStops.length * 4);
-            const fuelSavedLiters = parseFloat((totalDistKm * 0.28).toFixed(1));
-
-            return {
-                pathPoints,
-                orderedStops,
-                totalDistKm,
-                estTimeMins,
-                fuelSavedLiters,
-                stopCount: orderedStops.length
-            };
-        }
-
-        // --- Algorithmic Garbage Truck Route Planner & Animated Telemetry ---
-        function drawTruckRoute() {
-            if (routePolyline) map.removeLayer(routePolyline);
-            if (movingTruckMarker) map.removeLayer(movingTruckMarker);
-            if (truckAnimTimer) clearInterval(truckAnimTimer);
-
-            const activeTickets = ticketsData.filter(t => (t.status || 'reported') !== 'resolved');
-
-            const routeResult = solveOptimizedTruckRoute(activeTickets);
-            const waypoints = routeResult.pathPoints;
-
-            // Draw green dashed optimized polyline
-            routePolyline = L.polyline(waypoints, {
-                color: '#10b981',
-                weight: 4,
-                dashArray: '8, 8',
-                opacity: 0.95
-            }).addTo(map);
-
-            const truckIcon = L.divIcon({
-                className: 'moving-truck-pin',
-                html: '<div class="moving-truck-icon"><i class="fa-solid fa-truck-fast"></i></div>',
-                iconSize: [36, 36],
-                iconAnchor: [18, 18]
-            });
-
-            movingTruckMarker = L.marker(waypoints[0], { icon: truckIcon }).addTo(map);
-            movingTruckMarker.bindTooltip("🚛 <strong>BMC Dispatch Truck #01</strong><br><span style='font-size:0.72rem;'>En Route to Janpath Depot</span>", { permanent: false, direction: "top" });
-
-            let step = 0;
-            truckAnimTimer = setInterval(() => {
-                step = (step + 1) % waypoints.length;
-                movingTruckMarker.setLatLng(waypoints[step]);
-                const stopName = (step === 0 || step === waypoints.length - 1) ? "Janpath Central Depot" : `Ward Pickup Point #${step}`;
-                movingTruckMarker.setTooltipContent(`🚛 <strong>BMC Dispatch Truck #01</strong><br><span style='font-size:0.72rem; color:#10b981;'>En Route: ${stopName}</span>`);
-            }, 1200);
-
-            // Update live telemetry stats overlay on map
-            const overlay = document.getElementById('routeStatsOverlay');
-            if (overlay) {
-                overlay.style.display = 'flex';
-                document.getElementById('routeDistVal').innerText = `${routeResult.totalDistKm} km`;
-                document.getElementById('routeTimeVal').innerText = `${routeResult.estTimeMins} mins`;
-                document.getElementById('routeFuelVal').innerText = `${routeResult.fuelSavedLiters} L`;
-            }
-
-            map.fitBounds(routePolyline.getBounds(), { padding: [50, 50] });
-            alert(`⚡ TSP Algorithmic Route Optimized!\n\n• Route Distance: ${routeResult.totalDistKm} km\n• Collection Points: ${routeResult.stopCount} Wards\n• Est. Fuel Saved: ${routeResult.fuelSavedLiters} Litres`);
-        }
-
-
 
         function renderMetrics() {
             document.getElementById('mTotal').innerText = ticketsData.length;
@@ -872,9 +788,11 @@
 
             if (filteredTickets.length === 0) {
                 tbody.innerHTML = '<tr><td colspan="7" style="text-align:center; color:var(--text-muted); padding:20px;">No matching civic tickets found.</td></tr>';
+                updatePaginationControls(0, 0, 0);
                 return;
             }
 
+            // Render Radar Map Pins for ALL filtered tickets
             filteredTickets.forEach(t => {
                 let pinColor = t.status === 'resolved' ? '#06b6d4' : (t.urgency_score >= 7.0 ? '#ef4444' : t.urgency_score >= 4.0 ? '#f59e0b' : '#10b981');
                 let categoryIcon = '<i class="fa-solid fa-trash-can"></i>';
@@ -884,7 +802,6 @@
                 else if (t.category === 'Construction Debris') categoryIcon = '<i class="fa-solid fa-trowel-bricks"></i>';
                 else if (t.category === 'E-Waste') categoryIcon = '<i class="fa-solid fa-plug"></i>';
                 else if (t.category === 'Hazardous') categoryIcon = '<i class="fa-solid fa-biohazard"></i>';
-
 
                 const customIcon = L.divIcon({
                     className: '',
@@ -906,18 +823,32 @@
                 const popupHtml = `
                     <div style="padding:4px; font-family:'Plus Jakarta Sans',sans-serif;">
                         <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:6px;">
-                            <strong style="font-family:'Outfit',sans-serif; color:white; font-size:1.05rem;">${t.id}</strong>
+                            <strong style="font-family:'Outfit',sans-serif; color:var(--text-main); font-size:1.05rem;">${t.id}</strong>
                             <span style="font-size:0.7rem; font-weight:800; padding:2px 8px; border-radius:6px; background:${pinColor}22; color:${pinColor}; border:1px solid ${pinColor}44;">${t.status || 'reported'}</span>
                         </div>
-                        <div style="font-size:0.8rem; color:#94a3b8; margin-bottom:4px;">Category: <strong style="color:white;">${t.category}</strong></div>
-                        <div style="font-size:0.8rem; color:#94a3b8; margin-bottom:8px;">Urgency Score: <strong style="color:${pinColor}; font-size:0.9rem;">${t.urgency_score}/10</strong></div>
+                        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:4px;">Category: <strong style="color:var(--text-main);">${t.category}</strong></div>
+                        <div style="font-size:0.8rem; color:var(--text-muted); margin-bottom:8px;">Urgency Score: <strong style="color:${pinColor}; font-size:0.9rem;">${t.urgency_score}/10</strong></div>
                         <button onclick="inspect('${t.id}')" style="width:100%; background:linear-gradient(135deg, var(--primary), var(--primary-dark)); color:white; border:none; padding:6px; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">Inspect Ticket</button>
                     </div>
                 `;
 
                 marker.bindPopup(popupHtml);
                 marker.on('click', () => inspect(t.id));
+            });
 
+            // Pagination Slicing for Table Display
+            const totalItems = filteredTickets.length;
+            const perPage = itemsPerPage === 'ALL' ? totalItems : itemsPerPage;
+            const totalPages = Math.ceil(totalItems / perPage) || 1;
+            if (currentPage > totalPages) currentPage = totalPages;
+            if (currentPage < 1) currentPage = 1;
+
+            const startIndex = (currentPage - 1) * perPage;
+            const endIndex = Math.min(startIndex + perPage, totalItems);
+            const pageTickets = filteredTickets.slice(startIndex, endIndex);
+
+            pageTickets.forEach(t => {
+                let pinColor = t.status === 'resolved' ? '#06b6d4' : (t.urgency_score >= 7.0 ? '#ef4444' : t.urgency_score >= 4.0 ? '#f59e0b' : '#10b981');
                 const isSelected = currentInspectId === t.id;
                 const statusBadgeBg = t.status === 'resolved' ? 'rgba(6, 182, 212, 0.2)' : t.status === 'in_progress' ? 'rgba(245, 158, 11, 0.2)' : t.status === 'forwarded' ? 'rgba(139, 92, 246, 0.25)' : 'rgba(255, 255, 255, 0.1)';
                 const statusBadgeColor = t.status === 'resolved' ? 'var(--accent-cyan)' : t.status === 'in_progress' ? 'var(--accent-amber)' : t.status === 'forwarded' ? '#a78bfa' : 'var(--text-muted)';
@@ -934,18 +865,13 @@
                         <td><button onclick="event.stopPropagation(); inspect('${t.id}');" style="background:linear-gradient(135deg, var(--accent-cyan), #0284c7); color:white; border:none; padding:5px 10px; border-radius:8px; font-weight:800; font-size:0.75rem; cursor:pointer;">Inspect</button></td>
                     </tr>
                 `;
-
             });
+
+            updatePaginationControls(startIndex + 1, endIndex, totalItems);
 
             if (filteredTickets.length > 0 && !currentInspectId) {
                 inspect(filteredTickets[0].id);
             }
-        }
-
-
-        function updateDispatchVisuals(t) {
-            const cat = (t.category || "").toLowerCase();
-            const vol = (t.volume_band || "").toLowerCase();
             const isSmall = vol.includes("small") || vol.includes("<0.2");
             const isLarge = vol.includes("large") || vol.includes(">1") || vol.includes(">3");
 
