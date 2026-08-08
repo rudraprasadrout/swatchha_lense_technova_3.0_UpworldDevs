@@ -65,6 +65,8 @@ def init_db(db_path):
         cursor.execute("ALTER TABLE tickets ADD COLUMN in_jurisdiction INTEGER DEFAULT 1")
     if "governing_authority" not in existing_cols:
         cursor.execute("ALTER TABLE tickets ADD COLUMN governing_authority TEXT DEFAULT 'Bhubaneswar Municipal Corporation (BMC)'")
+    if "reporters" not in existing_cols:
+        cursor.execute("ALTER TABLE tickets ADD COLUMN reporters TEXT DEFAULT '[]'")
     conn.commit()
     conn.close()
 

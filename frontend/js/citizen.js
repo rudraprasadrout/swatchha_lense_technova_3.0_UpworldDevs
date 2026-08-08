@@ -75,7 +75,7 @@ async function submitReport(e) {
 
     if (submitBtn) {
         submitBtn.disabled = true;
-        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Anonymizing & Running AI...</span>`;
+        submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Processing Report...</span>`;
     }
 
     // Parse coordinates from location input if manually edited
@@ -92,6 +92,16 @@ async function submitReport(e) {
         }
     }
 
+    function getOrCreateUserId() {
+        let uid = localStorage.getItem('swachh_user_id');
+        if (!uid) {
+            uid = 'USER-' + Math.random().toString(36).substring(2, 9).toUpperCase();
+            localStorage.setItem('swachh_user_id', uid);
+        }
+        return uid;
+    }
+
+    const userId = getOrCreateUserId();
     const isSensitive = sensitiveSelect !== "None";
 
     const formData = new FormData();
@@ -102,6 +112,7 @@ async function submitReport(e) {
     formData.append('lang', langSelect);
     formData.append('is_sensitive_area', isSensitive ? "1" : "0");
     formData.append('sensitive_area_type', sensitiveSelect);
+    formData.append('user_id', userId);
 
     try {
         const baseUrl = (typeof CONFIG !== 'undefined' && CONFIG.API_BASE_URL) ? CONFIG.API_BASE_URL : "http://127.0.0.1:5000";
@@ -114,11 +125,18 @@ async function submitReport(e) {
                 card.style.display = 'flex'; // Permanently reveal details card
             }
 
-            if (result.action === 'merged_duplicate') {
+            if (result.action === 'already_reported') {
                 setSafeText('resTicketId', result.ticket_id);
-                setSafeText('resCategory', "Merged Duplicate (<20m Radius)");
-                setSafeText('resVolume', "Priority Incremented (+1)");
-                setSafeText('resUrgency', "Score Escalated");
+                setSafeText('resCategory', (result.category || "Issue") + " (Already Reported by You)");
+                setSafeText('resVolume', "Anti-Spam Filter Active");
+                setSafeText('resUrgency', "Priority Maintained");
+                setSafeText('resDispatchUnit', "Existing Crew Queue");
+                setSafeText('resDispatch', result.message || "You have already submitted a report for this issue. Priority escalation is reserved for distinct citizen reports.");
+            } else if (result.action === 'merged_duplicate') {
+                setSafeText('resTicketId', result.ticket_id);
+                setSafeText('resCategory', (result.category || "Issue") + " (Merged Duplicate <20m)");
+                setSafeText('resVolume', "Priority Escalated (+1 Unique Citizen)");
+                setSafeText('resUrgency', "Community Score Boosted");
                 setSafeText('resDispatchUnit', "Escalated Team Dispatch");
                 setSafeText('resDispatch', result.message);
             } else if (result.ticket) {

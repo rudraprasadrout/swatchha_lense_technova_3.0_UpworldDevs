@@ -1,12 +1,12 @@
 import base64
 from datetime import datetime
+import json
 import os
 import sys
 import uuid
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
-# Automatically ensure parent directory is in sys.path to avoid ModuleNotFoundError
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, ".."))
 FRONTEND_DIR = os.path.join(PROJECT_ROOT, "frontend")
@@ -16,7 +16,6 @@ if CURRENT_DIR not in sys.path:
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
-# Auto-load .env file if present in project root
 ENV_FILE = os.path.join(PROJECT_ROOT, ".env")
 if os.path.exists(ENV_FILE):
     try:
@@ -27,9 +26,8 @@ if os.path.exists(ENV_FILE):
                     k, v = line.split("=", 1)
                     os.environ[k.strip()] = v.strip().strip("'\"")
     except Exception as e:
-        print(f"Notice: .env reading exception: {e}")
+        pass
 
-# Import backend modules
 from anonymizer import anonymize_image_bytes
 from db import get_conn, init_db
 from dedup import find_existing_nearby_ticket, merge_duplicate_ticket
@@ -40,10 +38,7 @@ from firebase_db import (
     find_existing_nearby_ticket_fs, merge_duplicate_ticket_fs, delete_ticket_fs
 )
 
-
 app = Flask(__name__, static_folder=FRONTEND_DIR)
-
-# Enable full CORS for cross-origin access across all routes
 CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.after_request
@@ -54,17 +49,14 @@ def add_cors_headers(response):
     return response
 
 DB_PATH = os.path.join(CURRENT_DIR, "swachhlens.db")
-
-# Initialize database schema on startup
 init_db(DB_PATH)
 
 
-# --- ROOT INDEX ENDPOINT ---
 @app.route("/", methods=["GET"])
 def index():
     return jsonify(
         {
-            "system": "SwachhLens AI Backend Engine",
+            "system": "SwachhLens Engine",
             "status": "online",
             "version": "v1.0",
             "endpoints": {
@@ -79,20 +71,17 @@ def index():
     )
 
 
-# --- HEALTHCHECK ENDPOINT ---
 @app.route("/health", methods=["GET"])
 def health():
-    return jsonify({"status": "healthy", "service": "SwachhLens Core Engine v1.0"})
+    return jsonify({"status": "healthy", "service": "SwachhLens Core Service"})
 
 
-# --- MUNICIPAL OFFICER AUTHENTICATION ENDPOINT ---
 @app.route("/api/v1/auth", methods=["POST"])
 def officer_login():
     data = request.get_json() or {}
     officer_id = data.get("id", "").strip()
     password = data.get("password", "").strip()
 
-    # Verified officer credentials check
     if (officer_id in ["admin@swachhlens.gov.in", "ADMIN01"]) and password == "admin123":
         return jsonify({
             "status": "success",
@@ -110,7 +99,6 @@ def officer_login():
     }), 401
 
 
-# --- CITIZEN REPORT INGESTION ENDPOINT ---
 @app.route("/api/v1/report", methods=["POST"])
 def submit_report():
     api_key = os.environ.get("MISTRAL_API_KEY", "")
@@ -122,7 +110,6 @@ def submit_report():
         note = data.get("note", "").strip()
         lang = data.get("lang", "or-IN").strip()
 
-        # Location Sensitivity Zone Support
         is_sensitive = data.get("is_sensitive_area", "0") in ["1", "true", "True"]
         sensitive_type = data.get("sensitive_area_type", "None").strip()
 
@@ -134,33 +121,14 @@ def submit_report():
         if not img_bytes:
             return jsonify({"status": "error", "message": "Empty image uploaded"}), 400
 
-        # Step 1: Run Edge Privacy Anonymization
+        user_id = data.get("user_id", "").strip() or request.remote_addr or "anon_user"
+
         anonymized_bytes, faces_blurred, plates_blurred = anonymize_image_bytes(img_bytes)
 
-        # Step 1.5: Validate Municipal Geofence Jurisdiction
         jurisdiction_info = check_municipal_jurisdiction(lat, lng)
         in_jurisdiction = 1 if jurisdiction_info["in_jurisdiction"] else 0
         authority_name = jurisdiction_info["authority"]
 
-        # Step 2: Spatial Deduplication Check (20m Haversine)
-        duplicate_match = find_existing_nearby_ticket_fs(lat=lat, lng=lng, max_distance_meters=20.0)
-
-        if duplicate_match:
-            merge_duplicate_ticket_fs(existing_ticket=duplicate_match)
-
-            return jsonify(
-                {
-                    "status": "success",
-                    "action": "merged_duplicate",
-                    "message": "Report matched an existing active ticket within 20m. Priority incremented.",
-                    "ticket_id": duplicate_match["id"],
-                    "in_jurisdiction": in_jurisdiction,
-                    "governing_authority": authority_name,
-                    "jurisdiction_note": jurisdiction_info["jurisdiction_note"]
-                }
-            )
-
-        # Step 3: Run Mistral Multimodal Vision Extraction with Regional Voice Note
         ai_data = analyze_image_with_mistral(
             anonymized_bytes, citizen_note=note, lang=lang, api_key=api_key
         )
@@ -168,10 +136,38 @@ def submit_report():
         is_drain = bool(ai_data.get("is_drain_blocked", False))
         is_fire = bool(ai_data.get("is_fire_hazard", False))
         dispatch_unit = ai_data.get("dispatch_unit", "Manual Sanitation Crew")
+        incoming_category = ai_data.get("category", "Organic Waste")
 
-        # Step 4: Calculate Deterministic Algorithmic Urgency Score
+        duplicate_match = find_existing_nearby_ticket_fs(
+            lat=lat, lng=lng, category=incoming_category, max_distance_meters=20.0
+        )
+
+        if duplicate_match:
+            merged_res = merge_duplicate_ticket_fs(existing_ticket=duplicate_match, reporter_id=user_id)
+            action_type = merged_res.get("action_status", "merged_duplicate")
+            is_spam_prevented = merged_res.get("is_spam_prevented", False)
+
+            if action_type == "already_reported":
+                msg = "You have already submitted a report for this issue. Priority boost is restricted to unique citizen reports."
+            else:
+                msg = "Report matched an existing active ticket within 20m. Priority incremented (+1 unique citizen confirmation)."
+
+            return jsonify(
+                {
+                    "status": "success",
+                    "action": action_type,
+                    "is_spam_prevented": is_spam_prevented,
+                    "message": msg,
+                    "ticket_id": duplicate_match["id"],
+                    "category": duplicate_match.get("category"),
+                    "in_jurisdiction": in_jurisdiction,
+                    "governing_authority": authority_name,
+                    "jurisdiction_note": jurisdiction_info["jurisdiction_note"]
+                }
+            )
+
         computed_urgency = calculate_algorithmic_urgency(
-            category=ai_data.get("category", "Organic Waste"),
+            category=incoming_category,
             volume_band=ai_data.get("volume_band", "Medium (0.2-1.0m³)"),
             is_drain_blocked=is_drain,
             is_fire_hazard=is_fire,
@@ -180,18 +176,16 @@ def submit_report():
             is_monsoon_season=True,
         )
 
-        # Step 5: Convert Anonymized Bytes to Base64 String
         img_b64 = base64.b64encode(anonymized_bytes).decode("utf-8")
 
         ticket_id = f"SW-{uuid.uuid4().hex[:8].upper()}"
         now_str = datetime.utcnow().isoformat()
 
-        # Step 6: Save Ticket into Firebase Firestore & Local SQLite
         ticket_record = {
             "id": ticket_id,
             "lat": lat,
             "lng": lng,
-            "category": ai_data.get("category"),
+            "category": incoming_category,
             "volume_band": ai_data.get("volume_band"),
             "hazard_level": 1 if (is_drain or is_fire) else 0,
             "is_drain_blocked": 1 if is_drain else 0,
@@ -209,6 +203,7 @@ def submit_report():
             "created_at": now_str,
             "last_seen": now_str,
             "duplicate_count": 0,
+            "reporters": json.dumps([user_id]),
             "is_sensitive_area": 1 if is_sensitive else 0,
             "sensitive_area_type": sensitive_type,
             "dispatch_unit": dispatch_unit,
@@ -248,10 +243,8 @@ def submit_report():
         return jsonify({"status": "error", "message": str(e)}), 500
 
 
-# --- MUNICIPALITY GEOFENCE CONFIGURATION ENDPOINTS ---
 @app.route("/api/v1/config/municipality", methods=["GET", "POST"])
 def manage_municipality_config():
-    """Allows municipal command staff to dynamically configure or switch active city jurisdiction boundaries."""
     from scoring import MUNICIPAL_BOUNDS, CITY_PRESETS, set_active_municipality
     if request.method == "POST":
         data = request.get_json() or {}
@@ -265,11 +258,8 @@ def manage_municipality_config():
     return jsonify({"status": "success", "config": MUNICIPAL_BOUNDS, "presets": CITY_PRESETS})
 
 
-# --- ADMIN DASHBOARD MAP TICKETS ENDPOINT ---
 @app.route("/api/v1/reports", methods=["GET"])
-
 def get_reports():
-    """Returns all active civic tickets formatted for Leaflet.js map integration."""
     rows = get_all_tickets()
 
     reports = []
@@ -281,10 +271,8 @@ def get_reports():
     return jsonify({"status": "success", "data": reports})
 
 
-# --- TICKET IMAGE RETRIEVAL ENDPOINT ---
 @app.route("/api/v1/report/<ticket_id>/image", methods=["GET"])
 def get_ticket_image(ticket_id):
-    """Returns base64 image payload for a specific ticket when requested by dashboard."""
     ticket = get_ticket(ticket_id)
 
     if not ticket or not ticket.get("image_b64"):
@@ -293,10 +281,8 @@ def get_ticket_image(ticket_id):
     return jsonify({"status": "success", "image_b64": ticket["image_b64"]})
 
 
-# --- AI EXECUTIVE TABLE SUMMARY ENDPOINT ---
 @app.route("/api/v1/reports/summary", methods=["POST", "GET"])
 def get_reports_summary():
-    """Generates an AI Executive Analytics Summary for municipal command staff."""
     rows = get_all_tickets()
 
     total = len(rows)
@@ -325,7 +311,7 @@ def get_reports_summary():
     cleanliness_score = max(10, 100 - (high_urgency * 12 + drain_blocks * 8))
 
     summary_text = (
-        f"MUNICIPAL AI EXECUTIVE SUMMARY: Total {total} active civic complaint(s) logged. "
+        f"MUNICIPAL EXECUTIVE SUMMARY: Total {total} active civic complaint(s) logged. "
         f"Top reported waste category is '{top_cat}' ({categories.get(top_cat, 0)} reports). "
         f"Critical priority queue contains {high_urgency} high-urgency issue(s) (score >= 7.0), including {drain_blocks} drain blockage(s) and {fire_hazards} fire hazard(s). "
         f"Estimated Municipal Cleanliness Index: {cleanliness_score}/100. Immediate dispatch recommended for high-urgency clusters."
@@ -335,7 +321,6 @@ def get_reports_summary():
 
 
 def query_mistral_advisor(user_query: str, telemetry_context: str) -> str:
-    """Invokes real Mistral AI Chat Completion API when MISTRAL_API_KEY is available."""
     api_key = os.environ.get("MISTRAL_API_KEY")
     if not api_key:
         return None
@@ -348,7 +333,7 @@ def query_mistral_advisor(user_query: str, telemetry_context: str) -> str:
 
         client = Mistral(api_key=api_key)
         prompt = (
-            f"You are the SwachhLens AI Municipal Command Advisor. Provide a direct, intelligent, and helpful answer for the officer.\n"
+            f"You are the SwachhLens Municipal Command Advisor. Provide a direct, intelligent, and helpful answer for the officer.\n"
             f"Live Telemetry Context:\n{telemetry_context}\n\n"
             f"Officer Query: '{user_query}'\n\n"
             f"Rule: Keep your response short, conversational, and direct (max 3-4 bullet points or short paragraphs). Do NOT output repetitive template headers."
@@ -360,19 +345,12 @@ def query_mistral_advisor(user_query: str, telemetry_context: str) -> str:
         if res and res.choices and res.choices[0].message:
             return res.choices[0].message.content.strip()
     except Exception as e:
-        print(f"Mistral AI Chat API execution notice: {e}")
+        pass
     return None
 
 
-# --- MISTRAL AI CITY TELEMETRY ADVISOR BOT ENDPOINT ---
 @app.route("/api/v1/ai/analyze-city", methods=["POST", "GET"])
 def analyze_city_telemetry():
-    """
-    Analyzes active database complaints to answer:
-    1. Work remaining & estimated crew clearance hours.
-    2. High-density complaint hotspots.
-    3. Low-complaint zone diagnostics & root cause analysis.
-    """
     rows = get_all_tickets()
 
     data_json = request.get_json() or {}
@@ -407,50 +385,46 @@ def analyze_city_telemetry():
         f"Estimated workforce clearance effort: ~{est_hours} truck-hours."
     )
 
-    # 1. Attempt live Mistral AI Cloud API call if MISTRAL_API_KEY is configured
     live_reply = query_mistral_advisor(user_query, telemetry_ctx) if user_query else None
 
     if live_reply:
-        bot_response = f"🤖 [Mistral AI Live API Response]:\n{live_reply}"
+        bot_response = f"Live Advisor Response:\n{live_reply}"
     elif total == 0:
-        bot_response = "🏙️ City Cleanliness Status: Excellent! No active complaints logged in database. All wards operating clean with 100% cleanliness score."
-        workload_analysis = "Workload Status: 0 pending complaints. Sanitation crews on standby."
-        density_analysis = "Density Status: Uniformly low across all city sectors."
-        low_density_root_cause = "Zero Complaint Diagnostics: High efficiency from scheduled morning municipal sweeps."
+        bot_response = "City Cleanliness Status: Excellent. No active complaints logged in database. All wards operating clean with 100% cleanliness score."
     elif "workload" in user_query or "work" in user_query or "clearance" in user_query or "backlog" in user_query:
         bot_response = (
-            f"📊 WORKLOAD BRIEFING:\n"
-            f"• Pending Initial Dispatch: {reported} ticket(s)\n"
-            f"• Currently In-Progress: {in_progress} ticket(s)\n"
-            f"• Resolved Completed: {resolved}/{total} tickets\n"
-            f"⏱️ Estimated Clearance Effort: ~{est_hours} truck-hours required for full crew dispatch clearance."
+            f"WORKLOAD BRIEFING:\n"
+            f"- Pending Initial Dispatch: {reported} ticket(s)\n"
+            f"- Currently In-Progress: {in_progress} ticket(s)\n"
+            f"- Resolved Completed: {resolved}/{total} tickets\n"
+            f"Estimated Clearance Effort: ~{est_hours} truck-hours required for full crew dispatch clearance."
         )
     elif "density" in user_query or "hotspot" in user_query or "high" in user_query:
         bot_response = (
-            f"🔥 SPATIAL DENSITY ANALYTICS:\n"
-            f"• Primary Waste Category: '{top_cat}' ({cat_counts.get(top_cat, 0)} reports)\n"
-            f"• Environmental Hazards: {drain_blocked} blocked drain(s) & {fire_hazards} fire hazard(s)\n"
-            f"📍 Recommendation: Route heavy compaction vehicles to high-density clusters first."
+            f"SPATIAL DENSITY ANALYTICS:\n"
+            f"- Primary Waste Category: '{top_cat}' ({cat_counts.get(top_cat, 0)} reports)\n"
+            f"- Environmental Hazards: {drain_blocked} blocked drain(s) & {fire_hazards} fire hazard(s)\n"
+            f"Recommendation: Route heavy compaction vehicles to high-density clusters first."
         )
     elif "low" in user_query or "reason" in user_query or "cause" in user_query or "less" in user_query:
         bot_response = (
-            f"🔍 LOW-COMPLAINT ZONE DIAGNOSTICS:\n"
+            f"LOW-COMPLAINT ZONE DIAGNOSTICS:\n"
             f"Low complaint density in peripheral wards stems from 2 distinct factors:\n"
-            f"1️⃣ Efficient Routine Sweeps: Scheduled daily morning garbage vehicle routes.\n"
-            f"2️⃣ Digital Adoption Gap: Citizens in rural/suburban wards report via physical councilors rather than mobile app.\n"
-            f"💡 Action Item: Deploy mobile reporting kiosks to bridge digital reporting gaps."
+            f"1. Efficient Routine Sweeps: Scheduled daily morning garbage vehicle routes.\n"
+            f"2. Digital Adoption Gap: Citizens in rural/suburban wards report via physical councilors rather than mobile app.\n"
+            f"Action Item: Deploy mobile reporting kiosks to bridge digital reporting gaps."
         )
     elif user_query:
         bot_response = (
-            f"🤖 Mistral AI Strategic Advice for '{user_query}':\n"
+            f"Strategic Advice for '{user_query}':\n"
             f"Currently tracking {total} total civic report(s) ({high_urgency} critical >= 7.0).\n"
             f"Recommended priority order: (1) Unblock {drain_blocked} monsoon drain(s), (2) Service {reported} pending reports, (3) Verify {in_progress} active sites."
         )
     else:
         bot_response = (
-            f"🤖 Mistral AI City Advisor Ready:\n"
+            f"City Advisor Ready:\n"
             f"Tracking {total} total report(s) across the city ({high_urgency} critical priority, {reported} pending dispatch).\n"
-            f"Click a quick chip below or ask any specific question!"
+            f"Ask any specific question or select a topic."
         )
 
     return jsonify({
@@ -471,10 +445,8 @@ def analyze_city_telemetry():
     })
 
 
-# --- UPDATE TICKET STATUS ENDPOINT ---
 @app.route("/api/v1/report/<ticket_id>/status", methods=["PATCH", "POST"])
 def update_ticket_status(ticket_id):
-    """Updates status (e.g. 'reported', 'in_progress', 'resolved') for a ticket with optional verification photo."""
     new_status = "in_progress"
     verification_b64 = None
 
@@ -501,10 +473,8 @@ def update_ticket_status(ticket_id):
     })
 
 
-# --- TICKET VERIFICATION IMAGE ENDPOINT ---
 @app.route("/api/v1/report/<ticket_id>/verification-image", methods=["GET"])
 def get_ticket_verification_image(ticket_id):
-    """Returns base64 cleanup verification image payload for a resolved ticket."""
     ticket = get_ticket(ticket_id)
 
     if not ticket or not ticket.get("verification_image_b64"):
@@ -517,8 +487,6 @@ def get_ticket_verification_image(ticket_id):
     })
 
 
-
-# --- STATIC FRONTEND ASSET PROXY ROUTE ---
 @app.route("/<path:path>", methods=["GET"])
 def static_proxy(path):
     if os.path.exists(os.path.join(FRONTEND_DIR, path)):

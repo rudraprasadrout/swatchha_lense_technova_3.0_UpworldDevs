@@ -28,12 +28,13 @@ def haversine_distance_meters(
     return EARTH_RADIUS_M * c
 
 
+import json
+
 def find_existing_nearby_ticket(
-    conn, lat: float, lng: float, max_distance_meters: float = 20.0
+    conn, lat: float, lng: float, category: str = None, max_distance_meters: float = 20.0
 ):
-    """Searches active tickets within `max_distance_meters` and returns full dictionary row if found."""
+    """Searches active tickets within `max_distance_meters` matching issue category if provided."""
     cursor = conn.cursor()
-    # SELECT * ensures all fields required for scoring recalculation are available
     cursor.execute("""
         SELECT * 
         FROM tickets 
@@ -42,41 +43,68 @@ def find_existing_nearby_ticket(
     active_tickets = cursor.fetchall()
 
     for ticket in active_tickets:
-        # Convert sqlite3.Row to standard dict for safe key access
         t_dict = dict(ticket)
         dist = haversine_distance_meters(
             lat, lng, t_dict["lat"], t_dict["lng"]
         )
         if dist <= max_distance_meters:
+            if category:
+                t_cat = (t_dict.get("category") or "").strip().lower()
+                in_cat = category.strip().lower()
+                if t_cat and in_cat and t_cat != in_cat:
+                    continue
             return t_dict
 
     return None
 
 
-def merge_duplicate_ticket(conn, existing_ticket: dict):
-    """Increments duplicate_count, updates last_seen timestamp, and recalculates score dynamically."""
+def merge_duplicate_ticket(conn, existing_ticket: dict, reporter_id: str = "anonymous"):
+    """Tracks unique reporters list and updates duplicate count & urgency score cleanly."""
     now_str = datetime.utcnow().isoformat()
-    new_count = existing_ticket.get("duplicate_count", 0) + 1
 
-    # Recalculate score dynamically using scoring engine
+    reporters_raw = existing_ticket.get("reporters", "[]")
+    if isinstance(reporters_raw, str):
+        try:
+            reporters = json.loads(reporters_raw)
+        except Exception:
+            reporters = []
+    elif isinstance(reporters_raw, list):
+        reporters = reporters_raw
+    else:
+        reporters = []
+
+    already_reported = reporter_id in reporters
+
+    if already_reported:
+        conn.execute(
+            "UPDATE tickets SET last_seen = ? WHERE id = ?",
+            (now_str, existing_ticket["id"]),
+        )
+        conn.commit()
+        return {"action_status": "already_reported", "is_spam_prevented": True}
+
+    reporters.append(reporter_id)
+    unique_duplicate_count = max(0, len(reporters) - 1)
+
     new_urgency = calculate_algorithmic_urgency(
         category=existing_ticket.get("category", "Organic Waste"),
         volume_band=existing_ticket.get("volume_band", "Medium (0.2-1.0m³)"),
         is_drain_blocked=bool(existing_ticket.get("is_drain_blocked", 0)),
         is_fire_hazard=bool(existing_ticket.get("is_fire_hazard", 0)),
         is_sensitive_area=bool(existing_ticket.get("is_sensitive_area", 0)),
-        duplicate_count=new_count,
+        duplicate_count=unique_duplicate_count,
     )
-
 
     conn.execute(
         """
         UPDATE tickets
         SET duplicate_count = ?,
+            reporters = ?,
             urgency_score = ?,
             last_seen = ?
         WHERE id = ?
     """,
-        (new_count, new_urgency, now_str, existing_ticket["id"]),
+        (unique_duplicate_count, json.dumps(reporters), new_urgency, now_str, existing_ticket["id"]),
     )
     conn.commit()
+    return {"action_status": "merged_duplicate", "is_spam_prevented": False}

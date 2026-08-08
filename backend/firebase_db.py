@@ -59,7 +59,7 @@ def doc_to_ticket_dict(doc: dict) -> dict:
     return ticket
 
 
-# --- FIREBASE FIRESTORE & SQLITE DUAL DATABASE HELPERS ---
+# Database helper functions
 
 def save_ticket(ticket_dict: dict) -> bool:
     """Saves a ticket dictionary into Firebase Firestore AND SQLite local DB."""
@@ -67,10 +67,14 @@ def save_ticket(ticket_dict: dict) -> bool:
     if not ticket_id:
         return False
 
+    clean_dict = ticket_dict.copy()
+    clean_dict.pop("action_status", None)
+    clean_dict.pop("is_spam_prevented", None)
+
     # 1. Save to Firebase Firestore
     try:
         url = f"{FIRESTORE_BASE_URL}/{COLLECTION_NAME}?documentId={ticket_id}"
-        payload = {"fields": dict_to_firestore_fields(ticket_dict)}
+        payload = {"fields": dict_to_firestore_fields(clean_dict)}
         res = requests.post(url, json=payload, timeout=5)
         if res.status_code not in (200, 201):
             # If document already exists, update via PATCH
@@ -82,13 +86,17 @@ def save_ticket(ticket_dict: dict) -> bool:
     # 2. Save to SQLite for local redundancy
     try:
         conn = get_conn(DB_PATH)
-        cols = list(ticket_dict.keys())
-        vals = [ticket_dict[k] for k in cols]
-        placeholders = ", ".join(["?"] * len(cols))
-        col_names = ", ".join(cols)
-        
+        cursor = conn.cursor()
+        cursor.execute("PRAGMA table_info(tickets)")
+        valid_cols = set(row[1] for row in cursor.fetchall())
+
+        sqlite_cols = [k for k in clean_dict.keys() if k in valid_cols]
+        sqlite_vals = [clean_dict[k] for k in sqlite_cols]
+        placeholders = ", ".join(["?"] * len(sqlite_cols))
+        col_names = ", ".join(sqlite_cols)
+
         # Replace existing ticket if already present
-        conn.execute(f"INSERT OR REPLACE INTO tickets ({col_names}) VALUES ({placeholders})", vals)
+        conn.execute(f"INSERT OR REPLACE INTO tickets ({col_names}) VALUES ({placeholders})", sqlite_vals)
         conn.commit()
         conn.close()
     except Exception as e:
@@ -193,8 +201,8 @@ def update_ticket_status(ticket_id: str, new_status: str, verification_b64: str 
     return True
 
 
-def find_existing_nearby_ticket_fs(lat: float, lng: float, max_distance_meters: float = 20.0) -> dict:
-    """Checks active tickets within `max_distance_meters` in Firebase Firestore / SQLite."""
+def find_existing_nearby_ticket_fs(lat: float, lng: float, category: str = None, max_distance_meters: float = 20.0) -> dict:
+    """Checks active tickets within `max_distance_meters` in Firebase Firestore / SQLite, matching issue category if specified."""
     tickets = get_all_tickets()
     active_tickets = [t for t in tickets if t.get("status") in ("reported", "in_progress")]
 
@@ -210,29 +218,70 @@ def find_existing_nearby_ticket_fs(lat: float, lng: float, max_distance_meters: 
             c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
             dist = 6371000.0 * c
             if dist <= max_distance_meters:
+                # Category-Aware Check: Ensure different issues (e.g. Blocked Drain vs Overflowing Trash) in nearby area create separate tickets
+                if category:
+                    t_cat = (t.get("category") or "").strip().lower()
+                    in_cat = category.strip().lower()
+                    if t_cat and in_cat and t_cat != in_cat:
+                        continue  # Different issue type at nearby location
                 return t
     return None
 
 
-def merge_duplicate_ticket_fs(existing_ticket: dict) -> dict:
-    """Increments duplicate_count, updates last_seen, and recalculates urgency score in Firebase + SQLite."""
+def merge_duplicate_ticket_fs(existing_ticket: dict, reporter_id: str = "anonymous") -> dict:
+    """
+    Merges duplicate report with existing ticket.
+    Tracks unique reporters list.
+    If same reporter_id attempts repeated submissions -> suppresses urgency boost (Anti-Spam Filter).
+    If distinct reporter_id submits -> increments unique duplicate count (+1) and recalculates score.
+    """
     now_str = datetime.utcnow().isoformat()
-    new_count = existing_ticket.get("duplicate_count", 0) + 1
+
+    reporters_raw = existing_ticket.get("reporters", "[]")
+    if isinstance(reporters_raw, str):
+        try:
+            reporters = json.loads(reporters_raw)
+        except Exception:
+            reporters = []
+    elif isinstance(reporters_raw, list):
+        reporters = reporters_raw
+    else:
+        reporters = []
+
+    already_reported = reporter_id in reporters
+
+    if already_reported:
+        # Same user spam attempt: Record last_seen but suppress duplicate_count increment and urgency escalation
+        existing_ticket["last_seen"] = now_str
+        save_ticket(existing_ticket)
+        res_ticket = existing_ticket.copy()
+        res_ticket["action_status"] = "already_reported"
+        res_ticket["is_spam_prevented"] = True
+        return res_ticket
+
+    # New unique citizen report
+    reporters.append(reporter_id)
+    unique_duplicate_count = max(0, len(reporters) - 1)
+
     new_urgency = calculate_algorithmic_urgency(
         category=existing_ticket.get("category", "Organic Waste"),
         volume_band=existing_ticket.get("volume_band", "Medium (0.2-1.0m³)"),
         is_drain_blocked=bool(existing_ticket.get("is_drain_blocked", 0)),
         is_fire_hazard=bool(existing_ticket.get("is_fire_hazard", 0)),
         is_sensitive_area=bool(existing_ticket.get("is_sensitive_area", 0)),
-        duplicate_count=new_count
+        duplicate_count=unique_duplicate_count
     )
 
-    existing_ticket["duplicate_count"] = new_count
+    existing_ticket["reporters"] = json.dumps(reporters)
+    existing_ticket["duplicate_count"] = unique_duplicate_count
     existing_ticket["urgency_score"] = new_urgency
     existing_ticket["last_seen"] = now_str
 
     save_ticket(existing_ticket)
-    return existing_ticket
+    res_ticket = existing_ticket.copy()
+    res_ticket["action_status"] = "merged_duplicate"
+    res_ticket["is_spam_prevented"] = False
+    return res_ticket
 
 
 def delete_ticket_fs(ticket_id: str) -> bool:
