@@ -100,6 +100,97 @@ ODIA_FAST_MAP = {
     "garbage": "ଅବର୍ଜନା"
 }
 
+# Language code mapping: frontend codes → Sarvam AI codes
+SARVAM_LANG_MAP = {
+    "or-in": "od-IN",
+    "or": "od-IN",
+    "ori-in": "od-IN",
+    "hi-in": "hi-IN",
+    "hi": "hi-IN",
+    "bn-in": "bn-IN",
+    "bn": "bn-IN",
+    "en-in": "en-IN",
+    "en": "en-IN",
+}
+
+SARVAM_STT_URL = "https://api.sarvam.ai/speech-to-text"
+
+
+@app.route("/api/v1/sarvam-stt", methods=["POST"])
+def sarvam_speech_to_text():
+    """
+    Receives audio from the frontend (MediaRecorder WebM/WAV blob),
+    sends it to Sarvam AI's STT API, and returns native script transcript.
+    """
+    audio_file = request.files.get("audio")
+    target_lang = str(request.form.get("lang", "or-IN")).strip().lower()
+
+    if not audio_file:
+        return jsonify({"status": "error", "message": "No audio file received"}), 400
+
+    audio_bytes = audio_file.read()
+    if not audio_bytes:
+        return jsonify({"status": "error", "message": "Empty audio file"}), 400
+
+    sarvam_key = os.environ.get("SARVAM_API_KEY", "").strip()
+    if not sarvam_key or sarvam_key == "YOUR_SARVAM_API_KEY_HERE":
+        # Fallback: return empty so frontend knows STT is not configured
+        return jsonify({
+            "status": "error",
+            "message": "Sarvam API key not configured. Set SARVAM_API_KEY in environment."
+        }), 503
+
+    # Map frontend language code to Sarvam language code
+    sarvam_lang = SARVAM_LANG_MAP.get(target_lang, "od-IN")
+
+    try:
+        import requests as req_lib
+
+        # Determine file extension from the uploaded filename
+        filename = audio_file.filename or "audio.webm"
+        if not filename.endswith((".webm", ".wav", ".mp3", ".ogg", ".flac", ".aac")):
+            filename = "audio.webm"
+
+        headers = {
+            "api-subscription-key": sarvam_key
+        }
+
+        files = {
+            "file": (filename, audio_bytes, audio_file.content_type or "audio/webm")
+        }
+
+        data = {
+            "model": "saaras:v3",
+            "language_code": sarvam_lang,
+        }
+
+        resp = req_lib.post(SARVAM_STT_URL, headers=headers, files=files, data=data, timeout=30)
+
+        if resp.status_code == 200:
+            result = resp.json()
+            transcript = result.get("transcript", "")
+            detected_lang = result.get("language_code", sarvam_lang)
+            return jsonify({
+                "status": "success",
+                "transcript": transcript,
+                "language_code": detected_lang
+            })
+        else:
+            error_detail = resp.text[:300] if resp.text else "Unknown error"
+            print(f"Sarvam STT API error ({resp.status_code}): {error_detail}")
+            return jsonify({
+                "status": "error",
+                "message": f"Sarvam API returned {resp.status_code}",
+                "detail": error_detail
+            }), 502
+
+    except Exception as e:
+        print(f"Sarvam STT exception: {e}")
+        return jsonify({
+            "status": "error",
+            "message": f"Speech transcription failed: {str(e)}"
+        }), 500
+
 @app.route("/api/v1/transcribe-voice", methods=["POST"])
 def transcribe_voice():
     data = request.get_json() or {}
