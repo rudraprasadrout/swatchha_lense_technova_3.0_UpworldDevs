@@ -1,4 +1,4 @@
-// SwachhLens Global Application Configuration
+// auto-detect if we're running locally or on the deployed site
 const isLocalOrigin = typeof window !== 'undefined' && window.location.origin && 
     (window.location.origin.includes('127.0.0.1') || window.location.origin.includes('localhost'));
 

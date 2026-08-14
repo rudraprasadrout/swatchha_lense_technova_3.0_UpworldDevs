@@ -1,4 +1,5 @@
-// frontend/js/i18n.js - Multilingual UI Engine for SwachhLens
+// multilingual support for the swachhlens UI
+// currently supports english, odia, and hindi
 
 const TRANSLATIONS = {
     en: {
@@ -10,7 +11,7 @@ const TRANSLATIONS = {
         liveAi: "Live Vision AI",
         engineBadge: "SwachhLens Engine",
         
-        // Homepage
+        // homepage stuff
         homePill: "Bhubaneswar Municipal Corporation (BMC) Portal",
         homeTitle: "Cleaner City, Faster Response",
         homeSubtitle: "Report garbage, blocked drains, or sanitation issues in seconds. Captured photos are instantly routed to municipal cleanup teams.",
@@ -24,7 +25,7 @@ const TRANSLATIONS = {
         cardAboutDesc: "Learn how automated vision classification, privacy blurring, spatial deduplication, and priority scoring work.",
         btnExploreAbout: "Explore System",
 
-        // How It Works Grid on Homepage
+        // how it works section
         featHeading: "How It Works",
         howItWorksSub: "Three quick steps to report and clear civic issues",
         step1Header: "Snap & Capture",
@@ -34,7 +35,7 @@ const TRANSLATIONS = {
         step3Header: "Rapid Cleanup",
         step3Detail: "Municipal teams get instant location alerts and dispatch sanitation trucks immediately.",
 
-        // Citizen Form Page
+        // citizen form page
         formHeaderTitle: "Report Civic Issue (BMC Wards)",
         formHeaderSub: "Capture image, speak regional note, & auto-anonymize",
         tapPhotoTitle: "Tap to Capture Photo",
@@ -58,7 +59,7 @@ const TRANSLATIONS = {
         lblResUrg: "Algorithmic Urgency:",
         lblResPlan: "Action Plan:",
 
-        // About Page
+        // about page
         aboutTitle: "SwachhLens System Architecture & Workflow",
         aboutSub: "An end-to-end computer vision and spatial decision support framework designed for municipal sanitation logistics.",
         step1Title: "1. Data Collection",
@@ -81,7 +82,6 @@ const TRANSLATIONS = {
         liveAi: "ଲାଇଭ୍ ଭିଜନ୍ AI",
         engineBadge: "ସ୍ୱଚ୍ଛଲେନ୍ସ ଇଞ୍ଜିନ୍",
         
-        // Homepage
         homePill: "ଭୁବନେଶ୍ୱର ମ୍ୟୁନିସିପାଲ୍ କୋର୍ପୋରେସନ୍ (BMC) ପୋର୍ଟାଲ୍",
         homeTitle: "ସ୍ୱଚ୍ଛ ସହର, ତୁରନ୍ତ କାର୍ଯ୍ୟାନୁଷ୍ଠାନ",
         homeSubtitle: "କିଛି ସେକେଣ୍ଡରେ ଆବର୍ଜନା, ଅବରୋଧ ହୋଇଥିବା ନାଳ କିମ୍ବା ସଫେଇ ସମସ୍ୟା ରିପୋର୍ଟ କରନ୍ତୁ। ଉଠାଯାଇଥିବା ଫୋଟୋ ତୁରନ୍ତ ସଫେଇ ଟିମ୍ ପାଖକୁ ଯାଏ।",
@@ -95,7 +95,6 @@ const TRANSLATIONS = {
         cardAboutDesc: "ସ୍ୱୟଂଚାଳିତ ବର୍ଗୀକରଣ, ଗୋପନୀୟତା ସୁରକ୍ଷା ଏବଂ ପ୍ରାଥମିକତା ସ୍କୋରିଙ୍ଗ୍ କିପରି କାମ କରେ ଜାଣନ୍ତୁ।",
         btnExploreAbout: "ସିଷ୍ଟମ୍ ଦେଖନ୍ତୁ",
 
-        // How It Works Grid on Homepage
         featHeading: "କିପରି କାର୍ଯ୍ୟ କରେ",
         howItWorksSub: "ସିଭିକ୍ ସମସ୍ୟା ରିପୋର୍ଟ କରିବା ପାଇଁ ୩ଟି ସହଜ ପଦକ୍ଷେପ",
         step1Header: "ଫୋଟୋ ଉଠାନ୍ତୁ",
@@ -105,7 +104,6 @@ const TRANSLATIONS = {
         step3Header: "ତୁରନ୍ତ ସଫେଇ",
         step3Detail: "ମ୍ୟୁନିସିପାଲିଟି ଟିମ୍ ତୁରନ୍ତ ସ୍ଥାନ ସୂଚନା ପାଇ ସଫେଇ ଗାଡି ପଠାନ୍ତି।",
 
-        // Citizen Form Page
         formHeaderTitle: "ନାଗରିକ ସମସ୍ୟା ରିପୋର୍ଟ କରନ୍ତୁ",
         formHeaderSub: "ଫୋଟୋ ଉଠାନ୍ତୁ, କଣ୍ଠସ୍ୱର ନୋଟ୍ କୁହନ୍ତୁ ଏବଂ ସ୍ୱୟଂଚାଳିତ ଗୋପନୀୟତା ରଖନ୍ତୁ",
         tapPhotoTitle: "ଫୋଟୋ ଉଠାଇବା ପାଇଁ ଟ୍ୟାପ୍ କରନ୍ତୁ",
@@ -129,9 +127,8 @@ const TRANSLATIONS = {
         lblResUrg: "ଜରୁରୀ ସ୍କୋର (Urgency):",
         lblResPlan: "କାର୍ଯ୍ୟାନୁଷ୍ଠାନ ଯୋଜନା:",
 
-        // About Page
         aboutTitle: "ସ୍ୱଚ୍ଛଲେନ୍ସ ସିଷ୍ଟମ୍ ଆର୍କିଟେକ୍ଚର୍ ଏବଂ କାର୍ଯ୍ୟପ୍ରଣାଳୀ",
-        aboutSub: "ମ୍ୟୁନିସିପାଲିଟି ସଫେଇ ପରିଚାଳନା ପାଇଁ ପ୍ରସ୍ତୁତ ଏକ ସମ୍ପୂର୍ଣ୍ଣ କମ୍ପ୍ୟୁଟର ଭିଜନ୍ ଏବଂ ନିଷ୍ପତ୍ତି ପ୍ରଣାଳୀ।",
+        aboutSub: "ମ୍ୟୁନିସିପାଲିଟି ସଫେଇ ପରିଚାଳନା ପାଇଁ ପ୍ରସ୍ତୁତ ଏକ ସମ୍ପୂର୍ଣ୍ଣ କಮ୍ପ୍ୟୁଟର ଭିଜନ୍ ଏବଂ ନିଷ୍ପତ୍ତି ପ୍ରଣାଳୀ।",
         step1Title: "୧. ଡାଟା ସଂଗ୍ରହ",
         step1Desc: "ଜିଓ-ଟ୍ୟାଗ୍ ସହିତ ଫୋଟୋ, ଜିପିଏସ୍ ଏବଂ ଓଡ଼ିଆ, ହିନ୍ଦୀ, ଇଂରାଜୀ କଣ୍ଠସ୍ୱର ସଂଗ୍ରହ କରେ।",
         step2Title: "୨. ଗୋପନୀୟତା ଅନୋନିମାଇଜେସନ୍",
@@ -152,7 +149,6 @@ const TRANSLATIONS = {
         liveAi: "लाइव विज़न AI",
         engineBadge: "स्वच्छलेंस इंजन",
         
-        // Homepage
         homePill: "भुवनेश्वर नगर निगम (BMC) पोर्टल",
         homeTitle: "स्वच्छ शहर, त्वरित कार्रवाई",
         homeSubtitle: "कुछ ही सेकंड में कचरा, अवरुद्ध नालियों या स्वच्छता संबंधी समस्याओं की रिपोर्ट करें। फोटो सीधे सफाई टीमों को भेजी जाती हैं।",
@@ -166,7 +162,6 @@ const TRANSLATIONS = {
         cardAboutDesc: "जानें कि स्वचालित विज़न वर्गीकरण, गोपनीयता धुंधलापन और प्राथमिकता स्कोरिंग कैसे काम करती है।",
         btnExploreAbout: "सिस्टम देखें",
 
-        // How It Works Grid on Homepage
         featHeading: "यह कैसे काम करता है",
         howItWorksSub: "नागरिक समस्याओं को रिपोर्ट करने के 3 आसान चरण",
         step1Header: "फोटो खींचें",
@@ -176,7 +171,6 @@ const TRANSLATIONS = {
         step3Header: "त्वरित सफाई",
         step3Detail: "नगर निगम टीमों को तुरंत स्थान अलर्ट मिलता है और सफाई वाहन भेजे जाते हैं।",
 
-        // Citizen Form Page
         formHeaderTitle: "नागरिक समस्या रिपोर्ट करें",
         formHeaderSub: "फोटो खींचें, क्षेत्रीय वॉयस नोट बोलें और गोपनीयता रखें",
         tapPhotoTitle: "फोटो खींचने के लिए टैप करें",
@@ -200,7 +194,6 @@ const TRANSLATIONS = {
         lblResUrg: "प्राथमिकता स्कोर:",
         lblResPlan: "कार्रवाई योजना:",
 
-        // About Page
         aboutTitle: "स्वच्छलेंस सिस्टम आर्किटेक्चर और कार्यप्रणाली",
         aboutSub: "नगर निगम स्वच्छता प्रबंधन के लिए बनाया गया एक संपूर्ण कंप्यूटर विज़न और निर्णय समर्थन ढांचा।",
         step1Title: "1. डेटा संग्रह",
@@ -237,6 +230,7 @@ function updateThemeIcon(theme) {
 }
 
 document.addEventListener("DOMContentLoaded", () => {
+    // load saved theme or default to dark
     const savedTheme = localStorage.getItem("swachh_theme") || "dark";
     document.documentElement.setAttribute("data-theme", savedTheme);
     updateThemeIcon(savedTheme);
@@ -250,6 +244,7 @@ function changeUiLanguage(langCode) {
     localStorage.setItem("swachh_ui_lang", langCode);
     applyUiLanguage(langCode);
 
+    // also switch the voice language to match
     const voiceLangSel = document.getElementById("langSelect");
     if (voiceLangSel) {
         if (langCode === "or") voiceLangSel.value = "or-IN";
@@ -261,6 +256,7 @@ function changeUiLanguage(langCode) {
 function applyUiLanguage(lang) {
     const dict = TRANSLATIONS[lang] || TRANSLATIONS.en;
 
+    // swap out text content for all elements with data-i18n attribute
     document.querySelectorAll("[data-i18n]").forEach(el => {
         const key = el.getAttribute("data-i18n");
         if (dict[key]) {
@@ -268,6 +264,7 @@ function applyUiLanguage(lang) {
         }
     });
 
+    // same for placeholder text
     document.querySelectorAll("[data-i18n-ph]").forEach(el => {
         const key = el.getAttribute("data-i18n-ph");
         if (dict[key]) {

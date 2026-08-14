@@ -1,4 +1,4 @@
-# backend/utils/vision.py
+# handles the mistral pixtral vision API call + fallback heuristics
 import base64
 import json
 import os
@@ -10,7 +10,7 @@ except ImportError:
 
 
 def determine_dispatch_unit(category: str, volume_band: str, is_drain_blocked: bool, is_fire_hazard: bool) -> str:
-    """Returns exact municipal crew and vehicle dispatch recommendation."""
+    """Pick the right crew/vehicle combo based on what we're dealing with."""
     if is_fire_hazard or is_drain_blocked or category == "Hazardous":
         return "Hazmat & Emergency Response Unit"
     if category in ["Plastic Waste", "E-Waste"]:
@@ -28,12 +28,13 @@ def analyze_image_with_mistral(
 ) -> dict:
     key = api_key or os.environ.get("MISTRAL_API_KEY")
     
-    # Heuristic fallback generator when Mistral API key is not configured or fails
+    # if mistral isn't available, we can still do basic classification from the text
     def get_fallback():
         note_lower = citizen_note.lower() if citizen_note else ""
         is_drain = any(w in note_lower for w in ["drain", "nalla", "water", "block", "overflow", "stagnant", "flood"])
         is_fire = any(w in note_lower for w in ["fire", "burn", "smoke", "flame", "chemical", "spark"])
         
+        # try to guess the category from keywords in the note
         category = "Organic Waste"
         if any(w in note_lower for w in ["plastic", "bottle", "bag", "polythene"]):
             category = "Plastic Waste"
@@ -68,6 +69,7 @@ def analyze_image_with_mistral(
         b64_str = base64.b64encode(image_bytes).decode("utf-8")
         img_data_url = f"data:image/jpeg;base64,{b64_str}"
 
+        # send the image to pixtral for analysis
         prompt = f"""
         Act as a Municipal Waste Logistics Decision Support AI. Analyze this civic report photo and regional voice transcript.
         
@@ -119,4 +121,4 @@ def analyze_image_with_mistral(
         }
     except Exception as err:
         print(f"[Vision Fallback] Mistral API call failed: {err}")
-        return get_fallback()
+        return get_fallback()

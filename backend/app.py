@@ -7,6 +7,7 @@ import uuid
 from flask import Flask, jsonify, request, send_from_directory
 from flask_cors import CORS
 
+# figure out where we are so we can find the frontend folder and import our own modules
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 PROJECT_ROOT = os.path.abspath(os.path.join(CURRENT_DIR, ".."))
 FRONTEND_DIR = os.path.join(PROJECT_ROOT, "frontend")
@@ -16,6 +17,7 @@ if CURRENT_DIR not in sys.path:
 if PROJECT_ROOT not in sys.path:
     sys.path.insert(0, PROJECT_ROOT)
 
+# load .env manually since we're not using python-dotenv
 ENV_FILE = os.path.join(PROJECT_ROOT, ".env")
 if os.path.exists(ENV_FILE):
     try:
@@ -26,8 +28,9 @@ if os.path.exists(ENV_FILE):
                     k, v = line.split("=", 1)
                     os.environ[k.strip()] = v.strip().strip("'\"")
     except Exception as e:
-        pass
+        pass  # not a big deal if .env doesn't load, env vars might be set elsewhere
 
+# mistral sdk has changed their import path a couple times, so try both
 try:
     from mistralai import Mistral
 except ImportError:
@@ -51,6 +54,7 @@ CORS(app, resources={r"/*": {"origins": "*"}})
 
 @app.after_request
 def add_cors_headers(response):
+    # belt and suspenders approach to CORS - some hosting setups need this
     response.headers["Access-Control-Allow-Origin"] = "*"
     response.headers["Access-Control-Allow-Headers"] = "Content-Type, Authorization, X-Requested-With"
     response.headers["Access-Control-Allow-Methods"] = "GET, POST, PUT, PATCH, DELETE, OPTIONS"
@@ -62,6 +66,7 @@ init_db(DB_PATH)
 
 @app.route("/", methods=["GET"])
 def index():
+    # just a quick info page so people know the API is alive
     return jsonify(
         {
             "system": "SwachhLens Core API Engine",
@@ -87,6 +92,8 @@ def health():
     return jsonify({"status": "healthy", "service": "SwachhLens Core Service"})
 
 
+# quick lookup table for common odia words people might say
+# not really used for translation anymore since mistral handles it, but kept as reference
 ODIA_FAST_MAP = {
     "aborjana": "ଅବର୍ଜନା",
     "kuda": "କୁଡ଼ା",
@@ -99,97 +106,6 @@ ODIA_FAST_MAP = {
     "overflow": "ଓଭରଫ୍ଲୋ",
     "garbage": "ଅବର୍ଜନା"
 }
-
-# Language code mapping: frontend codes → Sarvam AI codes
-SARVAM_LANG_MAP = {
-    "or-in": "od-IN",
-    "or": "od-IN",
-    "ori-in": "od-IN",
-    "hi-in": "hi-IN",
-    "hi": "hi-IN",
-    "bn-in": "bn-IN",
-    "bn": "bn-IN",
-    "en-in": "en-IN",
-    "en": "en-IN",
-}
-
-SARVAM_STT_URL = "https://api.sarvam.ai/speech-to-text"
-
-
-@app.route("/api/v1/sarvam-stt", methods=["POST"])
-def sarvam_speech_to_text():
-    """
-    Receives audio from the frontend (MediaRecorder WebM/WAV blob),
-    sends it to Sarvam AI's STT API, and returns native script transcript.
-    """
-    audio_file = request.files.get("audio")
-    target_lang = str(request.form.get("lang", "or-IN")).strip().lower()
-
-    if not audio_file:
-        return jsonify({"status": "error", "message": "No audio file received"}), 400
-
-    audio_bytes = audio_file.read()
-    if not audio_bytes:
-        return jsonify({"status": "error", "message": "Empty audio file"}), 400
-
-    sarvam_key = os.environ.get("SARVAM_API_KEY", "").strip()
-    if not sarvam_key or sarvam_key == "YOUR_SARVAM_API_KEY_HERE":
-        # Fallback: return empty so frontend knows STT is not configured
-        return jsonify({
-            "status": "error",
-            "message": "Sarvam API key not configured. Set SARVAM_API_KEY in environment."
-        }), 503
-
-    # Map frontend language code to Sarvam language code
-    sarvam_lang = SARVAM_LANG_MAP.get(target_lang, "od-IN")
-
-    try:
-        import requests as req_lib
-
-        # Determine file extension from the uploaded filename
-        filename = audio_file.filename or "audio.webm"
-        if not filename.endswith((".webm", ".wav", ".mp3", ".ogg", ".flac", ".aac")):
-            filename = "audio.webm"
-
-        headers = {
-            "api-subscription-key": sarvam_key
-        }
-
-        files = {
-            "file": (filename, audio_bytes, audio_file.content_type or "audio/webm")
-        }
-
-        data = {
-            "model": "saaras:v3",
-            "language_code": sarvam_lang,
-        }
-
-        resp = req_lib.post(SARVAM_STT_URL, headers=headers, files=files, data=data, timeout=30)
-
-        if resp.status_code == 200:
-            result = resp.json()
-            transcript = result.get("transcript", "")
-            detected_lang = result.get("language_code", sarvam_lang)
-            return jsonify({
-                "status": "success",
-                "transcript": transcript,
-                "language_code": detected_lang
-            })
-        else:
-            error_detail = resp.text[:300] if resp.text else "Unknown error"
-            print(f"Sarvam STT API error ({resp.status_code}): {error_detail}")
-            return jsonify({
-                "status": "error",
-                "message": f"Sarvam API returned {resp.status_code}",
-                "detail": error_detail
-            }), 502
-
-    except Exception as e:
-        print(f"Sarvam STT exception: {e}")
-        return jsonify({
-            "status": "error",
-            "message": f"Speech transcription failed: {str(e)}"
-        }), 500
 
 @app.route("/api/v1/transcribe-voice", methods=["POST"])
 def transcribe_voice():
@@ -204,6 +120,7 @@ def transcribe_voice():
     if api_key:
         try:
             client = Mistral(api_key=api_key)
+            # ask mistral to clean up the speech transcript and convert to native script
             prompt = f"""
             Act as an expert Odia & Regional Language Speech Normalizer for Municipal Civic Reports.
             The user selected target language: "{target_lang}".
@@ -231,6 +148,7 @@ def transcribe_voice():
         except Exception as e:
             print("Voice transcription Error:", e)
             
+    # if mistral isn't available or fails, just pass through what we got
     return jsonify({"status": "success", "native_text": raw_text})
 
 
@@ -281,6 +199,7 @@ def transcribe_voice_audio():
 
 @app.route("/api/v1/auth", methods=["POST"])
 def officer_login():
+    # super basic auth for the hackathon demo - obviously would use proper auth in prod
     data = request.get_json() or {}
     officer_id = data.get("id", "").strip()
     password = data.get("password", "").strip()
@@ -316,6 +235,7 @@ def submit_report():
         is_sensitive = data.get("is_sensitive_area", "0") in ["1", "true", "True"]
         sensitive_type = data.get("sensitive_area_type", "None").strip()
 
+        # grab the uploaded image
         file = request.files.get("image")
         if not file:
             return jsonify({"status": "error", "message": "No image provided"}), 400
@@ -326,12 +246,15 @@ def submit_report():
 
         user_id = data.get("user_id", "").strip() or request.remote_addr or "anon_user"
 
+        # blur faces and plates before we do anything else with the image
         anonymized_bytes, faces_blurred, plates_blurred = anonymize_image_bytes(img_bytes)
 
+        # check if this location is within BMC limits
         jurisdiction_info = check_municipal_jurisdiction(lat, lng)
         in_jurisdiction = 1 if jurisdiction_info["in_jurisdiction"] else 0
         authority_name = jurisdiction_info["authority"]
 
+        # run the image through mistral for waste classification
         ai_data = analyze_image_with_mistral(
             anonymized_bytes, citizen_note=note, lang=lang, api_key=api_key
         )
@@ -341,6 +264,7 @@ def submit_report():
         dispatch_unit = ai_data.get("dispatch_unit", "Manual Sanitation Crew")
         incoming_category = ai_data.get("category", "Organic Waste")
 
+        # check for duplicate reports within 20 meters
         duplicate_match = find_existing_nearby_ticket_fs(
             lat=lat, lng=lng, category=incoming_category, max_distance_meters=20.0
         )
@@ -369,6 +293,7 @@ def submit_report():
                 }
             )
 
+        # not a duplicate, so calculate urgency and create a new ticket
         computed_urgency = calculate_algorithmic_urgency(
             category=incoming_category,
             volume_band=ai_data.get("volume_band", "Medium (0.2-1.0m³)"),
@@ -489,6 +414,7 @@ def get_reports_summary():
             "summary": "No active civic complaints registered in the municipal database. Overall cleanliness index is 100%."
         })
 
+    # tally up the stats we need for the summary
     categories = {}
     drain_blocks = 0
     fire_hazards = 0
@@ -518,6 +444,7 @@ def get_reports_summary():
 
 
 def query_mistral_advisor(user_query: str, telemetry_context: str) -> str:
+    """Hit up mistral to get an AI-generated answer for the officer's question."""
     api_key = os.environ.get("MISTRAL_API_KEY")
     if not api_key:
         return None
@@ -561,6 +488,7 @@ def analyze_city_telemetry():
     drain_blocked = sum(1 for r in rows if r["is_drain_blocked"])
     fire_hazards = sum(1 for r in rows if r["is_fire_hazard"])
 
+    # rough estimate: ~1.5 hrs per pending ticket, ~1 hr per in-progress
     est_hours = round(reported * 1.5 + in_progress * 1.0, 1)
 
     cat_counts = {}
@@ -570,6 +498,7 @@ def analyze_city_telemetry():
 
     top_cat = max(cat_counts.items(), key=lambda x: x[1])[0] if cat_counts else "None"
 
+    # build a context string so the AI advisor knows what's going on
     telemetry_ctx = (
         f"Total complaints: {total}\n"
         f"Pending dispatch: {reported}\n"
@@ -582,6 +511,7 @@ def analyze_city_telemetry():
         f"Estimated workforce clearance effort: ~{est_hours} truck-hours."
     )
 
+    # try to get a live AI response if the officer asked something specific
     live_reply = query_mistral_advisor(user_query, telemetry_ctx) if user_query else None
 
     if live_reply:
@@ -647,6 +577,7 @@ def update_ticket_status(ticket_id):
     new_status = "in_progress"
     verification_b64 = None
 
+    # handle both JSON and form-data since the admin panel sends both depending on context
     if request.is_json and request.get_json():
         data = request.get_json()
         new_status = data.get("status", "in_progress")
@@ -654,6 +585,7 @@ def update_ticket_status(ticket_id):
     elif request.form:
         new_status = request.form.get("status", "in_progress")
 
+    # if there's a verification photo attached as a file upload, grab it
     if "verification_image" in request.files:
         v_file = request.files["verification_image"]
         v_bytes = v_file.read()
@@ -686,6 +618,7 @@ def get_ticket_verification_image(ticket_id):
 
 @app.route("/<path:path>", methods=["GET"])
 def static_proxy(path):
+    # serve frontend files if they exist, otherwise 404
     if os.path.exists(os.path.join(FRONTEND_DIR, path)):
         return send_from_directory(FRONTEND_DIR, path)
     return jsonify({"status": "error", "message": "API endpoint or static file not found"}), 404

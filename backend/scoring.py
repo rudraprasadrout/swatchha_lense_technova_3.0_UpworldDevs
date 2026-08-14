@@ -1,6 +1,6 @@
-# backend/utils/scoring.py
+# scoring + jurisdiction logic for swachhlens
 
-# Category Base Risk Weights
+# how risky each waste type is (higher = more urgent)
 CATEGORY_WEIGHTS = {
     "Hazardous": 3.0,
     "E-Waste": 2.5,
@@ -10,7 +10,7 @@ CATEGORY_WEIGHTS = {
     "Plastic Waste": 1.0,
 }
 
-# Volume Weight Multipliers
+# bigger piles = more trucks needed = higher score
 VOLUME_WEIGHTS = {
     "Very Large (>3.0m³)": 3.0,
     "Large (1.0-3.0m³)": 2.0,
@@ -18,7 +18,8 @@ VOLUME_WEIGHTS = {
     "Small (<0.2m³)": 0.5,
 }
 
-# Official Municipal Geofence - Bhubaneswar Municipal Corporation (BMC)
+# bhubaneswar municipal corporation boundary box
+# these are the lat/lng limits of BMC jurisdiction
 BMC_BOUNDS = {
     "municipality_name": "Bhubaneswar Municipal Corporation (BMC)",
     "center_lat": 20.2961,
@@ -29,47 +30,41 @@ BMC_BOUNDS = {
     "max_lng": 85.9500,
 }
 
-# Alias for backward compatibility
 MUNICIPAL_BOUNDS = BMC_BOUNDS.copy()
 
 
 def detect_external_region_name(lat: float, lng: float) -> str:
-    """
-    Dynamically identifies the specific external district or region name
-    for GPS coordinates outside Bhubaneswar (BMC) municipal limits.
-    """
-    # 1. North of BMC -> Cuttack Region / CMC Jurisdiction
+    """Figure out which district/region a point belongs to when it's outside BMC.
+    This is a rough approximation based on the geography around Bhubaneswar."""
+
+    # north of BMC -> probably Cuttack side
     if lat > 20.4500:
         if 85.7500 <= lng <= 85.9800:
             return "Cuttack Municipal Corporation (CMC) Boundary"
         return "Cuttack District Rural & Panchayati Raj Zone"
     
-    # 2. South / South-East of BMC -> Puri / Pipili / Jatni Corridor
+    # south of BMC -> Puri / Jatni direction
     elif lat < 20.1500:
         if 19.7500 <= lat <= 19.9000 and 85.7500 <= lng <= 85.9000:
             return "Puri Municipality Jurisdiction"
         return "Puri / Jatni District Administration Corridor"
     
-    # 3. East of BMC -> Khurda East / Jagatsinghpur Highway Corridor
+    # east -> towards Jagatsinghpur
     elif lng > 85.9500:
         return "Khurda - Jagatsinghpur State Highway 16 Development Zone"
     
-    # 4. West / North-West of BMC -> Chandaka Reserve / Khurda Rural
+    # west -> Chandaka forest area
     elif lng < 85.6500:
         if lat > 22.0:
             return "Rourkela Municipal Corporation (RMC) Zone"
         return "Chandaka Forest Reserve / Khurda Rural Panchayati Raj Zone"
     
-    # Default Fallback for general Khurda Outer Territory
     return "Khurda District Rural Panchayati Raj & Highway Authority"
 
 
 def check_municipal_jurisdiction(lat: float, lng: float) -> dict:
-    """
-    BMC Municipal Geofence Validation:
-    Validates whether incoming citizen report coordinates fall within official BMC limits.
-    If outside, dynamically identifies the specific external region and governing authority.
-    """
+    """Check if a GPS coordinate falls within BMC limits. If not, figure out
+    which external authority handles that area."""
     in_bmc = (
         BMC_BOUNDS["min_lat"] <= lat <= BMC_BOUNDS["max_lat"]
     ) and (
@@ -96,46 +91,42 @@ def check_municipal_jurisdiction(lat: float, lng: float) -> dict:
         }
 
 
-
-
-
 def calculate_algorithmic_urgency(
-
     category: str,
     volume_band: str,
     is_drain_blocked: bool,
     is_fire_hazard: bool,
     is_sensitive_area: bool = False,
     duplicate_count: int = 0,
-    is_monsoon_season: bool = True,  # Default True for Indian monsoon preparedness
+    is_monsoon_season: bool = True,
 ) -> float:
-    """
-    Calculates a deterministic 1.0 - 10.0 urgency score based on municipal parameters.
-    Formula: Base (2.0) + Category + Volume + Environmental Hazards + Location Sensitivity + Duplicate Multiplier
-    """
-    # Base starting score for any verified citizen report
+    """Calculate a 1-10 urgency score based on what kind of waste it is, how much
+    there is, whether it's blocking drains or near a school, etc.
+    
+    Formula is basically: start at 2, then add points for each risk factor."""
+    
+    # every verified report starts at 2.0
     score = 2.0
 
-    # 1. Category Risk Weight (Default 1.0 if category unrecognized)
+    # add weight based on waste type (hazardous stuff scores higher)
     score += CATEGORY_WEIGHTS.get(category, 1.0)
 
-    # 2. Volume Weight (Default 1.0 if volume string unrecognized)
+    # bigger pile = more points
     score += VOLUME_WEIGHTS.get(volume_band, 1.0)
 
-    # 3. Hazard Multipliers
+    # blocked drains are extra bad during monsoon season
     if is_drain_blocked:
-        # Elevate drain blockage priority to +3.0 during monsoon seasons
         score += 3.0 if is_monsoon_season else 2.0
     if is_fire_hazard:
-        score += 2.5  # Immediate civic safety & air quality risk
+        score += 2.5
 
-    # 4. Location Sensitivity Multiplier (+1.5 for School/Hospital/Waterbody proximity)
+    # near a school, hospital, or water body? bump it up
     if is_sensitive_area:
         score += 1.5
 
-    # 5. Duplicate/Community Interest Weight (+0.5 per extra report, max +2.0)
+    # more people reporting the same issue = probably more serious
+    # cap at +2.0 so one viral report doesn't break the scale
     score += min(2.0, duplicate_count * 0.5)
 
-    # Cap at maximum 10.0 and minimum 1.0, rounded to 1 decimal place
     final_score = round(min(10.0, max(1.0, score)), 1)
-    return final_score
+    return final_score

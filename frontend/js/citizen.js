@@ -1,10 +1,12 @@
+// citizen report form logic
+
 let currentLat = (typeof CONFIG !== 'undefined' && CONFIG.DEFAULT_LAT) ? CONFIG.DEFAULT_LAT : 20.2961;
 let currentLng = (typeof CONFIG !== 'undefined' && CONFIG.DEFAULT_LNG) ? CONFIG.DEFAULT_LNG : 85.8245;
 
 document.addEventListener("DOMContentLoaded", () => {
     updateTime();
 
-    // Auto-fetch GPS
+    // try to grab the user's location right away
     if (navigator.geolocation) {
         navigator.geolocation.getCurrentPosition(p => {
             currentLat = p.coords.latitude;
@@ -14,7 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
         }, err => console.log("GPS fallback used"));
     }
 
-    // Camera Preview Handler
+    // show a preview when the user picks/takes a photo
     const imgInput = document.getElementById('imageInput');
     if (imgInput) {
         imgInput.addEventListener('change', (e) => {
@@ -39,7 +41,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // Tap anywhere on capture box to open file picker
+    // clicking anywhere on the capture area should open the file picker
     const captureBox = document.getElementById('captureBox');
     if (captureBox && imgInput) {
         captureBox.addEventListener('click', (e) => {
@@ -106,7 +108,7 @@ function updateTime() {
 }
 
 async function submitReport(e) {
-    // 1. Strictly halt default browser form behavior
+    // stop the form from doing a normal browser submit
     if (e) {
         e.preventDefault();
         e.stopPropagation();
@@ -128,7 +130,7 @@ async function submitReport(e) {
         submitBtn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> <span>Processing Report...</span>`;
     }
 
-    // Parse coordinates from location input if manually edited
+    // if the user manually typed in coordinates, parse them
     const locInput = document.getElementById('locationInput');
     if (locInput && locInput.value) {
         const parts = locInput.value.split(',');
@@ -142,6 +144,7 @@ async function submitReport(e) {
         }
     }
 
+    // generate a persistent user id so we can track duplicate submissions
     function getOrCreateUserId() {
         let uid = localStorage.getItem('swachh_user_id');
         if (!uid) {
@@ -172,7 +175,7 @@ async function submitReport(e) {
         if (result.status === 'success') {
             const card = document.getElementById('detailsCard');
             if (card) {
-                card.style.display = 'flex'; // Permanently reveal details card
+                card.style.display = 'flex';
             }
 
             if (result.action === 'already_reported') {
@@ -200,7 +203,7 @@ async function submitReport(e) {
                 setSafeHTML('resFaces', `<i class="fa-solid fa-user-shield"></i> ${t.faces_blurred} Faces Blurred`);
                 setSafeHTML('resPlates', `<i class="fa-solid fa-car"></i> ${t.plates_blurred} Plates Blurred`);
 
-                // Municipal Jurisdiction Geofence Check (Bhubaneswar BMC Limits)
+                // show jurisdiction warning if the location is outside BMC limits
                 const jRow = document.getElementById('jurisdictionRow');
                 if (t.in_jurisdiction === false || t.in_jurisdiction === 0) {
                     if (jRow) jRow.style.display = 'flex';
@@ -214,8 +217,7 @@ async function submitReport(e) {
 
 
 
-
-            // Smooth scroll to receipt so the user sees the output immediately
+            // scroll down so the user can see the result card
             if (card) card.scrollIntoView({ behavior: 'smooth' });
 
         } else {
@@ -235,7 +237,7 @@ async function submitReport(e) {
     return false;
 }
 
-// Failsafe text/html setters preventing JS crashes
+// safe DOM helpers - won't crash if the element doesn't exist on the page
 function setSafeText(id, text) {
     const el = document.getElementById(id);
     if (el) el.innerText = text;

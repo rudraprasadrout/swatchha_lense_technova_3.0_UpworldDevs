@@ -2,16 +2,17 @@ import math
 from datetime import datetime
 from scoring import calculate_algorithmic_urgency
 from db import get_conn
+import json
 
-
-# Earth radius in meters
+# earth's radius in meters - needed for the haversine calculation
 EARTH_RADIUS_M = 6371000.0
 
 
 def haversine_distance_meters(
     lat1: float, lng1: float, lat2: float, lng2: float
 ) -> float:
-    """Calculates the great-circle distance between two GPS coordinates in meters safely."""
+    """Calculate the distance in meters between two GPS coordinates.
+    Uses the haversine formula which accounts for earth's curvature."""
     phi1, phi2 = math.radians(lat1), math.radians(lat2)
     delta_phi = math.radians(lat2 - lat1)
     delta_lambda = math.radians(lng2 - lng1)
@@ -21,19 +22,18 @@ def haversine_distance_meters(
         + math.cos(phi1) * math.cos(phi2) * math.sin(delta_lambda / 2.0) ** 2
     )
 
-    # Clamp 'a' between 0.0 and 1.0 to prevent floating point instability / domain errors
+    # clamp between 0 and 1 to avoid math domain errors with floating point
     a = min(1.0, max(0.0, a))
     c = 2.0 * math.atan2(math.sqrt(a), math.sqrt(1.0 - a))
 
     return EARTH_RADIUS_M * c
 
 
-import json
-
 def find_existing_nearby_ticket(
     conn, lat: float, lng: float, category: str = None, max_distance_meters: float = 20.0
 ):
-    """Searches active tickets within `max_distance_meters` matching issue category if provided."""
+    """Check if there's already an active ticket within 20m of this location.
+    If a category is given, only match tickets of the same category."""
     cursor = conn.cursor()
     cursor.execute("""
         SELECT * 
@@ -48,6 +48,7 @@ def find_existing_nearby_ticket(
             lat, lng, t_dict["lat"], t_dict["lng"]
         )
         if dist <= max_distance_meters:
+            # if we're checking by category, skip tickets that are a different issue type
             if category:
                 t_cat = (t_dict.get("category") or "").strip().lower()
                 in_cat = category.strip().lower()
@@ -59,7 +60,8 @@ def find_existing_nearby_ticket(
 
 
 def merge_duplicate_ticket(conn, existing_ticket: dict, reporter_id: str = "anonymous"):
-    """Tracks unique reporters list and updates duplicate count & urgency score cleanly."""
+    """Merge a new report into an existing ticket. Keeps track of who reported it
+    so we can prevent the same person from spamming urgency boosts."""
     now_str = datetime.utcnow().isoformat()
 
     reporters_raw = existing_ticket.get("reporters", "[]")
@@ -76,6 +78,7 @@ def merge_duplicate_ticket(conn, existing_ticket: dict, reporter_id: str = "anon
     already_reported = reporter_id in reporters
 
     if already_reported:
+        # they already reported this - just update last_seen, don't boost priority
         conn.execute(
             "UPDATE tickets SET last_seen = ? WHERE id = ?",
             (now_str, existing_ticket["id"]),
@@ -83,6 +86,7 @@ def merge_duplicate_ticket(conn, existing_ticket: dict, reporter_id: str = "anon
         conn.commit()
         return {"action_status": "already_reported", "is_spam_prevented": True}
 
+    # new reporter! add them and recalculate the urgency score
     reporters.append(reporter_id)
     unique_duplicate_count = max(0, len(reporters) - 1)
 

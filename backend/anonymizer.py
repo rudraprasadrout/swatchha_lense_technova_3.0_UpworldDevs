@@ -3,7 +3,7 @@ import cv2
 import numpy as np
 import urllib.request
 
-# Path for the model file
+# paths for the face detection model weights
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 MODELS_DIR = os.path.join(BASE_DIR, "models")
 os.makedirs(MODELS_DIR, exist_ok=True)
@@ -11,7 +11,7 @@ DB_PATH = os.path.join(BASE_DIR, "swachhlens.db")
 MODEL_PATH = os.path.join(MODELS_DIR, "face_detection_yunet_2023mar.onnx")
 
 
-# Auto-download model weights if not present in the current directory
+# download the yunet model if it's not already there (~300KB, pretty small)
 if not os.path.exists(MODEL_PATH):
     try:
         print("Downloading YuNet Face Detector weights (~300 KB)...")
@@ -20,7 +20,7 @@ if not os.path.exists(MODEL_PATH):
     except Exception as e:
         print(f"Notice: Model weight download exception: {e}")
 
-# Initialize YuNet Face Detector safely
+# set up the face detector - might not work on all opencv builds
 _detector = None
 try:
     if hasattr(cv2, "FaceDetectorYN") and os.path.exists(MODEL_PATH):
@@ -34,7 +34,7 @@ try:
 except Exception as e:
     print(f"Notice: YuNet FaceDetectorYN initialization exception: {e}")
 
-# Initialize License Plate Haar Cascade safely
+# haar cascade for license plates - built into opencv so no download needed
 _plate_cascade = None
 try:
     if hasattr(cv2, "CascadeClassifier") and hasattr(cv2, "data") and hasattr(cv2.data, "haarcascades"):
@@ -45,10 +45,11 @@ except Exception as e:
 
 
 def _pixelate_region(img, x, y, w, h, blocks=8, pad_percent=0.2):
-    """Obscures the region using heavy pixelation with padding."""
+    """Heavy pixelation on a region of the image. We add some padding around
+    the detected area so we don't miss edges of faces/plates."""
     h_img, w_img, _ = img.shape
 
-    # Expand box by 20% padding to guarantee full coverage
+    # expand the box by 20% on each side to be safe
     pad_w = int(w * pad_percent)
     pad_h = int(h * pad_percent)
 
@@ -64,7 +65,7 @@ def _pixelate_region(img, x, y, w, h, blocks=8, pad_percent=0.2):
     if roi.size == 0:
         return
 
-    # Shrink down region and scale back up
+    # shrink way down then scale back up = pixelation effect
     pixel_w = max(1, box_w // blocks)
     pixel_h = max(1, box_h // blocks)
     small = cv2.resize(roi, (pixel_w, pixel_h), interpolation=cv2.INTER_LINEAR)
@@ -75,7 +76,8 @@ def _pixelate_region(img, x, y, w, h, blocks=8, pad_percent=0.2):
 
 def anonymize_image_bytes(image_bytes: bytes):
     """
-    Returns (jpeg_bytes, faces_blurred_count, plates_blurred_count)
+    Takes raw image bytes, detects faces and license plates, pixelates them,
+    and returns the anonymized jpeg bytes along with counts of what was blurred.
     """
     arr = np.frombuffer(image_bytes, dtype=np.uint8)
     img = cv2.imdecode(arr, cv2.IMREAD_COLOR)
@@ -86,7 +88,7 @@ def anonymize_image_bytes(image_bytes: bytes):
     faces_count = 0
     plates_count = 0
 
-    # 1. Face Detection with YuNet
+    # run face detection
     if _detector is not None:
         try:
             _detector.setInputSize((w_img, h_img))
@@ -99,7 +101,7 @@ def anonymize_image_bytes(image_bytes: bytes):
         except Exception as e:
             print(f"Notice: Face detection execution exception: {e}")
 
-    # 2. License Plate Detection
+    # run plate detection
     if _plate_cascade is not None and not _plate_cascade.empty():
         try:
             gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)

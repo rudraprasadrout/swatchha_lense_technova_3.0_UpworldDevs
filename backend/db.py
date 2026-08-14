@@ -7,11 +7,13 @@ MODEL_PATH = os.path.join(BASE_DIR, "models", "face_detection_yunet_2023mar.onnx
 
 def get_conn(db_path):
     conn = sqlite3.connect(db_path)
-    conn.row_factory = sqlite3.Row
+    conn.row_factory = sqlite3.Row  # so we can access columns by name
     return conn
 
 
 def init_db(db_path):
+    """Create the tickets table if it doesn't exist, and run any schema migrations
+    for columns we've added over time."""
     conn = get_conn(db_path)
     conn.execute("""
         CREATE TABLE IF NOT EXISTS tickets (
@@ -41,7 +43,8 @@ def init_db(db_path):
     """)
     conn.commit()
 
-    # Schema migration: Add missing columns if database table already existed
+    # we've added a bunch of columns since the initial schema, so check and add
+    # any that are missing. This way existing databases don't break when we deploy
     cursor = conn.cursor()
     cursor.execute("PRAGMA table_info(tickets)")
     existing_cols = [row[1] for row in cursor.fetchall()]
