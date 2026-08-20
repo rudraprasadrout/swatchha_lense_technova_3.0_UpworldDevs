@@ -189,7 +189,7 @@ def transcribe_voice_audio():
             )
             content = resp.choices[0].message.content.strip()
             res_data = json.loads(content)
-            native_text = res_data.get("native_text", raw_text if 'raw_text' in locals() else "")
+            native_text = res_data.get("native_text", "")
             return jsonify({"status": "success", "native_text": native_text})
         except Exception as e:
             print("Audio transcribe error:", e)
