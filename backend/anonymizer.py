@@ -85,6 +85,15 @@ def anonymize_image_bytes(image_bytes: bytes):
         return image_bytes, 0, 0
 
     h_img, w_img, _ = img.shape
+    
+    # Resize if too large to prevent OOM during model inference
+    MAX_DIM = 1024
+    if max(h_img, w_img) > MAX_DIM:
+        scale = MAX_DIM / max(h_img, w_img)
+        new_w = int(w_img * scale)
+        new_h = int(h_img * scale)
+        img = cv2.resize(img, (new_w, new_h), interpolation=cv2.INTER_AREA)
+        h_img, w_img = new_h, new_w
     faces_count = 0
     plates_count = 0
 
